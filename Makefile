@@ -1,5 +1,7 @@
-OBJS := $(patsubst %.cpp, %.o, $(wildcard *.c))
+OBJS := $(patsubst %.cpp, %.o, $(wildcard *.cpp))
 BIN := minimu9-ahrs
+
+CC := g++
 
 CPPFLAGS += -Wall
 
@@ -7,6 +9,8 @@ CPPFLAGS += -Wall
 CPPFLAGS += -MD -MP
 
 all: $(BIN)
+
+$(BIN) : $(OBJS)
 
 DEPS := $(OBJS:%.o=%.d)
 

@@ -13,30 +13,22 @@ https://i2c.wiki.kernel.org/index.php/Main_Page
 #include <sys/ioctl.h>
 #include <fcntl.h>
 #include "i2c-dev.h"
-
-#define MAG_ADDRESS        (0x3C >> 1)
-#define LSM303_WHO_AM_I_M  (0x0F)
+#include "LSM303.h"
 
 int main()
 {
     const char * devName = "/dev/i2c-0";
 
     // Open up the I2C bus
-    int file = open(devName, O_RDWR);
-    if (file == -1)
+    int fd = open(devName, O_RDWR);
+    if (fd == -1)
     {
         perror(devName);
         exit(1);
     }
 
-    // Specify the address of the slave device.
-    if (ioctl(file, I2C_SLAVE, MAG_ADDRESS) < 0)
-    {
-        perror("Failed to acquire bus access and/or talk to slave");
-        exit(1);
-    }
-
-    int result = i2c_smbus_read_byte_data(file, LSM303_WHO_AM_I_M);
+    LSM303 lsm303(fd);
+    uint8_t result = lsm303.readMagReg(LSM303_WHO_AM_I_M);
     printf("result: 0x%02X\n", result);
 
     return 0;
