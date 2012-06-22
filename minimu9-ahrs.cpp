@@ -15,7 +15,7 @@ https://i2c.wiki.kernel.org/index.php/Main_Page
 #include "i2c-dev.h"
 #include "LSM303.h"
 
-int main()
+int main(int argc, char *argv[])
 {
     const char * devName = "/dev/i2c-0";
 
@@ -25,6 +25,11 @@ int main()
     {
         perror(devName);
         exit(1);
+    }
+
+    if (argc > 0)
+    {
+        
     }
 
     LSM303 lsm303(fd);
