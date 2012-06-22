@@ -3,6 +3,8 @@ BIN := minimu9-ahrs
 
 CC := g++
 
+CPPFLAGS += -I.
+
 CPPFLAGS += -Wall
 
 # Generate .d files with dependency info

@@ -2,6 +2,11 @@
 #define LSM303_h
 
 #include <stdint.h>
+#include <Eigen/Dense>
+
+// typedef Vector3f vector;
+extern int x;
+typedef Eigen::Vector3f vector;
 
 // device types
 
@@ -92,6 +97,10 @@
 class LSM303
 {
  public:
+    vector a; // accelerometer readings
+    vector m; // magnetometer readings
+    vector m_max, m_min; // extreme magnetometer values, used for calibration
+
     LSM303(int fd);
 
     void writeAccReg(uint8_t reg, uint8_t value);
@@ -99,7 +108,15 @@ class LSM303
     void writeMagReg(uint8_t reg, uint8_t value);
     uint8_t readMagReg(int8_t reg);
 
- private:
+    void readAcc(void);
+    void readMag(void);
+    void read(void);
+
+ protected:
+    void setAddr(uint8_t addr);
+    void addressMag(void);
+    void addressAcc(void);
+
     int fd;
 };
 
