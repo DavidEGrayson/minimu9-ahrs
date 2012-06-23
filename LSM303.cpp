@@ -41,6 +41,33 @@ uint8_t LSM303::readMagReg(int8_t reg)
     return i2c_smbus_read_byte_data(fd, reg);
 }
 
+void LSM303::writeMagReg(uint8_t reg, uint8_t value)
+{
+    addressMag();
+    i2c_smbus_write_byte_data(fd, reg, value);
+    // TODO: handle errors
+}
+
+void LSM303::writeAccReg(uint8_t reg, uint8_t value)
+{
+    addressAcc();
+    i2c_smbus_write_byte_data(fd, reg, value);
+    // TODO: handle errors
+}
+
+// Turns on the LSM303's accelerometer and magnetometers and places them in normal
+// mode.
+void LSM303::enableDefault(void)
+{
+    // Enable Accelerometer
+    // Normal power mode, all axes enabled
+    writeAccReg(LSM303_CTRL_REG1_A, 0b00100111);
+  
+    // Enable Magnetometer
+    // Continuous conversion mode
+    writeMagReg(LSM303_MR_REG_M, 0x00);
+}
+
 void LSM303::readAcc(void)
 {
     addressAcc();

@@ -103,6 +103,8 @@ class LSM303
 
     LSM303(int fd);
 
+    void enableDefault(void);
+
     void writeAccReg(uint8_t reg, uint8_t value);
     uint8_t readAccReg(uint8_t reg);
     void writeMagReg(uint8_t reg, uint8_t value);

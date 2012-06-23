@@ -32,6 +32,8 @@ int main(int argc, char *argv[])
         exit(2);
     }
 
+    lsm303.enableDefault();
+
     while(1)
     {
         lsm303.read();
