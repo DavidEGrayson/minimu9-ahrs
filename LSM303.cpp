@@ -54,7 +54,7 @@ void LSM303::readAcc(void)
         // TODO: better error handling here and in general
     }
 
-    // DLM, DLHC: register address order is X,Z,Y with high bytes first
+    // TODO: fix the bitshifting here, it should be like https://github.com/pololu/LSM303/blob/master/LSM303/LSM303.cpp but not exactly because an int on rpi is 32 bits, not 16
     a(0) = block[0] + (block[1] << 8);
     a(1) = block[2] + (block[3] << 8);
     a(2) = block[4] + (block[5] << 8);
