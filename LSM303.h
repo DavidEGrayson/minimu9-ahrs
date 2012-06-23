@@ -97,8 +97,8 @@ typedef Eigen::Vector3f vector;
 class LSM303
 {
  public:
-    vector a; // accelerometer readings
-    vector m; // magnetometer readings
+    Eigen::Vector3i a;  // accelerometer readings
+    Eigen::Vector3i m; // magnetometer readings
     vector m_max, m_min; // extreme magnetometer values, used for calibration
 
     LSM303(int fd);

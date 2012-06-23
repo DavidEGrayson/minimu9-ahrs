@@ -1,3 +1,7 @@
+sudo modeprobe i2c_dev
+
+sudo apt-get install libi2c-dev
+
 == Connections ==
 
 Raspberry Pi     MinIMU-9

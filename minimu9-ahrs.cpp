@@ -35,8 +35,12 @@ int main(int argc, char *argv[])
     while(1)
     {
         lsm303.read();
-        std::cout.width(6);
-        std::cout << std::right << lsm303.m << std::endl;
+        //std::cout.width(8);
+        //std::cout << std::right << lsm303.m(0) << std::right << lsm303.m(1) << std::right << lsm303.m(2) << std::endl;
+        printf("%7d %7d %7d  %7d %7d %7d\n",
+               lsm303.m(0), lsm303.m(1), lsm303.m(2),
+               lsm303.a(0), lsm303.a(1), lsm303.a(2)
+        );
         usleep(300*1000);
     }
 

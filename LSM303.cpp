@@ -1,5 +1,5 @@
 #include "LSM303.h"
-#include "i2c-dev.h"
+#include <linux/i2c-dev.h>
 #include <stdio.h>
 
 #define MAG_ADDRESS            (0x3C >> 1)
@@ -28,6 +28,11 @@ void LSM303::addressMag(void)
     setAddr(MAG_ADDRESS);
 }
 
+void LSM303::addressAcc(void)
+{
+    setAddr(ACC_ADDRESS_SA0_A_LOW);
+}
+
 uint8_t LSM303::readMagReg(int8_t reg)
 {
     addressMag();
@@ -38,17 +43,40 @@ uint8_t LSM303::readMagReg(int8_t reg)
 
 void LSM303::readAcc(void)
 {
-    // TODO: implement this
+    addressAcc();
+
+    uint8_t block[6];
+
+    int result = i2c_smbus_read_i2c_block_data(fd, 0x80 | LSM303_OUT_X_L_A, sizeof(block), block);
+    if (result != sizeof(block))
+    {
+        perror("Failed to read 6-byte accelometer block from LSM303.");
+        // TODO: better error handling here and in general
+    }
+
+    // DLM, DLHC: register address order is X,Z,Y with high bytes first
+    a(0) = block[0] + (block[1] << 8);
+    a(1) = block[2] + (block[3] << 8);
+    a(2) = block[4] + (block[5] << 8);
 }
 
 void LSM303::readMag(void)
 {
     addressMag();
 
-    uint8_t block[64];
+    uint8_t block[6];
 
-    int result = i2c_smbus_read_block_data(fd, LSM303_OUT_X_H_M, block);
-    printf("block: %d %02X%02X%02X%02X%02X%02X\n", result, block[0], block[1], block[2], block[3], block[4], block[5]);
+    int result = i2c_smbus_read_i2c_block_data(fd, 0x80 | LSM303_OUT_X_H_M, sizeof(block), block);
+    if (result != sizeof(block))
+    {
+        perror("Failed to read 6-byte magnetometer block from LSM303.");
+        // TODO: better error handling here and in general
+    }
+
+    // DLM, DLHC: register address order is X,Z,Y with high bytes first
+    m(0) = block[1] + (block[0] << 8);
+    m(1) = block[5] + (block[4] << 8);
+    m(2) = block[3] + (block[2] << 8);
 }
 
 // Reads all 6 channels of the LSM303 and stores them in the object variables
