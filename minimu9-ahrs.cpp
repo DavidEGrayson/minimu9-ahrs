@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
                lsm303.m(0), lsm303.m(1), lsm303.m(2),
                lsm303.a(0), lsm303.a(1), lsm303.a(2)
         );
-        usleep(300*1000);
+        usleep(100*1000);
     }
 
     return 0;
