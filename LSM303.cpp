@@ -17,7 +17,7 @@ LSM303::LSM303(int fd) : fd(fd)
 void LSM303::setAddr(uint8_t addr)
 {
     // Specify the address of the slave device.
-    if (ioctl(fd, I2C_SLAVE, MAG_ADDRESS) == -1)
+    if (ioctl(fd, I2C_SLAVE, addr) == -1)
     {
         perror("Failed to set I2C_SLAVE address.");
     }
