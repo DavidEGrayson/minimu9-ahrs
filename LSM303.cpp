@@ -4,7 +4,7 @@
 #define ACC_ADDRESS_SA0_A_LOW  (0x30 >> 1)
 #define ACC_ADDRESS_SA0_A_HIGH (0x32 >> 1)
 
-LSM303::LSM303(I2CBus& i2c, int fd) : i2c(i2c), fd(fd)
+LSM303::LSM303(I2CBus& i2c) : i2c(i2c)
 {
     // nothing to do here
 }

@@ -92,7 +92,6 @@ typedef Eigen::Vector3i int_vector;
 #define LSM303DLHC_OUT_Z_H_M     0x05
 #define LSM303DLHC_OUT_Z_L_M     0x06
 
-
 class LSM303
 {
  public:
@@ -100,7 +99,7 @@ class LSM303
     int_vector m; // magnetometer readings
     vector m_max, m_min; // extreme magnetometer values, used for calibration
 
-    LSM303(I2CBus& i2c, int fd);
+    LSM303(I2CBus& i2c);
 
     void enableDefault(void);
 
@@ -119,7 +118,6 @@ class LSM303
     void addressAcc(void);
 
     I2CBus& i2c;
-    int fd;
 };
 
 #endif
