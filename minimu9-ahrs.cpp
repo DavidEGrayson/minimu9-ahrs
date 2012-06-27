@@ -5,27 +5,15 @@ https://i2c.wiki.kernel.org/index.php/Main_Page
 */
 
 #include <iostream>
-#include <unistd.h>
-#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <fcntl.h>
 #include "LSM303.h"
 
 int main(int argc, char *argv[])
 {
-    const char * devName = "/dev/i2c-0";
-
-    // Open up the I2C bus
-    int fd = open(devName, O_RDWR);
-    if (fd == -1)
-    {
-        perror(devName);
-        exit(1);
-    }
-
-    I2CBus i2c(fd);
+    I2CBus i2c("/dev/i2c-0");
     LSM303 lsm303(i2c);
+
     uint8_t result = lsm303.readMagReg(LSM303_WHO_AM_I_M);
     if (result != 0x3C)
     {

@@ -1,8 +1,22 @@
 #include "I2CBus.h"
+#include <fcntl.h>
 #include <linux/i2c-dev.h>
 #include <stdio.h>
 #include <cerrno>
 //#include <system_error>
+
+// TODO: throw some nicer type of exception that results in a nice error message
+
+I2CBus::I2CBus(const char * devName) : currentAddress(-1)
+{
+    // Open up the I2C bus device.
+    fd = open(devName, O_RDWR);
+    if (fd == -1)
+    {
+        perror(devName); // TODO: remove this if a nicer exeption is thrown below
+        throw errno;
+    }
+}
 
 I2CBus::I2CBus(int fd) : fd(fd), currentAddress(-1)
 {

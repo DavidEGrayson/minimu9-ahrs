@@ -7,7 +7,10 @@ CPPFLAGS += -I.
 
 CPPFLAGS += -Wall
 
-# CPPFLAGS += --std=c++0x
+CPPFLAGS += --std=c++0x
+
+# Fix http://gcc.gnu.org/bugzilla/show_bug.cgi?id=42748
+CPPFLAGS += -Wno-psabi
 
 # Generate .d files with dependency info
 CPPFLAGS += -MD -MP

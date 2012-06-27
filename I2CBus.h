@@ -7,6 +7,7 @@ class I2CBus
 {
 public:
     I2CBus(int fd);
+    I2CBus(const char * devName);
 
     void setAddress(uint8_t address);
     void writeByte(uint8_t command, uint8_t data);
