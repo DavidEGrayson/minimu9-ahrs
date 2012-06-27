@@ -3,11 +3,12 @@
 #include <linux/i2c-dev.h>
 #include <stdio.h>
 #include <cerrno>
+#include <unistd.h>
 //#include <system_error>
 
 // TODO: throw some nicer type of exception that results in a nice error message
 
-I2CBus::I2CBus(const char * devName) : currentAddress(-1)
+I2CBus::I2CBus(const char * devName) : currentAddress(-1), ownFd(true)
 {
     // Open up the I2C bus device.
     fd = open(devName, O_RDWR);
@@ -18,9 +19,17 @@ I2CBus::I2CBus(const char * devName) : currentAddress(-1)
     }
 }
 
-I2CBus::I2CBus(int fd) : fd(fd), currentAddress(-1)
+I2CBus::I2CBus(int fd) : fd(fd), currentAddress(-1), ownFd(false)
 {
     // nothing to do here
+}
+
+I2CBus::~I2CBus()
+{
+    if (ownFd)
+    {
+        close(fd);
+    }
 }
 
 void I2CBus::setAddress(uint8_t address)
