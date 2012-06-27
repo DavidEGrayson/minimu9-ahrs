@@ -3,10 +3,10 @@
 
 #include <stdint.h>
 #include <Eigen/Dense>
+#include "I2CBus.h"
 
-// typedef Vector3f vector;
-extern int x;
 typedef Eigen::Vector3f vector;
+typedef Eigen::Vector3i int_vector;
 
 // device types
 
@@ -79,7 +79,6 @@ typedef Eigen::Vector3f vector;
 
 #define LSM303_TEMP_OUT_H_M      0x31 // DLHC only
 #define LSM303_TEMP_OUT_L_M      0x32 // DLHC only
-
 #define LSM303DLH_OUT_Y_H_M      0x05
 #define LSM303DLH_OUT_Y_L_M      0x06
 #define LSM303DLH_OUT_Z_H_M      0x07
@@ -97,11 +96,11 @@ typedef Eigen::Vector3f vector;
 class LSM303
 {
  public:
-    Eigen::Vector3i a;  // accelerometer readings
-    Eigen::Vector3i m; // magnetometer readings
+    int_vector a;  // accelerometer readings
+    int_vector m; // magnetometer readings
     vector m_max, m_min; // extreme magnetometer values, used for calibration
 
-    LSM303(int fd);
+    LSM303(I2CBus& i2c, int fd);
 
     void enableDefault(void);
 
@@ -119,6 +118,7 @@ class LSM303
     void addressMag(void);
     void addressAcc(void);
 
+    I2CBus& i2c;
     int fd;
 };
 

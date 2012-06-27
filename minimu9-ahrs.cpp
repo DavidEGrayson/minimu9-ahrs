@@ -24,7 +24,10 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
-    LSM303 lsm303(fd);
+    I2CBus i2c(fd);
+    i2c.setAddress(44); //tmphax
+
+    LSM303 lsm303(i2c, fd);
     uint8_t result = lsm303.readMagReg(LSM303_WHO_AM_I_M);
     if (result != 0x3C)
     {

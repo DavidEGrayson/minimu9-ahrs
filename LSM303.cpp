@@ -7,9 +7,8 @@
 #define ACC_ADDRESS_SA0_A_HIGH (0x32 >> 1)
 
 // TODO: real error handling.  Maybe we should use exceptions.
-// TODO: make i2c device class that LSM303 inherits from
 
-LSM303::LSM303(int fd) : fd(fd)
+LSM303::LSM303(I2CBus& i2c, int fd) : i2c(i2c), fd(fd)
 {
     // nothing to do here
 }
@@ -25,7 +24,8 @@ void LSM303::setAddr(uint8_t addr)
 
 void LSM303::addressMag(void)
 {
-    setAddr(MAG_ADDRESS);
+    //setAddr(MAG_ADDRESS);
+    i2c.setAddress(MAG_ADDRESS);
 }
 
 void LSM303::addressAcc(void)
