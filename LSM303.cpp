@@ -1,12 +1,8 @@
 #include "LSM303.h"
-#include <linux/i2c-dev.h>
-#include <stdio.h>
 
 #define MAG_ADDRESS            (0x3C >> 1)
 #define ACC_ADDRESS_SA0_A_LOW  (0x30 >> 1)
 #define ACC_ADDRESS_SA0_A_HIGH (0x32 >> 1)
-
-// TODO: real error handling.  Maybe we should use exceptions.
 
 LSM303::LSM303(I2CBus& i2c, int fd) : i2c(i2c), fd(fd)
 {
@@ -71,13 +67,7 @@ void LSM303::readMag(void)
     addressMag();
 
     uint8_t block[6];
-
-    int result = i2c_smbus_read_i2c_block_data(fd, 0x80 | LSM303_OUT_X_H_M, sizeof(block), block);
-    if (result != sizeof(block))
-    {
-        perror("Failed to read 6-byte magnetometer block from LSM303.");
-        // TODO: better error handling here and in general
-    }
+    i2c.readBlock(0x80 | LSM303_OUT_X_H_M, sizeof(block), block);
 
     // DLM, DLHC: register address order is X,Z,Y with high bytes first
     m(0) = (int16_t)(block[1] + (block[0] << 8));
