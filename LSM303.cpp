@@ -59,13 +59,7 @@ void LSM303::readAcc(void)
     addressAcc();
 
     uint8_t block[6];
-
-    int result = i2c_smbus_read_i2c_block_data(fd, 0x80 | LSM303_OUT_X_L_A, sizeof(block), block);
-    if (result != sizeof(block))
-    {
-        perror("Failed to read 6-byte accelometer block from LSM303.");
-        // TODO: better error handling here and in general
-    }
+    i2c.readBlock(0x80 | LSM303_OUT_X_L_A, sizeof(block), block);
 
     a(0) = (int16_t)(block[0] + (block[1] << 8)) >> 4;
     a(1) = (int16_t)(block[2] + (block[3] << 8)) >> 4;

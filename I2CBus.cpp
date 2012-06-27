@@ -41,5 +41,9 @@ uint8_t I2CBus::readByte(uint8_t command)
 
 void I2CBus::readBlock(uint8_t command, uint8_t size, uint8_t * data)
 {
-
+    int result = i2c_smbus_read_i2c_block_data(fd, command, size, data);
+    if (result != size)
+    {
+        throw "Error reading i2c block.";
+    }
 }
