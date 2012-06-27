@@ -7,6 +7,8 @@ CPPFLAGS += -I.
 
 CPPFLAGS += -Wall
 
+# CPPFLAGS += --std=c++0x
+
 # Generate .d files with dependency info
 CPPFLAGS += -MD -MP
 
