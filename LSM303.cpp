@@ -57,9 +57,9 @@ void LSM303::readAcc(void)
     uint8_t block[6];
     i2c.readBlock(0x80 | LSM303_OUT_X_L_A, sizeof(block), block);
 
-    a(0) = (int16_t)(block[0] + (block[1] << 8)) >> 4;
-    a(1) = (int16_t)(block[2] + (block[3] << 8)) >> 4;
-    a(2) = (int16_t)(block[4] + (block[5] << 8)) >> 4;
+    a(0) = (int16_t)(block[0] | block[1] << 8) >> 4;
+    a(1) = (int16_t)(block[2] | block[3] << 8) >> 4;
+    a(2) = (int16_t)(block[4] | block[5] << 8) >> 4;
 }
 
 void LSM303::readMag(void)
@@ -70,9 +70,9 @@ void LSM303::readMag(void)
     i2c.readBlock(0x80 | LSM303_OUT_X_H_M, sizeof(block), block);
 
     // DLM, DLHC: register address order is X,Z,Y with high bytes first
-    m(0) = (int16_t)(block[1] + (block[0] << 8));
-    m(1) = (int16_t)(block[5] + (block[4] << 8));
-    m(2) = (int16_t)(block[3] + (block[2] << 8));
+    m(0) = (int16_t)(block[1] | block[0] << 8);
+    m(1) = (int16_t)(block[5] | block[4] << 8);
+    m(2) = (int16_t)(block[3] | block[2] << 8);
 }
 
 // Reads all 6 channels of the LSM303 and stores them in the object variables

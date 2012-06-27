@@ -2,11 +2,8 @@
 #define LSM303_h
 
 #include <stdint.h>
-#include <Eigen/Dense>
 #include "I2CBus.h"
-
-typedef Eigen::Vector3f vector;
-typedef Eigen::Vector3i int_vector;
+#include "vector.h"
 
 // device types
 
