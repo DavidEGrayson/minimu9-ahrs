@@ -13,46 +13,32 @@ LSM303::LSM303(I2CBus& i2c, int fd) : i2c(i2c), fd(fd)
     // nothing to do here
 }
 
-void LSM303::setAddr(uint8_t addr)
-{
-    // Specify the address of the slave device.
-    if (ioctl(fd, I2C_SLAVE, addr) == -1)
-    {
-        perror("Failed to set I2C_SLAVE address.");
-    }
-}
-
 void LSM303::addressMag(void)
 {
-    //setAddr(MAG_ADDRESS);
     i2c.setAddress(MAG_ADDRESS);
 }
 
 void LSM303::addressAcc(void)
 {
-    setAddr(ACC_ADDRESS_SA0_A_LOW);
+    i2c.setAddress(ACC_ADDRESS_SA0_A_LOW);
 }
 
 uint8_t LSM303::readMagReg(int8_t reg)
 {
     addressMag();
-
-    // on error, the function below returns -1 which gets converted to 0xFF
-    return i2c_smbus_read_byte_data(fd, reg);
+    return i2c.readByte(reg);
 }
 
 void LSM303::writeMagReg(uint8_t reg, uint8_t value)
 {
     addressMag();
-    i2c_smbus_write_byte_data(fd, reg, value);
-    // TODO: handle errors
+    i2c.writeByte(reg, value);
 }
 
 void LSM303::writeAccReg(uint8_t reg, uint8_t value)
 {
     addressAcc();
-    i2c_smbus_write_byte_data(fd, reg, value);
-    // TODO: handle errors
+    i2c.writeByte(reg, value);
 }
 
 // Turns on the LSM303's accelerometer and magnetometers and places them in normal
