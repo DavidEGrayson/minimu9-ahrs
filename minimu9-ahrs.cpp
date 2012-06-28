@@ -10,19 +10,8 @@ https://i2c.wiki.kernel.org/index.php/Main_Page
 #include "LSM303.h"
 #include "L3G4200D.h"
 
-int main(int argc, char *argv[])
+void streamRawValues(LSM303& compass, L3G4200D& gyro)
 {
-    I2CBus i2c("/dev/i2c-0");
-    LSM303 compass(i2c);
-    L3G4200D gyro(i2c);
-
-    uint8_t result = compass.readMagReg(LSM303_WHO_AM_I_M);
-    if (result != 0x3C)
-    {
-        std::cerr << "Error getting \"Who Am I\" register." << std::endl;
-        exit(2);
-    }
-
     compass.enableDefault();
     gyro.enableDefault();
 
@@ -37,6 +26,46 @@ int main(int argc, char *argv[])
         );
         usleep(100*1000);
     }
+}
+
+void calibrate(LSM303& compass)
+{
+    compass.enableDefault();
+    int_vector mag_max(0,0,0), mag_min(0,0,0);
+    while(1)
+    {
+        compass.read();
+        mag_min = mag_min.cwiseMin(compass.m);
+        mag_max = mag_max.cwiseMax(compass.m);
+        printf("%7d %7d %7d  %7d %7d %7d\n",
+               mag_min(0), mag_min(1), mag_min(2),
+               mag_max(0), mag_max(1), mag_max(2));
+        usleep(10*1000);
+    }
+}
+
+int main(int argc, char *argv[])
+{
+    I2CBus i2c("/dev/i2c-0");
+    LSM303 compass(i2c);
+    L3G4200D gyro(i2c);
+
+    uint8_t result = compass.readMagReg(LSM303_WHO_AM_I_M);
+    if (result != 0x3C)
+    {
+        std::cerr << "Error getting \"Who Am I\" register." << std::endl;
+        exit(2);
+    }
+
+    if (argc > 1)
+    {
+        if (0 == strcmp("cal", argv[1]))
+        {
+            calibrate(compass);
+        }
+    }
+
+    streamRawValues(compass, gyro);
 
     return 0;
 }
