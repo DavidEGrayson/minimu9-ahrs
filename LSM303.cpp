@@ -16,7 +16,7 @@ void LSM303::addressMag(void)
 
 void LSM303::addressAcc(void)
 {
-    i2c.setAddress(ACC_ADDRESS_SA0_A_LOW);
+    i2c.setAddress(ACC_ADDRESS_SA0_A_HIGH);
 }
 
 uint8_t LSM303::readMagReg(int8_t reg)
@@ -42,9 +42,9 @@ void LSM303::writeAccReg(uint8_t reg, uint8_t value)
 void LSM303::enableDefault(void)
 {
     // Enable Accelerometer
-    // Normal power mode, all axes enabled
-    writeAccReg(LSM303_CTRL_REG1_A, 0b00100111);
-  
+    // Normal power mode, all axes enabled, 50 Hz
+    writeAccReg(LSM303_CTRL_REG1_A, 0b01000111);
+
     // Enable Magnetometer
     // Continuous conversion mode
     writeMagReg(LSM303_MR_REG_M, 0x00);

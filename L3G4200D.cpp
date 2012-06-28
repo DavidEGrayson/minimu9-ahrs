@@ -1,6 +1,8 @@
 #include "L3G4200D.h"
 
-#define GYR_ADDRESS (0xD2 >> 1)
+#define GYR_ADDRESS (0xD6 >> 1)
+
+// TODO: rename gyro class
 
 L3G4200D::L3G4200D(I2CBus& i2c) : i2c(i2c)
 {
