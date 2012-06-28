@@ -82,26 +82,26 @@ void ahrs(LSM303& compass, L3G4200D& gyro)
     gyro.writeReg(L3G4200D_CTRL_REG1, 0x0F); // normal power mode, all axes enabled, 100 Hz
     gyro.writeReg(L3G4200D_CTRL_REG4, 0x20); // 2000 dps full scale
 
-    // // Calculate offsets, assuming the MiniMU is resting
-    // // with is z acis pointing up.
-    // {
-    //     int i;
-    //     for(i = 0; i < 32; i++)
-    //     {
-    //         gyro.read();
-    //         compass.readAcc();
-    //         gyro_offset += gyro.g;
-    //         accel_offset += compass.a;
-    //         usleep(20*1000);
-    //     }
-    //     gyro_offset /= i;
-    //     accel_offset /= i;
-    //     accel_offset(3) -= gravity * accel_sign(3);
-    // }
+    // Calculate offsets, assuming the MiniMU is resting
+    // with is z acis pointing up.
+    {
+        int i;
+        for(i = 0; i < 32; i++)
+        {
+            gyro.read();
+            compass.readAcc();
+            gyro_offset += gyro.g.cast<float>();
+            accel_offset += compass.a.cast<float>();
+            usleep(20*1000);
+        }
+        gyro_offset /= i;
+        accel_offset /= i;
+        accel_offset(2) -= gravity * accel_sign(2);
+    }
 
-    // printf("Offset: %7f %7f %7f  %7f %7f %7f\n",
-    //        gyro_offset(0), gyro_offset(1), gyro_offset(2),
-    //        accel_offset(0), accel_offset(1), accel_offset(2));
+    printf("Offset: %7f %7f %7f  %7f %7f %7f\n",
+           gyro_offset(0), gyro_offset(1), gyro_offset(2),
+           accel_offset(0), accel_offset(1), accel_offset(2));
 
 }
 
