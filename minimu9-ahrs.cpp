@@ -7,9 +7,18 @@ https://i2c.wiki.kernel.org/index.php/Main_Page
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
-#include <chrono>
+#include <time.h>
 #include "LSM303.h"
 #include "L3G4200D.h"
+#include <sys/time.h>
+
+int millis()
+{
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+
+    return (tv.tv_sec) * 1000 + (tv.tv_usec)/1000;
+}
 
 void streamRawValues(LSM303& compass, L3G4200D& gyro)
 {
@@ -62,6 +71,7 @@ const int gravity = 256;
 // Positive pitch : nose down
 // Positive roll : right wing down
 // Positive yaw : counterclockwise
+// TODO: really understand what these sign vectors do
 const int_vector gyro_sign(1, -1, -1);
 const int_vector accel_sign(-1, 1, 1);
 const int_vector mag_sign(1, -1, -1);
@@ -84,25 +94,47 @@ void ahrs(LSM303& compass, L3G4200D& gyro)
 
     // Calculate offsets, assuming the MiniMU is resting
     // with is z acis pointing up.
+    const int sampleCount = 32;
+    for(int i = 0; i < 32; i++)
     {
-        int i;
-        for(i = 0; i < 32; i++)
-        {
-            gyro.read();
-            compass.readAcc();
-            gyro_offset += gyro.g.cast<float>();
-            accel_offset += compass.a.cast<float>();
-            usleep(20*1000);
-        }
-        gyro_offset /= i;
-        accel_offset /= i;
-        accel_offset(2) -= gravity * accel_sign(2);
+        gyro.read();
+        compass.readAcc();
+        gyro_offset += gyro.g.cast<float>();
+        accel_offset += compass.a.cast<float>();
+        usleep(20*1000);
     }
+    gyro_offset /= sampleCount;
+    accel_offset /= sampleCount;
+    accel_offset(2) -= gravity * accel_sign(2);
 
     printf("Offset: %7f %7f %7f  %7f %7f %7f\n",
            gyro_offset(0), gyro_offset(1), gyro_offset(2),
            accel_offset(0), accel_offset(1), accel_offset(2));
 
+    // TODO: better timing system that won't randomly drift
+    int counter = 0;
+    int start = millis(); // truncate 64-bit return value
+    while(1)
+    {
+        int last_start = start;
+        start = millis();
+        float dt = (start-last_start)/1000.0;
+        printf("dt = %f\n", dt);
+
+        if (dt < 0){ throw "time went backwards"; }       
+
+        // Every 5 loop runs read compass data.
+        if (counter > 5)
+        {
+            counter = 0;
+        }
+
+        // Ensure that each iteration of the loop takes at least 20 ms.
+        while(millis() - start < 20)
+        {
+            usleep(1000);
+        }
+    }
 }
 
 int main(int argc, char *argv[])
