@@ -72,11 +72,19 @@ const int gravity = 256;
 // Positive roll : right wing down
 // Positive yaw : counterclockwise
 // TODO: really understand what these sign vectors do
-const int_vector gyro_sign(1, -1, -1);
+const int_vector gyro_sign(1, -1, -1);  // TODO: change gyro_sign(-1)? v_gyro seems to be wrong
 const int_vector accel_sign(-1, 1, 1);
 const int_vector mag_sign(1, -1, -1);
 
 vector gyro_offset(0,0,0), accel_offset(0,0,0);
+
+vector v_gyro, v_accel, v_magnetom;
+
+void readGyro(L3G4200D& gyro)
+{
+    gyro.read();
+    v_gyro = gyro_sign.cast<float>().cwiseProduct( gyro.g.cast<float>() - gyro_offset );
+}
 
 void ahrs(LSM303& compass, L3G4200D& gyro)
 {
@@ -119,15 +127,27 @@ void ahrs(LSM303& compass, L3G4200D& gyro)
         int last_start = start;
         start = millis();
         float dt = (start-last_start)/1000.0;
-        printf("dt = %f\n", dt);
+        //printf("dt = %f\n", dt);
 
         if (dt < 0){ throw "time went backwards"; }       
 
-        // Every 5 loop runs read compass data.
+        readGyro(gyro);
+        //readAcc(compass);
+
+        // Every 5 loop runs read compass data (10 Hz)
         if (counter > 5)
         {
             counter = 0;
+            //readMag(compass);
+            //compassHeading();
         }
+
+        //matrixUpdate();
+        //normalize();
+        //driftCorrection();
+        //eulerAngles();
+
+        printf("%14.2f %14.2f %14.2f\n", v_gyro(0), v_gyro(1), v_gyro(2));
 
         // Ensure that each iteration of the loop takes at least 20 ms.
         while(millis() - start < 20)
