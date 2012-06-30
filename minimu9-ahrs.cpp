@@ -11,6 +11,7 @@ https://i2c.wiki.kernel.org/index.php/Main_Page
 #include "LSM303.h"
 #include "L3G4200D.h"
 #include <sys/time.h>
+#include <Eigen/Geometry>
 
 int millis()
 {
@@ -112,7 +113,8 @@ static vector readGyro(L3G4200D& gyro, const int_vector& gyro_sign, const vector
 
 static matrix updateMatrix(const vector& w, float dt) 
 {
-    // TODO: represent this in a cooler way
+    // TODO: represent this in a cooler way, maybe:
+    //   http://eigen.tuxfamily.org/dox/classEigen_1_1VectorwiseOp.html#aeaa2c5d72558c2bfc049a098efc25633
     matrix m = matrix::Identity();
     m(0,1) = -dt * w(2);
     m(0,2) =  dt * w(1);
@@ -121,6 +123,17 @@ static matrix updateMatrix(const vector& w, float dt)
     m(2,0) = -dt * w(1);
     m(2,1) =  dt * w(0);
     return m;
+}
+
+// TODO: change this somehow to treat all the rows equally (currently Z is special)
+static matrix normalize(const matrix & m)
+{
+    float error = m.row(0).dot(m.row(1));
+    matrix norm;
+    norm.row(0) = m.row(0) - (error/2) * m.row(1);
+    norm.row(1) = m.row(1) - (error/2) * m.row(0);
+    norm.row(2) = m.row(0).cross(m.row(1));
+    return norm;
 }
 
 // DCM algorithm: http://diydrones.com/forum/topics/robust-estimator-of-the
@@ -151,8 +164,8 @@ void ahrs(LSM303& compass, L3G4200D& gyro)
 
     vector angular_velocity, v_accel, v_magnetom;
 
-    // The rotation matrix that can convert a vector in body-coordinates
-    // to earth coordinates.
+    // The rotation matrix that can convert a vector in body coordinates
+    // to ground coordinates.
     matrix rotation = matrix::Identity();
 
     int counter = 0;
@@ -178,7 +191,7 @@ void ahrs(LSM303& compass, L3G4200D& gyro)
         }
 
         rotation *= updateMatrix(angular_velocity, dt);
-        //normalize();
+        rotation = normalize(rotation);
         //driftCorrection();
         //eulerAngles();
 
