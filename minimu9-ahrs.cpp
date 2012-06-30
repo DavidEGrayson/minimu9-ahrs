@@ -16,7 +16,6 @@ int millis()
 {
     struct timeval tv;
     gettimeofday(&tv, NULL);
-
     return (tv.tv_sec) * 1000 + (tv.tv_usec)/1000;
 }
 
@@ -57,40 +56,14 @@ void calibrate(LSM303& compass)
 
 void loadCalibration(int_vector& mag_min, int_vector& mag_max)
 {
+    // TODO: recalibrate for my new IMU
     // TODO: load from ~/.lsm303_mag_cal instead of hardcoding
     mag_min = int_vector(-835, -931, -978);
     mag_max = int_vector(921, 590, 741);
 }
 
-// LSM303 accelerometer: 8 g sensitivity.  3.8 mg/digit; 1 g = 256
-const int gravity = 256;
-
-// X axis pointing forward
-// Y axis pointing to the left 
-// and Z axis pointing up
-// Positive pitch : nose down
-// Positive roll : right wing down
-// Positive yaw : counterclockwise
-// TODO: really understand what these sign vectors do
-const int_vector gyro_sign(1, -1, -1);  // TODO: change gyro_sign(-1)? v_gyro seems to be wrong
-const int_vector accel_sign(-1, 1, 1);
-const int_vector mag_sign(1, -1, -1);
-
-vector gyro_offset(0,0,0), accel_offset(0,0,0);
-
-vector v_gyro, v_accel, v_magnetom;
-
-void readGyro(L3G4200D& gyro)
+static void enableSensors(LSM303& compass, L3G4200D& gyro)
 {
-    gyro.read();
-    v_gyro = gyro_sign.cast<float>().cwiseProduct( gyro.g.cast<float>() - gyro_offset );
-}
-
-void ahrs(LSM303& compass, L3G4200D& gyro)
-{
-    int_vector mag_min, mag_max;
-    loadCalibration(mag_min, mag_max);
-
     compass.writeAccReg(LSM303_CTRL_REG1_A, 0x47); // normal power mode, all axes enabled, 50 Hz
     compass.writeAccReg(LSM303_CTRL_REG4_A, 0x20); // 8 g full scale
 
@@ -99,11 +72,20 @@ void ahrs(LSM303& compass, L3G4200D& gyro)
 
     gyro.writeReg(L3G4200D_CTRL_REG1, 0x0F); // normal power mode, all axes enabled, 100 Hz
     gyro.writeReg(L3G4200D_CTRL_REG4, 0x20); // 2000 dps full scale
+}
 
-    // Calculate offsets, assuming the MiniMU is resting
-    // with is z acis pointing up.
+// Calculate offsets, assuming the MiniMU is resting
+// with is z axis pointing up.
+static void calculateOffsets(LSM303& compass, L3G4200D& gyro,
+                             vector& accel_offset, vector& gyro_offset,
+                             const int_vector& accel_sign)
+{
+    // LSM303 accelerometer: 8 g sensitivity.  3.8 mg/digit; 1 g = 256
+    const int gravity = 256;
+
+    gyro_offset = accel_offset = vector(0,0,0);
     const int sampleCount = 32;
-    for(int i = 0; i < 32; i++)
+    for(int i = 0; i < sampleCount; i++)
     {
         gyro.read();
         compass.readAcc();
@@ -114,12 +96,65 @@ void ahrs(LSM303& compass, L3G4200D& gyro)
     gyro_offset /= sampleCount;
     accel_offset /= sampleCount;
     accel_offset(2) -= gravity * accel_sign(2);
+}
 
+// Returns the measured angular velocity vector
+// in units of radians per second.
+static vector readGyro(L3G4200D& gyro, const int_vector& gyro_sign, const vector& gyro_offset)
+{
+    // At the full-scale=2000 dps setting, the gyro datasheet says
+    // we get 0.07 dps/digit.
+    const float gyro_gain = 0.07 * 3.14159265 / 180;
+
+    gyro.read();
+    return gyro_sign.cast<float>().cwiseProduct( gyro.g.cast<float>() - gyro_offset ) * gyro_gain;
+}
+
+static matrix updateMatrix(const vector& w, float dt) 
+{
+    // TODO: represent this in a cooler way
+    matrix m = matrix::Identity();
+    m(0,1) = -dt * w(2);
+    m(0,2) =  dt * w(1);
+    m(1,0) =  dt * w(2);
+    m(1,2) = -dt * w(0);
+    m(2,0) = -dt * w(1);
+    m(2,1) =  dt * w(0);
+    return m;
+}
+
+// DCM algorithm: http://diydrones.com/forum/topics/robust-estimator-of-the
+
+void ahrs(LSM303& compass, L3G4200D& gyro)
+{
+    // X axis pointing forward
+    // Y axis pointing to the right 
+    // and Z axis pointing down
+    // Positive pitch : nose down
+    // Positive roll : right wing down
+    // Positive yaw : counterclockwise
+    const int_vector gyro_sign(1, 1, 1);
+    const int_vector accel_sign(-1, -1, -1);
+    const int_vector mag_sign(1, 1, 1);
+
+    int_vector mag_min, mag_max;
+    loadCalibration(mag_min, mag_max);
+
+    enableSensors(compass, gyro);
+
+    vector accel_offset, gyro_offset;
+    calculateOffsets(compass, gyro, accel_offset, gyro_offset, accel_sign);
+    
     printf("Offset: %7f %7f %7f  %7f %7f %7f\n",
            gyro_offset(0), gyro_offset(1), gyro_offset(2),
            accel_offset(0), accel_offset(1), accel_offset(2));
 
-    // TODO: better timing system that won't randomly drift
+    vector angular_velocity, v_accel, v_magnetom;
+
+    // The rotation matrix that can convert a vector in body-coordinates
+    // to earth coordinates.
+    matrix rotation = matrix::Identity();
+
     int counter = 0;
     int start = millis(); // truncate 64-bit return value
     while(1)
@@ -131,23 +166,29 @@ void ahrs(LSM303& compass, L3G4200D& gyro)
 
         if (dt < 0){ throw "time went backwards"; }       
 
-        readGyro(gyro);
+        angular_velocity = readGyro(gyro, gyro_sign, gyro_offset);
         //readAcc(compass);
 
         // Every 5 loop runs read compass data (10 Hz)
-        if (counter > 5)
+        if (++counter == 5)
         {
             counter = 0;
             //readMag(compass);
             //compassHeading();
         }
 
-        //matrixUpdate();
+        rotation *= updateMatrix(angular_velocity, dt);
         //normalize();
         //driftCorrection();
         //eulerAngles();
 
-        printf("%14.2f %14.2f %14.2f\n", v_gyro(0), v_gyro(1), v_gyro(2));
+        //printf("%14.2f %14.2f %14.2f\n", v_gyro(0), v_gyro(1), v_gyro(2));
+        printf("%7.4f %7.4f %7.4f %7.4f %7.4f %7.4f %7.4f %7.4f %7.4f\n",
+               rotation(0,0), rotation(0,1), rotation(0,2),
+               rotation(1,0), rotation(1,1), rotation(1,2),
+               rotation(2,0), rotation(2,1), rotation(2,2));
+
+        //std::cout << rotation;
 
         // Ensure that each iteration of the loop takes at least 20 ms.
         while(millis() - start < 20)

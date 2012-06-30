@@ -4,5 +4,6 @@
 #include <Eigen/Core>
 typedef Eigen::Vector3f vector;
 typedef Eigen::Vector3i int_vector;
+typedef Eigen::Matrix3f matrix;
 
 #endif
