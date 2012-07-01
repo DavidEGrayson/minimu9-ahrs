@@ -63,8 +63,8 @@ void loadCalibration(int_vector& mag_min, int_vector& mag_max)
 {
     // TODO: recalibrate for my new IMU
     // TODO: load from ~/.lsm303_mag_cal instead of hardcoding
-    mag_min = int_vector(-835, -931, -978);
-    mag_max = int_vector(921, 590, 741);
+    mag_min = int_vector(-519, -476, -765);
+    mag_max = int_vector(475, 623, 469);
 }
 
 static void enableSensors(LSM303& compass, L3G4200D& gyro)
@@ -82,10 +82,10 @@ static void enableSensors(LSM303& compass, L3G4200D& gyro)
 // Calculate offsets, assuming the MiniMU is resting
 // with is z axis pointing up.
 static void calculateOffsets(LSM303& compass, L3G4200D& gyro,
-                             vector& accel_offset, vector& gyro_offset,
-                             const int_vector& accel_sign)
+                             vector& accel_offset, vector& gyro_offset)
 {
-    // LSM303 accelerometer: 8 g sensitivity.  3.8 mg/digit; 1 g = 256
+    // LSM303 accelerometer: 8 g sensitivity.  3.8 mg/digit; 1 g = 256.
+    // TODO: unify this with the other place in the code where we scale accelerometer readings.
     const int gravity = 256;
 
     gyro_offset = accel_offset = vector(0,0,0);
@@ -100,33 +100,59 @@ static void calculateOffsets(LSM303& compass, L3G4200D& gyro,
     }
     gyro_offset /= sampleCount;
     accel_offset /= sampleCount;
-    accel_offset(2) -= gravity * accel_sign(2);
+    accel_offset(2) -= gravity;
 }
 
 // Returns the measured angular velocity vector
-// in units of radians per second.
-static vector readGyro(L3G4200D& gyro, const int_vector& gyro_sign, const vector& gyro_offset)
+// in units of radians per second, in the body coordinate system.
+static vector readGyro(L3G4200D& gyro, const vector& gyro_offset)
 {
     // At the full-scale=2000 dps setting, the gyro datasheet says
     // we get 0.07 dps/digit.
-    const float gyro_gain = 0.07 * 3.14159265 / 180;
+    const float gyro_scale = 0.07 * 3.14159265 / 180;
 
     gyro.read();
-    return gyro_sign.cast<float>().cwiseProduct( gyro.g.cast<float>() - gyro_offset ) * gyro_gain;
+    return ( gyro.g.cast<float>() - gyro_offset ) * gyro_scale;
+}
+
+// Returns acceleration vector in units of g, where g is 9.8 m/s^2,
+// in the body coordinate system.
+static vector readAcc(LSM303& compass, const vector& accel_offset)
+{
+    // LSM303 accelerometer: At 8 g sensitivity, the datasheet says
+    // we get 3.9 mg/digit.
+    // TODO: double check this figure using the correct datasheet
+    const float accel_scale = 0.0039;
+
+    compass.readAcc();
+    return ( compass.a.cast<float>() - accel_offset ) * accel_scale;
+}
+
+// Returns the magnetic field vector in the body coordinate system.
+// For each component, a value of 1 corresponds to the max value
+// and a value of -1 corresponds to the min value.
+static vector readMag(LSM303& compass, const int_vector& mag_min, const int_vector& mag_max)
+{
+    compass.readMag();
+    vector m;
+    m(0) = (float)(compass.m(0) - mag_min(0)) / (mag_max(0) - mag_min(0)) * 2 - 1;
+    m(1) = (float)(compass.m(1) - mag_min(1)) / (mag_max(1) - mag_min(1)) * 2 - 1;
+    m(2) = (float)(compass.m(2) - mag_min(2)) / (mag_max(2) - mag_min(2)) * 2 - 1;
+    return m;
 }
 
 static matrix updateMatrix(const vector& w, float dt)
 {
-    matrix m = matrix::Identity();
-    m(2,0) = -w(1) * dt;
-    m(0,2) =  w(1) * dt;
+    matrix u = matrix::Identity();
+    u(2,0) = -w(1) * dt;
+    u(0,2) =  w(1) * dt;
 
-    m(0,1) = -w(2) * dt;
-    m(1,0) =  w(2) * dt;
+    u(0,1) = -w(2) * dt;
+    u(1,0) =  w(2) * dt;
 
-    m(1,2) = -w(0) * dt;
-    m(2,1) =  w(0) * dt;
-    return m;
+    u(1,2) = -w(0) * dt;
+    u(2,1) =  w(0) * dt;
+    return u;
 }
 
 // TODO: change this somehow to treat all the rows equally (currently Z is special)
@@ -134,9 +160,9 @@ static matrix normalize(const matrix & m)
 {
     //float error = m.row(0).dot(m.row(1));
     matrix norm;
-    norm.row(0) = m.row(0) + m.row(1).cross(m.row(2));
-    norm.row(1) = m.row(1) + m.row(2).cross(m.row(0));
-    norm.row(2) = m.row(2) + m.row(0).cross(m.row(1));
+    norm.row(0) = m.row(0) + m.row(1).cross(m.row(2))/10;
+    norm.row(1) = m.row(1) + m.row(2).cross(m.row(0))/10;
+    norm.row(2) = m.row(2) + m.row(0).cross(m.row(1))/10;
     norm.row(0).normalize();
     norm.row(1).normalize();
     norm.row(2).normalize();
@@ -147,68 +173,55 @@ static matrix normalize(const matrix & m)
 
 void ahrs(LSM303& compass, L3G4200D& gyro)
 {
-    // X axis pointing forward
-    // Y axis pointing to the right 
-    // and Z axis pointing down
-    // Positive pitch : nose down
-    // Positive roll : right wing down
-    // Positive yaw : counterclockwise
-    const int_vector gyro_sign(1, 1, 1);
-    const int_vector accel_sign(1, 1, 1);
-    const int_vector mag_sign(1, 1, 1);
-
     int_vector mag_min, mag_max;
     loadCalibration(mag_min, mag_max);
 
     enableSensors(compass, gyro);
 
     vector accel_offset, gyro_offset;
-    calculateOffsets(compass, gyro, accel_offset, gyro_offset, accel_sign);
+    calculateOffsets(compass, gyro, accel_offset, gyro_offset);
     
-    //printf("Offset: %7f %7f %7f  %7f %7f %7f\n",
-    //       gyro_offset(0), gyro_offset(1), gyro_offset(2),
-    //       accel_offset(0), accel_offset(1), accel_offset(2));
-
-    vector angular_velocity, v_accel, v_magnetom;
+    fprintf(stderr, "Gyro offset: %7f %7f %7f\nAccel offset: %7f %7f %7f\n",
+           gyro_offset(0), gyro_offset(1), gyro_offset(2),
+           accel_offset(0), accel_offset(1), accel_offset(2));
 
     // The rotation matrix that can convert a vector in body coordinates
     // to ground coordinates.
     matrix rotation = matrix::Identity();
 
-    int counter = 0;
     int start = millis(); // truncate 64-bit return value
     while(1)
     {
         int last_start = start;
         start = millis();
         float dt = (start-last_start)/1000.0;
-        //printf("dt = %f\n", dt);
+        if (dt < 0){ throw "time went backwards"; }
 
-        if (dt < 0){ throw "time went backwards"; }       
-
-        angular_velocity = readGyro(gyro, gyro_sign, gyro_offset);
-        //readAcc(compass);
+        vector angular_velocity = readGyro(gyro, gyro_offset);
+        vector acceleration = readAcc(compass, accel_offset);
+        vector magnetic_field = readMag(compass, mag_min, mag_max); // TODO: read mag at 10Hz instead?  Why do others do that?
 
         // Every 5 loop runs read compass data (10 Hz)
-        if (++counter == 5)
-        {
-            counter = 0;
-            //readMag(compass);
-            //compassHeading();
-        }
+        //if (++counter == 5)
+        //{
+        //    counter = 0;
+        //    //readMag(compass);
+        //    //compassHeading();
+        //}
 
         rotation *= updateMatrix(angular_velocity, dt);
         rotation = normalize(rotation);
         //driftCorrection();
-        //eulerAngles();
 
         //fprintf(stderr, "g: %8d %8d %8d\n", gyro.g(0), gyro.g(1), gyro.g(2));
         fprintf(stderr, "dt: %7.4f  w: %7.4f %7.4f %7.4f\n", dt, angular_velocity(0), angular_velocity(1), angular_velocity(2));
 
-        printf("%7.4f %7.4f %7.4f %7.4f %7.4f %7.4f %7.4f %7.4f %7.4f\n",
+        printf("%7.4f %7.4f %7.4f %7.4f %7.4f %7.4f %7.4f %7.4f %7.4f  %7.4f %7.4f %7.4f  %7.4f %7.4f %7.4f\n",
                rotation(0,0), rotation(0,1), rotation(0,2),
                rotation(1,0), rotation(1,1), rotation(1,2),
-               rotation(2,0), rotation(2,1), rotation(2,2));
+               rotation(2,0), rotation(2,1), rotation(2,2),
+               acceleration(0), acceleration(1), acceleration(2),
+               magnetic_field(0), magnetic_field(1), magnetic_field(2));
         fflush(stdout);
 
         //std::cout << rotation;
