@@ -131,11 +131,14 @@ static matrix updateMatrix(const vector& w, float dt)
 // TODO: change this somehow to treat all the rows equally (currently Z is special)
 static matrix normalize(const matrix & m)
 {
-    float error = m.row(0).dot(m.row(1));
+    //float error = m.row(0).dot(m.row(1));
     matrix norm;
-    norm.row(0) = m.row(0) - (error/2) * m.row(1);
-    norm.row(1) = m.row(1) - (error/2) * m.row(0);
+    norm.row(0) = m.row(1).cross(m.row(2));
+    norm.row(1) = m.row(2).cross(m.row(0));
     norm.row(2) = m.row(0).cross(m.row(1));
+    norm.row(0).normalize();
+    norm.row(1).normalize();
+    norm.row(2).normalize();
     return norm;
 }
 
@@ -199,7 +202,7 @@ void ahrs(LSM303& compass, L3G4200D& gyro)
         //eulerAngles();
 
         //fprintf(stderr, "g: %8d %8d %8d\n", gyro.g(0), gyro.g(1), gyro.g(2));
-        fprintf(stderr, "w: %7.4f %7.4f %7.4f\n", angular_velocity(0), angular_velocity(1), angular_velocity(2));
+        fprintf(stderr, "dt: %7.4f  w: %7.4f %7.4f %7.4f\n", dt, angular_velocity(0), angular_velocity(1), angular_velocity(2));
 
         printf("%7.4f %7.4f %7.4f %7.4f %7.4f %7.4f %7.4f %7.4f %7.4f\n",
                rotation(0,0), rotation(0,1), rotation(0,2),
