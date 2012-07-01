@@ -1,9 +1,3 @@
-/*
-promising:
-http://elinux.org/Interfacing_with_I2C_Devices
-https://i2c.wiki.kernel.org/index.php/Main_Page
-*/
-
 #include "vector.h"
 #include <iostream>
 #include <stdio.h>
@@ -12,6 +6,16 @@ https://i2c.wiki.kernel.org/index.php/Main_Page
 #include "LSM303.h"
 #include "L3G4200D.h"
 #include <sys/time.h>
+
+/*
+promising:
+http://elinux.org/Interfacing_with_I2C_Devices
+https://i2c.wiki.kernel.org/index.php/Main_Page
+*/
+
+// TODO: read http://www.cs.cmu.edu/~spiff/moedit99/expmap.pdf
+
+
 
 int millis()
 {
@@ -113,9 +117,6 @@ static vector readGyro(L3G4200D& gyro, const int_vector& gyro_sign, const vector
 
 static matrix updateMatrix(const vector& w, float dt)
 {
-    // TODO: represent this in a cooler way, maybe:
-    //   http://eigen.tuxfamily.org/dox/classEigen_1_1VectorwiseOp.html#aeaa2c5d72558c2bfc049a098efc25633
-
     matrix m = matrix::Identity();
     m(2,0) = -w(1) * dt;
     m(0,2) =  w(1) * dt;
@@ -133,9 +134,9 @@ static matrix normalize(const matrix & m)
 {
     //float error = m.row(0).dot(m.row(1));
     matrix norm;
-    norm.row(0) = m.row(1).cross(m.row(2));
-    norm.row(1) = m.row(2).cross(m.row(0));
-    norm.row(2) = m.row(0).cross(m.row(1));
+    norm.row(0) = m.row(0) + m.row(1).cross(m.row(2));
+    norm.row(1) = m.row(1) + m.row(2).cross(m.row(0));
+    norm.row(2) = m.row(2) + m.row(0).cross(m.row(1));
     norm.row(0).normalize();
     norm.row(1).normalize();
     norm.row(2).normalize();
