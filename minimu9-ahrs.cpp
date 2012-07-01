@@ -111,17 +111,20 @@ static vector readGyro(L3G4200D& gyro, const int_vector& gyro_sign, const vector
     return gyro_sign.cast<float>().cwiseProduct( gyro.g.cast<float>() - gyro_offset ) * gyro_gain;
 }
 
-static matrix updateMatrix(const vector& w, float dt) 
+static matrix updateMatrix(const vector& w, float dt)
 {
     // TODO: represent this in a cooler way, maybe:
     //   http://eigen.tuxfamily.org/dox/classEigen_1_1VectorwiseOp.html#aeaa2c5d72558c2bfc049a098efc25633
+
     matrix m = matrix::Identity();
-    m(0,1) = -dt * w(2);
-    m(0,2) =  dt * w(1);
-    m(1,0) =  dt * w(2);
-    m(1,2) = -dt * w(0);
-    m(2,0) = -dt * w(1);
-    m(2,1) =  dt * w(0);
+    m(2,0) = -w(1) * dt;
+    m(0,2) =  w(1) * dt;
+
+    m(0,1) = -w(2) * dt;
+    m(1,0) =  w(2) * dt;
+
+    m(1,2) = -w(0) * dt;
+    m(2,1) =  w(0) * dt;
     return m;
 }
 
@@ -195,7 +198,9 @@ void ahrs(LSM303& compass, L3G4200D& gyro)
         //driftCorrection();
         //eulerAngles();
 
-        //printf("%14.2f %14.2f %14.2f\n", v_gyro(0), v_gyro(1), v_gyro(2));
+        //fprintf(stderr, "g: %8d %8d %8d\n", gyro.g(0), gyro.g(1), gyro.g(2));
+        fprintf(stderr, "w: %7.4f %7.4f %7.4f\n", angular_velocity(0), angular_velocity(1), angular_velocity(2));
+
         printf("%7.4f %7.4f %7.4f %7.4f %7.4f %7.4f %7.4f %7.4f %7.4f\n",
                rotation(0,0), rotation(0,1), rotation(0,2),
                rotation(1,0), rotation(1,1), rotation(1,2),
