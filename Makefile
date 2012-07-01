@@ -15,13 +15,16 @@ CPPFLAGS += -Wno-psabi
 # Generate .d files with dependency info
 CPPFLAGS += -MD -MP
 
-all: $(BIN)
+all: vector.h.gch $(BIN)
 
 $(BIN) : $(OBJS)
 
 DEPS := $(OBJS:%.o=%.d)
 
-clean:
-	@rm -fv $(BIN) $(OBJS) $(DEPS) *.o
+vector.h.gch: vector.h
+	$(CC) $(CPPFLAGS) $< -o $@
 
--include $(DEPS)
+clean:
+	@rm -fv $(BIN) $(OBJS) $(DEPS) *.o *.gch
+
+-include $(DEPS) vector.h.d

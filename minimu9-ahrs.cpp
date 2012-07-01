@@ -4,6 +4,7 @@ http://elinux.org/Interfacing_with_I2C_Devices
 https://i2c.wiki.kernel.org/index.php/Main_Page
 */
 
+#include "vector.h"
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
@@ -11,7 +12,6 @@ https://i2c.wiki.kernel.org/index.php/Main_Page
 #include "LSM303.h"
 #include "L3G4200D.h"
 #include <sys/time.h>
-#include <Eigen/Geometry>
 
 int millis()
 {
