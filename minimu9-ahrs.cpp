@@ -147,7 +147,7 @@ void ahrs(LSM303& compass, L3G4200D& gyro)
     // Positive roll : right wing down
     // Positive yaw : counterclockwise
     const int_vector gyro_sign(1, 1, 1);
-    const int_vector accel_sign(-1, -1, -1);
+    const int_vector accel_sign(1, 1, 1);
     const int_vector mag_sign(1, 1, 1);
 
     int_vector mag_min, mag_max;
@@ -158,9 +158,9 @@ void ahrs(LSM303& compass, L3G4200D& gyro)
     vector accel_offset, gyro_offset;
     calculateOffsets(compass, gyro, accel_offset, gyro_offset, accel_sign);
     
-    printf("Offset: %7f %7f %7f  %7f %7f %7f\n",
-           gyro_offset(0), gyro_offset(1), gyro_offset(2),
-           accel_offset(0), accel_offset(1), accel_offset(2));
+    //printf("Offset: %7f %7f %7f  %7f %7f %7f\n",
+    //       gyro_offset(0), gyro_offset(1), gyro_offset(2),
+    //       accel_offset(0), accel_offset(1), accel_offset(2));
 
     vector angular_velocity, v_accel, v_magnetom;
 
@@ -200,6 +200,7 @@ void ahrs(LSM303& compass, L3G4200D& gyro)
                rotation(0,0), rotation(0,1), rotation(0,2),
                rotation(1,0), rotation(1,1), rotation(1,2),
                rotation(2,0), rotation(2,1), rotation(2,2));
+        fflush(stdout);
 
         //std::cout << rotation;
 
