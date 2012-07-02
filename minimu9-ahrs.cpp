@@ -45,7 +45,7 @@ void streamRawValues(LSM303& compass, L3G4200D& gyro)
 void calibrate(LSM303& compass)
 {
     compass.enableDefault();
-    int_vector mag_max(0,0,0), mag_min(0,0,0);
+    int_vector mag_max, mag_min;
     while(1)
     {
         compass.read();
@@ -88,7 +88,7 @@ static void calculateOffsets(LSM303& compass, L3G4200D& gyro,
     // TODO: unify this with the other place in the code where we scale accelerometer readings.
     const int gravity = 256;
 
-    gyro_offset = accel_offset = vector(0,0,0);
+    gyro_offset = accel_offset = vector::Zero();
     const int sampleCount = 32;
     for(int i = 0; i < sampleCount; i++)
     {
@@ -101,6 +101,12 @@ static void calculateOffsets(LSM303& compass, L3G4200D& gyro,
     gyro_offset /= sampleCount;
     accel_offset /= sampleCount;
     accel_offset(2) -= gravity;
+
+    if (accel_offset.norm() > 50)
+    {
+        fprintf(stderr, "Unable to calculate accelerometer offset because board was not resting in the correct orientation.\n");
+        accel_offset = vector::Zero();
+    }
 }
 
 // Returns the measured angular velocity vector
@@ -181,9 +187,10 @@ void ahrs(LSM303& compass, L3G4200D& gyro)
     vector accel_offset, gyro_offset;
     calculateOffsets(compass, gyro, accel_offset, gyro_offset);
     
-    fprintf(stderr, "Gyro offset: %7f %7f %7f\nAccel offset: %7f %7f %7f\n",
-           gyro_offset(0), gyro_offset(1), gyro_offset(2),
-           accel_offset(0), accel_offset(1), accel_offset(2));
+    fprintf(stderr, "Gyro offset: %7f %7f %7f\nAccel offset: %7f %7f %7f (%7f)\n",
+            gyro_offset(0), gyro_offset(1), gyro_offset(2),
+            accel_offset(0), accel_offset(1), accel_offset(2),
+            accel_offset.norm());
 
     // The rotation matrix that can convert a vector in body coordinates
     // to ground coordinates.
@@ -201,20 +208,36 @@ void ahrs(LSM303& compass, L3G4200D& gyro)
         vector acceleration = readAcc(compass, accel_offset);
         vector magnetic_field = readMag(compass, mag_min, mag_max); // TODO: read mag at 10Hz instead?  Why do others do that?
 
-        // Every 5 loop runs read compass data (10 Hz)
-        //if (++counter == 5)
-        //{
-        //    counter = 0;
-        //    //readMag(compass);
-        //    //compassHeading();
-        //}
+        vector up = acceleration;     // usually true
+        vector magnetic_east = magnetic_field.cross(up);
+        vector east = magnetic_east;  // a rough approximation
+        vector north = up.cross(east);
+
+        matrix rotationFromCompass;
+        rotationFromCompass.row(0) = east;
+        rotationFromCompass.row(1) = north;
+        rotationFromCompass.row(2) = up;
+        rotationFromCompass.row(0).normalize();
+        rotationFromCompass.row(1).normalize();
+        rotationFromCompass.row(2).normalize();
+
+        vector magnetic_north = acceleration.cross(magnetic_east);
+
+        // TODO: if acceleration is not close to 1g, or angle between magnetic field and acceleration
+        // is too small, weaken the drift correction
 
         rotation *= updateMatrix(angular_velocity, dt);
+
+        rotation += rotationFromCompass/50;
+
         rotation = normalize(rotation);
         //driftCorrection();
 
         //fprintf(stderr, "g: %8d %8d %8d\n", gyro.g(0), gyro.g(1), gyro.g(2));
-        fprintf(stderr, "dt: %7.4f  w: %7.4f %7.4f %7.4f\n", dt, angular_velocity(0), angular_velocity(1), angular_velocity(2));
+        fprintf(stderr, "m: %7.4f %7.4f %7.4f  m_raw: %8d %8d %8d\n", magnetic_field(0), magnetic_field(1), magnetic_field(2), compass.m(0), compass.m(1), compass.m(2)); 
+        //fprintf(stderr, "dt: %7.4f  w: %7.4f %7.4f %7.4f\n", dt, angular_velocity(0), angular_velocity(1), angular_velocity(2));
+
+        //rotation = rotationFromCompass;  // TMPHAX
 
         printf("%7.4f %7.4f %7.4f %7.4f %7.4f %7.4f %7.4f %7.4f %7.4f  %7.4f %7.4f %7.4f  %7.4f %7.4f %7.4f\n",
                rotation(0,0), rotation(0,1), rotation(0,2),
