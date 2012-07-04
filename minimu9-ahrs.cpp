@@ -228,7 +228,7 @@ void ahrs(LSM303& compass, L3G4200D& gyro)
 
         rotation *= updateMatrix(angular_velocity, dt);
 
-        rotation += rotationFromCompass/50;
+        //rotation += rotationFromCompass/50;
 
         rotation = normalize(rotation);
         //driftCorrection();

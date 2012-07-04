@@ -1,4 +1,4 @@
-OBJS := $(patsubst %.cpp, %.o, $(wildcard *.cpp))
+OBJs := $(patsubst %.cpp, %.o, $(wildcard *.cpp))
 BIN := minimu9-ahrs
 
 CC := g++
@@ -17,14 +17,14 @@ CPPFLAGS += -MD -MP
 
 all: vector.h.gch $(BIN)
 
-$(BIN) : $(OBJS)
+$(BIN) : $(OBJs)
 
-DEPS := $(OBJS:%.o=%.d)
+DEPs := $(OBJs:%.o=%.d)
 
 vector.h.gch: vector.h
 	$(CC) $(CPPFLAGS) $< -o $@
 
 clean:
-	@rm -fv $(BIN) $(OBJS) $(DEPS) *.o *.gch
+	@rm -fv $(BIN) $(OBJs) $(DEPs) *.o *.gch
 
--include $(DEPS) vector.h.d
+-include $(DEPs) vector.h.d
