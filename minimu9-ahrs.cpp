@@ -161,7 +161,6 @@ static matrix updateMatrix(const vector& w, float dt)
     return u;
 }
 
-// TODO: change this somehow to treat all the rows equally (currently Z is special)
 static matrix normalize(const matrix & m)
 {
     //float error = m.row(0).dot(m.row(1));
@@ -175,7 +174,73 @@ static matrix normalize(const matrix & m)
     return norm;
 }
 
+void fuse_gyro_only(matrix& rotation, float dt, const vector& angular_velocity)
+{
+   rotation *= updateMatrix(angular_velocity, dt);
+
+   rotation = normalize(rotation);
+}
+
+#define Kp_ROLLPITCH 1
+#define Ki_ROLLPITCH 0.00002
+#define Kp_YAW 1.2
+#define Ki_YAW 0.00002
+
+void fuse(matrix& rotation, float dt, const vector& angular_velocity,
+  const vector& acceleration, const vector& magnetic_field)
+{
+    vector up = acceleration;     // usually true
+    vector magnetic_east = magnetic_field.cross(up);
+    vector east = magnetic_east;  // a rough approximation
+    vector north = up.cross(east);
+
+    matrix rotationFromCompass;
+    rotationFromCompass.row(0) = east;
+    rotationFromCompass.row(1) = north;
+    rotationFromCompass.row(2) = up;
+    rotationFromCompass.row(0).normalize();
+    rotationFromCompass.row(1).normalize();
+    rotationFromCompass.row(2).normalize();
+
+    // We trust the accelerometer more if it is telling us 1G.
+    float accel_weight = 1 - 2*abs(1 - acceleration.norm());
+    if (accel_weight < 0){ accel_weight = 0; }
+
+    vector omegaP(0,0,0);
+    //static vector omegaI;
+
+    // TMPHAX
+    //rotation = matrix::Identity();
+    //acceleration = vector(0,1,0);
+
+    // Add a "torque" that makes our up vector (rotation.row(2))
+    // get closer to the acceleration vector.
+    vector errorRollPitch = acceleration.cross(rotation.row(2)) * accel_weight;
+
+    fprintf(stderr, "errorRollPitch = %7.4f %7.4f %7.4f\n", errorRollPitch(0), errorRollPitch(1), errorRollPitch(2));
+
+    omegaP += errorRollPitch * Kp_ROLLPITCH;
+    //omegaI += errorRollPitch * Ki_ROLLPITCH;
+
+    // Add a "torque" that makes our east vector (rotation.row(0))
+    // get closer to east vector calculated from the compass.
+    //vector errorYaw = east.cross(rotation.row(0));
+    //omegaP += errorYaw * Kp_YAW;
+    //omegaI += errorYaw * Ki_YAW;
+
+    rotation *= updateMatrix(angular_velocity + omegaP, dt);
+    rotation = normalize(rotation);
+}
+
 // DCM algorithm: http://diydrones.com/forum/topics/robust-estimator-of-the
+
+void print(matrix m)
+{
+    printf("%7.4f %7.4f %7.4f %7.4f %7.4f %7.4f %7.4f %7.4f %7.4f",
+           m(0,0), m(0,1), m(0,2),
+           m(1,0), m(1,1), m(1,2),
+           m(2,0), m(2,1), m(2,2));
+}
 
 void ahrs(LSM303& compass, L3G4200D& gyro)
 {
@@ -208,33 +273,10 @@ void ahrs(LSM303& compass, L3G4200D& gyro)
         vector acceleration = readAcc(compass, accel_offset);
         vector magnetic_field = readMag(compass, mag_min, mag_max); // TODO: read mag at 10Hz instead?  Why do others do that?
 
-        vector up = acceleration;     // usually true
-        vector magnetic_east = magnetic_field.cross(up);
-        vector east = magnetic_east;  // a rough approximation
-        vector north = up.cross(east);
-
-        matrix rotationFromCompass;
-        rotationFromCompass.row(0) = east;
-        rotationFromCompass.row(1) = north;
-        rotationFromCompass.row(2) = up;
-        rotationFromCompass.row(0).normalize();
-        rotationFromCompass.row(1).normalize();
-        rotationFromCompass.row(2).normalize();
-
-        vector magnetic_north = acceleration.cross(magnetic_east);
-
-        // TODO: if acceleration is not close to 1g, or angle between magnetic field and acceleration
-        // is too small, weaken the drift correction
-
-        rotation *= updateMatrix(angular_velocity, dt);
-
-        //rotation += rotationFromCompass/50;
-
-        rotation = normalize(rotation);
-        //driftCorrection();
+        fuse(rotation, dt, angular_velocity, acceleration, magnetic_field);
 
         //fprintf(stderr, "g: %8d %8d %8d\n", gyro.g(0), gyro.g(1), gyro.g(2));
-        fprintf(stderr, "m: %7.4f %7.4f %7.4f  m_raw: %8d %8d %8d\n", magnetic_field(0), magnetic_field(1), magnetic_field(2), compass.m(0), compass.m(1), compass.m(2)); 
+        //fprintf(stderr, "m: %7.4f %7.4f %7.4f  m_raw: %8d %8d %8d\n", magnetic_field(0), magnetic_field(1), magnetic_field(2), compass.m(0), compass.m(1), compass.m(2)); 
         //fprintf(stderr, "dt: %7.4f  w: %7.4f %7.4f %7.4f\n", dt, angular_velocity(0), angular_velocity(1), angular_velocity(2));
 
         //rotation = rotationFromCompass;  // TMPHAX
@@ -257,11 +299,34 @@ void ahrs(LSM303& compass, L3G4200D& gyro)
     }
 }
 
+void tmphaxTest()
+{
+    const float turnAmount = 3.14159265/2;  // radians
+    const float turnTime = 0.5; // seconds
+    const int pieces = turnTime/0.02;
+    const vector angular_velocity(0, 0, turnAmount/turnTime);
+
+    const float dt = turnTime/pieces;
+    matrix rotation = matrix::Identity();
+
+    for (int i = 0; i < pieces; i++)
+    {
+        fuse_gyro_only(rotation, dt, angular_velocity);
+    }
+
+    print(rotation);
+    putchar('\n');
+    printf("tmphaxTest done\n");
+    exit(3);
+}
+
 int main(int argc, char *argv[])
 {
     I2CBus i2c("/dev/i2c-0");
     LSM303 compass(i2c);
     L3G4200D gyro(i2c);
+
+    //tmphaxTest();
 
     uint8_t result = compass.readMagReg(LSM303_WHO_AM_I_M);
     if (result != 0x3C)
