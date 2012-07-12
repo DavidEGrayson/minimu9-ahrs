@@ -34,8 +34,8 @@ void streamRawValues(LSM303& compass, L3G4200D& gyro)
         compass.read();
         gyro.read();
         printf("%7d %7d %7d,  %7d %7d %7d,  %7d %7d %7d\n",
-               compass.m(0), compass.m(1), compass.m(2),
-               compass.a(0), compass.a(1), compass.a(2),
+               compass.m[0], compass.m[1], compass.m[2],
+               compass.a[0], compass.a[1], compass.a[2],
                gyro.g(0), gyro.g(1), gyro.g(2)
         );
         usleep(100*1000);
@@ -49,8 +49,8 @@ void calibrate(LSM303& compass)
     while(1)
     {
         compass.read();
-        mag_min = mag_min.cwiseMin(compass.m);
-        mag_max = mag_max.cwiseMax(compass.m);
+        mag_min = mag_min.cwiseMin(int_vector_from_ints(&compass.m));
+        mag_max = mag_max.cwiseMax(int_vector_from_ints(&compass.m));
         printf("%7d %7d %7d  %7d %7d %7d\n",
                mag_min(0), mag_min(1), mag_min(2),
                mag_max(0), mag_max(1), mag_max(2));
@@ -95,7 +95,7 @@ static void calculateOffsets(LSM303& compass, L3G4200D& gyro,
         gyro.read();
         compass.readAcc();
         gyro_offset += gyro.g.cast<float>();
-        accel_offset += compass.a.cast<float>();
+        accel_offset += vector_from_ints(&compass.a);
         usleep(20*1000);
     }
     gyro_offset /= sampleCount;
@@ -131,7 +131,7 @@ static vector readAcc(LSM303& compass, const vector& accel_offset)
     const float accel_scale = 0.0039;
 
     compass.readAcc();
-    return ( compass.a.cast<float>() - accel_offset ) * accel_scale;
+    return ( vector_from_ints(&compass.a) - accel_offset ) * accel_scale;
 }
 
 // Returns the magnetic field vector in the body coordinate system.
@@ -141,9 +141,9 @@ static vector readMag(LSM303& compass, const int_vector& mag_min, const int_vect
 {
     compass.readMag();
     vector m;
-    m(0) = (float)(compass.m(0) - mag_min(0)) / (mag_max(0) - mag_min(0)) * 2 - 1;
-    m(1) = (float)(compass.m(1) - mag_min(1)) / (mag_max(1) - mag_min(1)) * 2 - 1;
-    m(2) = (float)(compass.m(2) - mag_min(2)) / (mag_max(2) - mag_min(2)) * 2 - 1;
+    m(0) = (float)(compass.m[0] - mag_min(0)) / (mag_max(0) - mag_min(0)) * 2 - 1;
+    m(1) = (float)(compass.m[1] - mag_min(1)) / (mag_max(1) - mag_min(1)) * 2 - 1;
+    m(2) = (float)(compass.m[2] - mag_min(2)) / (mag_max(2) - mag_min(2)) * 2 - 1;
     return m;
 }
 

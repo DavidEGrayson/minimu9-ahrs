@@ -3,7 +3,6 @@
 
 #include <stdint.h>
 #include "I2CBus.h"
-#include "vector.h"
 
 // device types
 
@@ -92,9 +91,8 @@
 class LSM303
 {
  public:
-    int_vector a;  // accelerometer readings
-    int_vector m; // magnetometer readings
-    vector m_max, m_min; // extreme magnetometer values, used for calibration
+    int a[3];  // accelerometer readings
+    int m[3];  // magnetometer readings
 
     LSM303(I2CBus& i2c);
 
