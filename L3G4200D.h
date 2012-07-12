@@ -1,7 +1,6 @@
 #ifndef _L3G4200D_h
 #define _L3G4200D_h
 
-#include "vector.h"
 #include "I2CBus.h"
 
 #define L3G4200D_WHO_AM_I      0x0F
@@ -41,7 +40,7 @@ public:
     L3G4200D(I2CBus& i2c);
 
     // gyro angular velocity readings
-    int_vector g;
+    int g[3];
 
     void enableDefault(void);
 

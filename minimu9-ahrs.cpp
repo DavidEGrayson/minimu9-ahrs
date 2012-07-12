@@ -36,7 +36,7 @@ void streamRawValues(LSM303& compass, L3G4200D& gyro)
         printf("%7d %7d %7d,  %7d %7d %7d,  %7d %7d %7d\n",
                compass.m[0], compass.m[1], compass.m[2],
                compass.a[0], compass.a[1], compass.a[2],
-               gyro.g(0), gyro.g(1), gyro.g(2)
+               gyro.g[0], gyro.g[1], gyro.g[2]
         );
         usleep(100*1000);
     }
@@ -94,7 +94,7 @@ static void calculateOffsets(LSM303& compass, L3G4200D& gyro,
     {
         gyro.read();
         compass.readAcc();
-        gyro_offset += gyro.g.cast<float>();
+        gyro_offset += vector_from_ints(&gyro.g);
         accel_offset += vector_from_ints(&compass.a);
         usleep(20*1000);
     }
@@ -118,7 +118,7 @@ static vector readGyro(L3G4200D& gyro, const vector& gyro_offset)
     const float gyro_scale = 0.07 * 3.14159265 / 180;
 
     gyro.read();
-    return ( gyro.g.cast<float>() - gyro_offset ) * gyro_scale;
+    return ( vector_from_ints(&gyro.g) - gyro_offset ) * gyro_scale;
 }
 
 // Returns acceleration vector in units of g, where g is 9.8 m/s^2,

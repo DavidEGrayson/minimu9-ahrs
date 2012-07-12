@@ -39,7 +39,7 @@ void L3G4200D::read()
     uint8_t block[6];
     i2c.readBlock(0x80 | L3G4200D_OUT_X_L, sizeof(block), block);
 
-    g(0) = (int16_t)(block[1] << 8 | block[0]);
-    g(1) = (int16_t)(block[3] << 8 | block[2]);
-    g(2) = (int16_t)(block[5] << 8 | block[4]);
+    g[0] = (int16_t)(block[1] << 8 | block[0]);
+    g[1] = (int16_t)(block[3] << 8 | block[2]);
+    g[2] = (int16_t)(block[5] << 8 | block[4]);
 }
