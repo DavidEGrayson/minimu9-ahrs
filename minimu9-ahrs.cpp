@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include "LSM303.h"
-#include "L3G4200D.h"
+#include "L3G.h"
 #include <sys/time.h>
 
 /*
@@ -24,7 +24,7 @@ int millis()
     return (tv.tv_sec) * 1000 + (tv.tv_usec)/1000;
 }
 
-void streamRawValues(LSM303& compass, L3G4200D& gyro)
+void streamRawValues(LSM303& compass, L3G& gyro)
 {
     compass.enableDefault();
     gyro.enableDefault();
@@ -67,7 +67,7 @@ void loadCalibration(int_vector& mag_min, int_vector& mag_max)
     mag_max = int_vector(475, 623, 469);
 }
 
-static void enableSensors(LSM303& compass, L3G4200D& gyro)
+static void enableSensors(LSM303& compass, L3G& gyro)
 {
     compass.writeAccReg(LSM303_CTRL_REG1_A, 0x47); // normal power mode, all axes enabled, 50 Hz
     compass.writeAccReg(LSM303_CTRL_REG4_A, 0x20); // 8 g full scale
@@ -75,13 +75,13 @@ static void enableSensors(LSM303& compass, L3G4200D& gyro)
     compass.writeMagReg(LSM303_MR_REG_M, 0x00); // continuous conversion mode
     // 15 Hz default
 
-    gyro.writeReg(L3G4200D_CTRL_REG1, 0x0F); // normal power mode, all axes enabled, 100 Hz
-    gyro.writeReg(L3G4200D_CTRL_REG4, 0x20); // 2000 dps full scale
+    gyro.writeReg(L3G_CTRL_REG1, 0x0F); // normal power mode, all axes enabled, 100 Hz
+    gyro.writeReg(L3G_CTRL_REG4, 0x20); // 2000 dps full scale
 }
 
 // Calculate offsets, assuming the MiniMU is resting
 // with is z axis pointing up.
-static void calculateOffsets(LSM303& compass, L3G4200D& gyro,
+static void calculateOffsets(LSM303& compass, L3G& gyro,
                              vector& accel_offset, vector& gyro_offset)
 {
     // LSM303 accelerometer: 8 g sensitivity.  3.8 mg/digit; 1 g = 256.
@@ -111,7 +111,7 @@ static void calculateOffsets(LSM303& compass, L3G4200D& gyro,
 
 // Returns the measured angular velocity vector
 // in units of radians per second, in the body coordinate system.
-static vector readGyro(L3G4200D& gyro, const vector& gyro_offset)
+static vector readGyro(L3G& gyro, const vector& gyro_offset)
 {
     // At the full-scale=2000 dps setting, the gyro datasheet says
     // we get 0.07 dps/digit.
@@ -253,7 +253,7 @@ void print(matrix m)
            m(2,0), m(2,1), m(2,2));
 }
 
-void ahrs(LSM303& compass, L3G4200D& gyro)
+void ahrs(LSM303& compass, L3G& gyro)
 {
     int_vector mag_min, mag_max;
     loadCalibration(mag_min, mag_max);
@@ -335,7 +335,7 @@ int main(int argc, char *argv[])
 {
     I2CBus i2c("/dev/i2c-0");
     LSM303 compass(i2c);
-    L3G4200D gyro(i2c);
+    L3G gyro(i2c);
 
     //tmphaxTest();
 
