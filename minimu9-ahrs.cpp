@@ -183,8 +183,10 @@ void fuse_gyro_only(matrix& rotation, float dt, const vector& angular_velocity)
 
 #define Kp_ROLLPITCH 1
 #define Ki_ROLLPITCH 0.00002
-#define Kp_YAW 1.2
+#define Kp_YAW 1
 #define Ki_YAW 0.00002
+
+#define PI 3.14159265
 
 void fuse(matrix& rotation, float dt, const vector& angular_velocity,
   const vector& acceleration, const vector& magnetic_field)
@@ -202,6 +204,19 @@ void fuse(matrix& rotation, float dt, const vector& angular_velocity,
     rotationFromCompass.row(1).normalize();
     rotationFromCompass.row(2).normalize();
 
+    // The board's x axis in earth coordinates.
+    vector x = rotationFromCompass.col(0);
+    x.normalize();
+    x(2) = 0;
+    float heading_weight = x.norm();
+
+    // 0 = east, pi/2 = north
+    float heading = atan2(x(1), x(0));
+
+    fprintf(stderr, "B = %7.4f %7.4f %7.4f (%7.4f)  w=%7.4f h=%7.4f\n",
+            magnetic_field(0), magnetic_field(1), magnetic_field(2),
+            magnetic_field.norm(), heading_weight, heading*180/PI);
+
     // We trust the accelerometer more if it is telling us 1G.
     float accel_weight = 1 - 2*abs(1 - acceleration.norm());
     if (accel_weight < 0){ accel_weight = 0; }
@@ -209,23 +224,19 @@ void fuse(matrix& rotation, float dt, const vector& angular_velocity,
     vector omegaP(0,0,0);
     //static vector omegaI;
 
-    // TMPHAX
-    //rotation = matrix::Identity();
-    //acceleration = vector(0,1,0);
-
     // Add a "torque" that makes our up vector (rotation.row(2))
     // get closer to the acceleration vector.
     vector errorRollPitch = acceleration.cross(rotation.row(2)) * accel_weight;
 
-    fprintf(stderr, "errorRollPitch = %7.4f %7.4f %7.4f\n", errorRollPitch(0), errorRollPitch(1), errorRollPitch(2));
+    //fprintf(stderr, "errorRollPitch = %7.4f %7.4f %7.4f\n", errorRollPitch(0), errorRollPitch(1), errorRollPitch(2));
 
     omegaP += errorRollPitch * Kp_ROLLPITCH;
     //omegaI += errorRollPitch * Ki_ROLLPITCH;
 
     // Add a "torque" that makes our east vector (rotation.row(0))
     // get closer to east vector calculated from the compass.
-    //vector errorYaw = east.cross(rotation.row(0));
-    //omegaP += errorYaw * Kp_YAW;
+    vector errorYaw = east.cross(rotation.row(0));
+    omegaP += errorYaw * Kp_YAW;
     //omegaI += errorYaw * Ki_YAW;
 
     rotation *= updateMatrix(angular_velocity + omegaP, dt);
