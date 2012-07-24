@@ -28,6 +28,13 @@ void MinIMU9::enableSensors()
     gyro.writeReg(L3G_CTRL_REG4, 0x20); // 2000 dps full scale
 }
 
+void MinIMU9::loadCalibration()
+{
+    // TODO: load from ~/.lsm303_mag_cal instead of hardcoding
+    mag_min = int_vector(-519, -476, -765);
+    mag_max = int_vector(475, 623, 469);
+}
+
 vector MinIMU9::readMag()
 {
     return vector(44,44,44); // TODO: this

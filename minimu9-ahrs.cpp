@@ -58,14 +58,6 @@ void calibrate(LSM303& compass)
     }
 }
 
-void loadCalibration(int_vector& mag_min, int_vector& mag_max)
-{
-    // TODO: recalibrate for my new IMU
-    // TODO: load from ~/.lsm303_mag_cal instead of hardcoding
-    mag_min = int_vector(-519, -476, -765);
-    mag_max = int_vector(475, 623, 469);
-}
-
 // Calculate offsets, assuming the MiniMU is resting
 // with is z axis pointing up.
 static void calculateOffsets(LSM303& compass, L3G& gyro,
@@ -240,10 +232,9 @@ void print(matrix m)
            m(2,0), m(2,1), m(2,2));
 }
 
-void ahrs(MinIMU9& imu)
+void ahrs(MinIMU9& imu)  // TODO: change this to just be IMU& eventually
 {
-    int_vector mag_min, mag_max;
-    loadCalibration(mag_min, mag_max);
+    imu.loadCalibration();
 
     imu.enableSensors();
     LSM303& compass = imu.compass;
@@ -271,7 +262,7 @@ void ahrs(MinIMU9& imu)
 
         vector angular_velocity = readGyro(gyro, gyro_offset);
         vector acceleration = readAcc(compass, accel_offset);
-        vector magnetic_field = readMag(compass, mag_min, mag_max); // TODO: read mag at 10Hz instead?  Why do others do that?
+        vector magnetic_field = readMag(compass, imu.mag_min, imu.mag_max); // TODO: read mag at 10Hz instead?  Why do others do that?
 
         fuse(rotation, dt, angular_velocity, acceleration, magnetic_field);
 

@@ -25,7 +25,7 @@ public:
     void loadCalibration();
     void calculateOffsets();
 
-    vector mag_min, mag_max;
+    int_vector mag_min, mag_max;
 };
 
 #endif
