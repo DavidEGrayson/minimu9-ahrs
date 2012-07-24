@@ -1,3 +1,4 @@
+#include "vector.h"
 #include "MinIMU9.h"
 #include <iostream>
 #include <stdio.h>
@@ -324,9 +325,9 @@ void tmphaxTest()
 int main(int argc, char *argv[])
 {
     I2CBus i2c("/dev/i2c-0");
-    MinIMU9 minimu9(i2c);
-    LSM303& compass = minimu9.compass;
-    L3G& gyro = minimu9.gyro;
+    MinIMU9 imu(i2c);
+    LSM303& compass = imu.compass;
+    L3G& gyro = imu.gyro;
 
     uint8_t result = compass.readMagReg(LSM303_WHO_AM_I_M);
     if (result != 0x3C)

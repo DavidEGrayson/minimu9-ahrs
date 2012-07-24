@@ -8,13 +8,17 @@
 
 class MinIMU9 : public IMU {
 public:
-    MinIMU9(I2CBus&);
+    MinIMU9(I2CBus& i2c);
+
+    virtual vector readAcc();
+    virtual vector readMag();
+    virtual vector readGyro();
 
     void enableSensors();
     void calibrate();
 
-    LSM303& compass;
-    L3G& gyro;
+    LSM303 compass;
+    L3G gyro;
 
     void calibrateMagnetometer();
     void loadCalibration();

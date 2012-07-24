@@ -1,10 +1,11 @@
+#include "vector.h"
 #include "MinIMU9.h"
 
 MinIMU9::MinIMU9(I2CBus& i2c) : compass(i2c), gyro(i2c)
 {
 }
 
-MinIMU9::enableSensors()
+void MinIMU9::enableSensors()
 {
     compass.writeAccReg(LSM303_CTRL_REG1_A, 0x47); // normal power mode, all axes enabled, 50 Hz
     compass.writeAccReg(LSM303_CTRL_REG4_A, 0x20); // 8 g full scale
@@ -16,3 +17,17 @@ MinIMU9::enableSensors()
     gyro.writeReg(L3G_CTRL_REG4, 0x20); // 2000 dps full scale
 }
 
+vector MinIMU9::readMag()
+{
+    return vector(44,44,44); // TODO: this
+}
+
+vector MinIMU9::readAcc()
+{
+    return vector(44,44,44); // TODO: this
+}
+
+vector MinIMU9::readGyro()
+{
+    return vector(44,44,44); // TODO: this
+}
