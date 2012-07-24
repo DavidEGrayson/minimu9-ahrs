@@ -14,6 +14,7 @@ public:
     virtual vector readMag();
     virtual vector readGyro();
 
+    void checkConnection();
     void enableSensors();
     void calibrate();
 

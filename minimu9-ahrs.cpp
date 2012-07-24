@@ -66,10 +66,6 @@ void loadCalibration(int_vector& mag_min, int_vector& mag_max)
     mag_max = int_vector(475, 623, 469);
 }
 
-static void enableSensors(LSM303& compass, L3G& gyro)
-{
-}
-
 // Calculate offsets, assuming the MiniMU is resting
 // with is z axis pointing up.
 static void calculateOffsets(LSM303& compass, L3G& gyro,
@@ -244,12 +240,14 @@ void print(matrix m)
            m(2,0), m(2,1), m(2,2));
 }
 
-void ahrs(LSM303& compass, L3G& gyro)
+void ahrs(MinIMU9& imu)
 {
     int_vector mag_min, mag_max;
     loadCalibration(mag_min, mag_max);
 
-    enableSensors(compass, gyro);
+    imu.enableSensors();
+    LSM303& compass = imu.compass;
+    L3G& gyro = imu.gyro;
 
     vector accel_offset, gyro_offset;
     calculateOffsets(compass, gyro, accel_offset, gyro_offset);
@@ -329,12 +327,7 @@ int main(int argc, char *argv[])
     LSM303& compass = imu.compass;
     L3G& gyro = imu.gyro;
 
-    uint8_t result = compass.readMagReg(LSM303_WHO_AM_I_M);
-    if (result != 0x3C)
-    {
-        std::cerr << "Error getting \"Who Am I\" register." << std::endl;
-        exit(2);
-    }
+    imu.checkConnection();
 
     if (argc > 1)
     {
@@ -354,7 +347,7 @@ int main(int argc, char *argv[])
     }
     else
     {
-        ahrs(compass, gyro);
+        ahrs(imu);
     }
 
     return 0;

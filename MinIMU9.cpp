@@ -1,8 +1,19 @@
 #include "vector.h"
 #include "MinIMU9.h"
+#include <stdio.h>
 
 MinIMU9::MinIMU9(I2CBus& i2c) : compass(i2c), gyro(i2c)
 {
+}
+
+void MinIMU9::checkConnection()
+{
+    uint8_t result = compass.readMagReg(LSM303_WHO_AM_I_M);
+    if (result != 0x3C)
+    {
+        fprintf(stderr, "Error getting \"Who Am I\" register.\n");
+        exit(2);
+    }
 }
 
 void MinIMU9::enableSensors()
