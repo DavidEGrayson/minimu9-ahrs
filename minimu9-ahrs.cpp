@@ -1,10 +1,8 @@
-#include "vector.h"
+#include "MinIMU9.h"
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include "LSM303.h"
-#include "L3G.h"
 #include <sys/time.h>
 
 /*
@@ -69,14 +67,6 @@ void loadCalibration(int_vector& mag_min, int_vector& mag_max)
 
 static void enableSensors(LSM303& compass, L3G& gyro)
 {
-    compass.writeAccReg(LSM303_CTRL_REG1_A, 0x47); // normal power mode, all axes enabled, 50 Hz
-    compass.writeAccReg(LSM303_CTRL_REG4_A, 0x20); // 8 g full scale
-
-    compass.writeMagReg(LSM303_MR_REG_M, 0x00); // continuous conversion mode
-    // 15 Hz default
-
-    gyro.writeReg(L3G_CTRL_REG1, 0x0F); // normal power mode, all axes enabled, 100 Hz
-    gyro.writeReg(L3G_CTRL_REG4, 0x20); // 2000 dps full scale
 }
 
 // Calculate offsets, assuming the MiniMU is resting
@@ -334,10 +324,9 @@ void tmphaxTest()
 int main(int argc, char *argv[])
 {
     I2CBus i2c("/dev/i2c-0");
-    LSM303 compass(i2c);
-    L3G gyro(i2c);
-
-    //tmphaxTest();
+    MinIMU9 minimu9(i2c);
+    LSM303& compass = minimu9.compass;
+    L3G& gyro = minimu9.gyro;
 
     uint8_t result = compass.readMagReg(LSM303_WHO_AM_I_M);
     if (result != 0x3C)
