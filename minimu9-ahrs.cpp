@@ -58,36 +58,6 @@ void calibrate(LSM303& compass)
     }
 }
 
-// Calculate offsets, assuming the MiniMU is resting
-// with is z axis pointing up.
-static void calculateOffsets(LSM303& compass, L3G& gyro,
-                             vector& accel_offset, vector& gyro_offset)
-{
-    // LSM303 accelerometer: 8 g sensitivity.  3.8 mg/digit; 1 g = 256.
-    // TODO: unify this with the other place in the code where we scale accelerometer readings.
-    const int gravity = 256;
-
-    gyro_offset = accel_offset = vector::Zero();
-    const int sampleCount = 32;
-    for(int i = 0; i < sampleCount; i++)
-    {
-        gyro.read();
-        compass.readAcc();
-        gyro_offset += vector_from_ints(&gyro.g);
-        accel_offset += vector_from_ints(&compass.a);
-        usleep(20*1000);
-    }
-    gyro_offset /= sampleCount;
-    accel_offset /= sampleCount;
-    accel_offset(2) -= gravity;
-
-    if (accel_offset.norm() > 50)
-    {
-        fprintf(stderr, "Unable to calculate accelerometer offset because board was not resting in the correct orientation.\n");
-        accel_offset = vector::Zero();
-    }
-}
-
 // Returns the measured angular velocity vector
 // in units of radians per second, in the body coordinate system.
 static vector readGyro(L3G& gyro, const vector& gyro_offset)
@@ -235,18 +205,16 @@ void print(matrix m)
 void ahrs(MinIMU9& imu)  // TODO: change this to just be IMU& eventually
 {
     imu.loadCalibration();
-
     imu.enableSensors();
-    LSM303& compass = imu.compass;
-    L3G& gyro = imu.gyro;
-
-    vector accel_offset, gyro_offset;
-    calculateOffsets(compass, gyro, accel_offset, gyro_offset);
+    imu.measureOffsets();
     
     fprintf(stderr, "Gyro offset: %7f %7f %7f\nAccel offset: %7f %7f %7f (%7f)\n",
-            gyro_offset(0), gyro_offset(1), gyro_offset(2),
-            accel_offset(0), accel_offset(1), accel_offset(2),
-            accel_offset.norm());
+            imu.gyro_offset(0), imu.gyro_offset(1), imu.gyro_offset(2),
+            imu.accel_offset(0), imu.accel_offset(1), imu.accel_offset(2),
+            imu.accel_offset.norm());
+
+    LSM303& compass = imu.compass;
+    L3G& gyro = imu.gyro;
 
     // The rotation matrix that can convert a vector in body coordinates
     // to ground coordinates.
@@ -260,8 +228,8 @@ void ahrs(MinIMU9& imu)  // TODO: change this to just be IMU& eventually
         float dt = (start-last_start)/1000.0;
         if (dt < 0){ throw "time went backwards"; }
 
-        vector angular_velocity = readGyro(gyro, gyro_offset);
-        vector acceleration = readAcc(compass, accel_offset);
+        vector angular_velocity = readGyro(gyro, imu.gyro_offset);
+        vector acceleration = readAcc(compass, imu.accel_offset);
         vector magnetic_field = readMag(compass, imu.mag_min, imu.mag_max); // TODO: read mag at 10Hz instead?  Why do others do that?
 
         fuse(rotation, dt, angular_velocity, acceleration, magnetic_field);
