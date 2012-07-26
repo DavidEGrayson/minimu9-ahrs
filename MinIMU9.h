@@ -12,17 +12,15 @@ public:
 
     LSM303 compass;
     L3G gyro;
-    int_vector mag_min, mag_max;
-    vector accel_offset, gyro_offset;
 
     virtual vector readAcc();
     virtual vector readMag();
     virtual vector readGyro();
 
-    void checkConnection();
+    virtual void checkConnection();
     virtual void enableSensors();
-    void loadCalibration();
-    void measureOffsets();
+    virtual void loadCalibration();
+    virtual void measureOffsets();
 };
 
 #endif

@@ -29,15 +29,15 @@ void streamRawValues(IMU& imu)
     }
 }
 
-void calibrate(LSM303& compass)
+void calibrateMag(IMU& imu)
 {
-    compass.enableDefault();
+    imu.enableSensors();
     int_vector mag_max, mag_min;
     while(1)
     {
-        compass.read();
-        mag_min = mag_min.cwiseMin(int_vector_from_ints(&compass.m));
-        mag_max = mag_max.cwiseMax(int_vector_from_ints(&compass.m));
+        imu.readMag();
+        mag_min = mag_min.cwiseMin(imu.m);
+        mag_max = mag_max.cwiseMax(imu.m);
         printf("%7d %7d %7d  %7d %7d %7d\n",
                mag_min(0), mag_min(1), mag_min(2),
                mag_max(0), mag_max(1), mag_max(2));
@@ -152,7 +152,7 @@ void print(matrix m)
            m(2,0), m(2,1), m(2,2));
 }
 
-void ahrs(MinIMU9& imu)  // TODO: change this to just be IMU& eventually
+void ahrs(IMU& imu)  // TODO: change this to just be IMU& eventually
 {
     imu.loadCalibration();
     imu.enableSensors();
@@ -209,7 +209,6 @@ int main(int argc, char *argv[])
 {
     I2CBus i2c("/dev/i2c-0");
     MinIMU9 imu(i2c);
-    LSM303& compass = imu.compass;
 
     imu.checkConnection();
 
@@ -217,7 +216,7 @@ int main(int argc, char *argv[])
     {
         if (0 == strcmp("cal", argv[1]))
         {
-            calibrate(compass);
+            calibrateMag(imu);
         }
         else if (0 == strcmp("raw", argv[1]))
         {
