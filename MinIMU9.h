@@ -20,7 +20,7 @@ public:
     virtual vector readGyro();
 
     void checkConnection();
-    void enableSensors();
+    virtual void enableSensors();
     void loadCalibration();
     void measureOffsets();
 };

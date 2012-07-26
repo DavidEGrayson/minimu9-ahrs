@@ -18,6 +18,9 @@ void MinIMU9::checkConnection()
 
 void MinIMU9::enableSensors()
 {
+    //compass.enableDefault();
+    //gyro.enableDefault();
+
     compass.writeAccReg(LSM303_CTRL_REG1_A, 0x47); // normal power mode, all axes enabled, 50 Hz
     compass.writeAccReg(LSM303_CTRL_REG4_A, 0x20); // 8 g full scale
 
@@ -66,15 +69,36 @@ void MinIMU9::measureOffsets()
 
 vector MinIMU9::readMag()
 {
-    return vector(44,44,44); // TODO: this
+    compass.readMag();
+
+    m = int_vector_from_ints(&compass.m);
+    
+    vector v;
+    v(0) = (float)(compass.m[0] - mag_min(0)) / (mag_max(0) - mag_min(0)) * 2 - 1;
+    v(1) = (float)(compass.m[1] - mag_min(1)) / (mag_max(1) - mag_min(1)) * 2 - 1;
+    v(2) = (float)(compass.m[2] - mag_min(2)) / (mag_max(2) - mag_min(2)) * 2 - 1;
+    return v;
 }
 
 vector MinIMU9::readAcc()
 {
-    return vector(44,44,44); // TODO: this
+    // LSM303 accelerometer: At 8 g sensitivity, the datasheet says
+    // we get 3.9 mg/digit.
+    // TODO: double check this figure using the correct datasheet
+    const float accel_scale = 0.0039;
+
+    compass.readAcc();
+    a = int_vector_from_ints(&compass.a);
+    return ( vector_from_ints(&compass.a) - accel_offset ) * accel_scale;
 }
 
 vector MinIMU9::readGyro()
 {
-    return vector(44,44,44); // TODO: this
+    // At the full-scale=2000 dps setting, the gyro datasheet says
+    // we get 0.07 dps/digit.
+    const float gyro_scale = 0.07 * 3.14159265 / 180;
+
+    gyro.read();
+    g = int_vector_from_ints(&gyro.g);
+    return ( vector_from_ints(&gyro.g) - gyro_offset ) * gyro_scale;
 }

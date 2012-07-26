@@ -6,16 +6,6 @@
 #include <time.h>
 #include <sys/time.h>
 
-/*
-promising:
-http://elinux.org/Interfacing_with_I2C_Devices
-https://i2c.wiki.kernel.org/index.php/Main_Page
-*/
-
-// TODO: read http://www.cs.cmu.edu/~spiff/moedit99/expmap.pdf
-
-
-
 int millis()
 {
     struct timeval tv;
@@ -23,21 +13,19 @@ int millis()
     return (tv.tv_sec) * 1000 + (tv.tv_usec)/1000;
 }
 
-void streamRawValues(LSM303& compass, L3G& gyro)
+void streamRawValues(IMU& imu)
 {
-    compass.enableDefault();
-    gyro.enableDefault();
+    imu.enableSensors();
 
     while(1)
     {
-        compass.read();
-        gyro.read();
+        imu.read();
         printf("%7d %7d %7d,  %7d %7d %7d,  %7d %7d %7d\n",
-               compass.m[0], compass.m[1], compass.m[2],
-               compass.a[0], compass.a[1], compass.a[2],
-               gyro.g[0], gyro.g[1], gyro.g[2]
+               imu.m[0], imu.m[1], imu.m[2],
+               imu.a[0], imu.a[1], imu.a[2],
+               imu.g[0], imu.g[1], imu.g[2]
         );
-        usleep(100*1000);
+        usleep(20*1000);
     }
 }
 
@@ -258,33 +246,11 @@ void ahrs(MinIMU9& imu)  // TODO: change this to just be IMU& eventually
     }
 }
 
-void tmphaxTest()
-{
-    const float turnAmount = 3.14159265/2;  // radians
-    const float turnTime = 0.5; // seconds
-    const int pieces = turnTime/0.02;
-    const vector angular_velocity(0, 0, turnAmount/turnTime);
-
-    const float dt = turnTime/pieces;
-    matrix rotation = matrix::Identity();
-
-    for (int i = 0; i < pieces; i++)
-    {
-        fuse_gyro_only(rotation, dt, angular_velocity);
-    }
-
-    print(rotation);
-    putchar('\n');
-    printf("tmphaxTest done\n");
-    exit(3);
-}
-
 int main(int argc, char *argv[])
 {
     I2CBus i2c("/dev/i2c-0");
     MinIMU9 imu(i2c);
     LSM303& compass = imu.compass;
-    L3G& gyro = imu.gyro;
 
     imu.checkConnection();
 
@@ -296,7 +262,7 @@ int main(int argc, char *argv[])
         }
         else if (0 == strcmp("raw", argv[1]))
         {
-            streamRawValues(compass, gyro);
+            streamRawValues(imu);
         }
         else
         {
