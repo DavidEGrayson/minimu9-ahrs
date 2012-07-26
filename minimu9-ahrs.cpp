@@ -73,22 +73,7 @@ static matrix normalize(const matrix & m)
     return norm;
 }
 
-void fuse_gyro_only(matrix& rotation, float dt, const vector& angular_velocity)
-{
-   rotation *= updateMatrix(angular_velocity, dt);
-
-   rotation = normalize(rotation);
-}
-
-#define Kp_ROLLPITCH 1
-#define Ki_ROLLPITCH 0.00002
-#define Kp_YAW 1
-#define Ki_YAW 0.00002
-
-#define PI 3.14159265
-
-void fuse(matrix& rotation, float dt, const vector& angular_velocity,
-  const vector& acceleration, const vector& magnetic_field)
+matrix rotationFromCompass(const vector& acceleration, const vector& magnetic_field)
 {
     vector up = acceleration;     // usually true
     vector magnetic_east = magnetic_field.cross(up);
@@ -103,8 +88,42 @@ void fuse(matrix& rotation, float dt, const vector& angular_velocity,
     rotationFromCompass.row(1).normalize();
     rotationFromCompass.row(2).normalize();
 
+    return rotationFromCompass;
+}
+
+typedef void fuse_function(matrix& rotation, float dt, const vector& angular_velocity,
+                  const vector& acceleration, const vector& magnetic_field);
+
+
+void fuse_compass_only(matrix& rotation, float dt, const vector& angular_velocity,
+  const vector& acceleration, const vector& magnetic_field)
+{
+    rotation = rotationFromCompass(acceleration, magnetic_field);
+}
+
+
+void fuse_gyro_only(matrix& rotation, float dt, const vector& angular_velocity,
+  const vector& acceleration, const vector& magnetic_field)
+{
+   rotation *= updateMatrix(angular_velocity, dt);
+
+   rotation = normalize(rotation);
+}
+
+#define Kp_ROLLPITCH 1
+#define Ki_ROLLPITCH 0.00002
+#define Kp_YAW 1
+#define Ki_YAW 0.00002
+
+#define PI 3.14159265
+
+void fuse_default(matrix& rotation, float dt, const vector& angular_velocity,
+  const vector& acceleration, const vector& magnetic_field)
+{
+    matrix rotationCompass = rotationFromCompass(acceleration, magnetic_field);
+
     // The board's x axis in earth coordinates.
-    vector x = rotationFromCompass.col(0);
+    vector x = rotationCompass.col(0);
     x.normalize();
     x(2) = 0;
     float heading_weight = x.norm();
@@ -134,7 +153,7 @@ void fuse(matrix& rotation, float dt, const vector& angular_velocity,
 
     // Add a "torque" that makes our east vector (rotation.row(0))
     // get closer to east vector calculated from the compass.
-    vector errorYaw = east.cross(rotation.row(0));
+    vector errorYaw = rotationCompass.row(0).cross(rotation.row(0));
     omegaP += errorYaw * Kp_YAW;
     //omegaI += errorYaw * Ki_YAW;
 
@@ -152,7 +171,7 @@ void print(matrix m)
            m(2,0), m(2,1), m(2,2));
 }
 
-void ahrs(IMU& imu)  // TODO: change this to just be IMU& eventually
+void ahrs(IMU& imu, fuse_function * fuse_func)
 {
     imu.loadCalibration();
     imu.enableSensors();
@@ -179,7 +198,7 @@ void ahrs(IMU& imu)  // TODO: change this to just be IMU& eventually
         vector acceleration = imu.readAcc();
         vector magnetic_field = imu.readMag();
 
-        fuse(rotation, dt, angular_velocity, acceleration, magnetic_field);
+        fuse_func(rotation, dt, angular_velocity, acceleration, magnetic_field);
 
         //fprintf(stderr, "g: %8d %8d %8d\n", gyro.g(0), gyro.g(1), gyro.g(2));
         //fprintf(stderr, "m: %7.4f %7.4f %7.4f  m_raw: %8d %8d %8d\n", magnetic_field(0), magnetic_field(1), magnetic_field(2), compass.m(0), compass.m(1), compass.m(2)); 
@@ -222,6 +241,14 @@ int main(int argc, char *argv[])
         {
             streamRawValues(imu);
         }
+        else if (0 == strcmp("gyro-only", argv[1]))
+        {
+            ahrs(imu, &fuse_gyro_only);
+        }
+        else if (0 == strcmp("compass-only", argv[1]))
+        {
+            ahrs(imu, &fuse_compass_only);
+        }
         else
         {
             fprintf(stderr, "Unknown action '%s'.\n", argv[1]);
@@ -230,7 +257,7 @@ int main(int argc, char *argv[])
     }
     else
     {
-        ahrs(imu);
+        ahrs(imu, &fuse_default);
     }
 
     return 0;
