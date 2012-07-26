@@ -46,44 +46,6 @@ void calibrate(LSM303& compass)
     }
 }
 
-// Returns the measured angular velocity vector
-// in units of radians per second, in the body coordinate system.
-static vector readGyro(L3G& gyro, const vector& gyro_offset)
-{
-    // At the full-scale=2000 dps setting, the gyro datasheet says
-    // we get 0.07 dps/digit.
-    const float gyro_scale = 0.07 * 3.14159265 / 180;
-
-    gyro.read();
-    return ( vector_from_ints(&gyro.g) - gyro_offset ) * gyro_scale;
-}
-
-// Returns acceleration vector in units of g, where g is 9.8 m/s^2,
-// in the body coordinate system.
-static vector readAcc(LSM303& compass, const vector& accel_offset)
-{
-    // LSM303 accelerometer: At 8 g sensitivity, the datasheet says
-    // we get 3.9 mg/digit.
-    // TODO: double check this figure using the correct datasheet
-    const float accel_scale = 0.0039;
-
-    compass.readAcc();
-    return ( vector_from_ints(&compass.a) - accel_offset ) * accel_scale;
-}
-
-// Returns the magnetic field vector in the body coordinate system.
-// For each component, a value of 1 corresponds to the max value
-// and a value of -1 corresponds to the min value.
-static vector readMag(LSM303& compass, const int_vector& mag_min, const int_vector& mag_max)
-{
-    compass.readMag();
-    vector m;
-    m(0) = (float)(compass.m[0] - mag_min(0)) / (mag_max(0) - mag_min(0)) * 2 - 1;
-    m(1) = (float)(compass.m[1] - mag_min(1)) / (mag_max(1) - mag_min(1)) * 2 - 1;
-    m(2) = (float)(compass.m[2] - mag_min(2)) / (mag_max(2) - mag_min(2)) * 2 - 1;
-    return m;
-}
-
 static matrix updateMatrix(const vector& w, float dt)
 {
     matrix u = matrix::Identity();
@@ -201,9 +163,6 @@ void ahrs(MinIMU9& imu)  // TODO: change this to just be IMU& eventually
             imu.accel_offset(0), imu.accel_offset(1), imu.accel_offset(2),
             imu.accel_offset.norm());
 
-    LSM303& compass = imu.compass;
-    L3G& gyro = imu.gyro;
-
     // The rotation matrix that can convert a vector in body coordinates
     // to ground coordinates.
     matrix rotation = matrix::Identity();
@@ -216,9 +175,9 @@ void ahrs(MinIMU9& imu)  // TODO: change this to just be IMU& eventually
         float dt = (start-last_start)/1000.0;
         if (dt < 0){ throw "time went backwards"; }
 
-        vector angular_velocity = readGyro(gyro, imu.gyro_offset);
-        vector acceleration = readAcc(compass, imu.accel_offset);
-        vector magnetic_field = readMag(compass, imu.mag_min, imu.mag_max); // TODO: read mag at 10Hz instead?  Why do others do that?
+        vector angular_velocity = imu.readGyro();
+        vector acceleration = imu.readAcc();
+        vector magnetic_field = imu.readMag();
 
         fuse(rotation, dt, angular_velocity, acceleration, magnetic_field);
 
