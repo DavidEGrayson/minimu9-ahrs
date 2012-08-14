@@ -34,8 +34,8 @@ void MinIMU9::enableSensors()
 void MinIMU9::loadCalibration()
 {
     // TODO: load from ~/.lsm303_mag_cal instead of hardcoding
-    mag_min = int_vector(-519, -476, -765);
-    mag_max = int_vector(475, 623, 469);
+    mag_min = int_vector(-550, -800, -780);
+    mag_max = int_vector(770, 640, 680);
 }
 
 // Calculate offsets, assuming the MinIMU is resting

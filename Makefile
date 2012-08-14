@@ -25,6 +25,6 @@ vector.h.gch: vector.h
 	$(CC) $(CPPFLAGS) $< -o $@
 
 clean:
-	@rm -fv $(BIN) $(OBJs) $(DEPs) *.o *.gch
+	@rm -fv $(BIN) $(OBJs) $(DEPs) *.o *.gch *.d
 
 -include $(DEPs) vector.h.d

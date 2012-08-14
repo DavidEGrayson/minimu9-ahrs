@@ -99,13 +99,13 @@ matrix rotationFromCompass(const vector& acceleration, const vector& magnetic_fi
     return rotationFromCompass;
 }
 
-vector heading(matrix rotation)
+float heading(matrix rotation)
 {
     // The board's x axis in earth coordinates.
     vector x = rotation.col(0);
     x.normalize();
     x(2) = 0;
-    float heading_weight = x.norm();
+    //float heading_weight = x.norm();
 
     // 0 = east, pi/2 = north
     return atan2(x(1), x(0));
