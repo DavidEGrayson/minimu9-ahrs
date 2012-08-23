@@ -28,29 +28,12 @@ void streamRawValues(IMU& imu)
     while(1)
     {
         imu.read();
-        printf("%7d %7d %7d,  %7d %7d %7d,  %7d %7d %7d\n",
+        printf("%7d %7d %7d  %7d %7d %7d  %7d %7d %7d\n",
                imu.m[0], imu.m[1], imu.m[2],
                imu.a[0], imu.a[1], imu.a[2],
                imu.g[0], imu.g[1], imu.g[2]
         );
         usleep(20*1000);
-    }
-}
-
-void calibrateMag(IMU& imu)
-{
-    imu.enableSensors();
-    int_vector mag_max, mag_min;
-    while(1)
-    {
-        imu.readMag();
-        mag_min = mag_min.cwiseMin(imu.m);
-        mag_max = mag_max.cwiseMax(imu.m);
-        printf("%7d %7d %7d  %7d %7d %7d\n",
-               mag_min(0), mag_min(1), mag_min(2),
-               mag_max(0), mag_max(1), mag_max(2));
-        usleep(10*1000);
-        // TODO: have some way of writing to ~/.lsm303_mag_cal
     }
 }
 
@@ -216,39 +199,47 @@ void ahrs(IMU& imu, fuse_function * fuse_func)
 
 int main(int argc, char *argv[])
 {
-    I2CBus i2c("/dev/i2c-0");
-    MinIMU9 imu(i2c);
-
-    imu.checkConnection();
-
-    if (argc > 1)
+    try
     {
-        if (0 == strcmp("cal", argv[1]))
+        I2CBus i2c("/dev/i2c-0");
+        MinIMU9 imu(i2c);
+        
+        imu.checkConnection();
+
+        if (argc > 1)
         {
-            calibrateMag(imu);
-        }
-        else if (0 == strcmp("raw", argv[1]))
-        {
-            streamRawValues(imu);
-        }
-        else if (0 == strcmp("gyro-only", argv[1]))
-        {
-            ahrs(imu, &fuse_gyro_only);
-        }
-        else if (0 == strcmp("compass-only", argv[1]))
-        {
-            ahrs(imu, &fuse_compass_only);
+            const char * action = argv[1];
+            if (0 == strcmp("raw", action))
+            {
+                streamRawValues(imu);
+            }
+            else if (0 == strcmp("gyro-only", action))
+            {
+                ahrs(imu, &fuse_gyro_only);
+            }
+            else if (0 == strcmp("compass-only", action))
+            {
+                ahrs(imu, &fuse_compass_only);
+            }
+            else
+            {
+                fprintf(stderr, "Unknown action '%s'.\n", action);
+                return 3;
+            }
         }
         else
         {
-            fprintf(stderr, "Unknown action '%s'.\n", argv[1]);
-            exit(3);
-        }
+            ahrs(imu, &fuse_default);
+        }        
+        return 0;
     }
-    else
+    catch(const char * error_message)
     {
-        ahrs(imu, &fuse_default);
+        fprintf(stderr, "Error: %s\n", error_message);
     }
-
-    return 0;
+    catch(const int error_num)
+    {
+        fprintf(stderr, "Error %d: %s\n", error_num, strerror(error_num));
+    }
+    return 1;
 }
