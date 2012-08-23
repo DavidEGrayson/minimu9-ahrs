@@ -1,8 +1,10 @@
 #include "vector.h"
 #include "MinIMU9.h"
+#include "exceptions.h"
 #include <stdio.h>
 #include <iostream>
 #include <fstream>
+#include <wordexp.h>
 
 MinIMU9::MinIMU9(I2CBus& i2c) : compass(i2c), gyro(i2c)
 {
@@ -35,22 +37,22 @@ void MinIMU9::enableSensors()
 
 void MinIMU9::loadCalibration()
 {
-    // TODO: load from ~/.lsm303_mag_cal instead of hardcoding
+    wordexp_t expansion_result;
+    wordexp("~/.minimu9-ahrs-cal", &expansion_result, 0);
 
-    // On table with projector:
-    //mag_min = int_vector(-525, -746, -728);
-    //mag_max = int_vector(737, 665, 633);
-
-    // On floor near TV stand:
-    //mag_min = int_vector(-421, -563, -462);
-    //mag_max = int_vector( 537,  479,  481);
-
-    std::ifstream file("~/.minimu9-ahrs-cal");
+    std::ifstream file(expansion_result.we_wordv[0]);
+    if (file.fail())
+    {
+        // TODO: throw a PosixError
+        throw "Failed to open calibration file ~/.minimu9-ahrs-cal.";
+    }
+    
     file >> mag_min(0) >> mag_max(0) >> mag_min(1) >> mag_max(1) >> mag_min(2) >> mag_max(2);
     if (file.fail() || file.bad())
     {
-        throw "Failed to read calibration file ~/.minimu9-ahrs-cal.";
+        throw "Failed to parse calibration file ~/.minimu9-ahrs-cal.";
     }
+    
 }
 
 // Calculate offsets, assuming the MinIMU is resting
