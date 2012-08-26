@@ -43,7 +43,7 @@ void I2CBus::setAddress(uint8_t address)
         //throw "Error setting slave address.";
     }
 
-    address = currentAddress;
+    currentAddress = address;
 }
 
 void I2CBus::writeByte(uint8_t command, uint8_t data)
