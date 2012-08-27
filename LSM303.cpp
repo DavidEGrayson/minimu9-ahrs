@@ -7,7 +7,7 @@
 LSM303::LSM303(I2CBus& i2c) : i2c(i2c)
 {
     fmag = i2c.registerI2CDevice(MAG_ADDRESS);
-    facc = i2c.registerI2CDevice(ACC_ADDRESS_SA0_A_LOW);
+    facc = i2c.registerI2CDevice(ACC_ADDRESS_SA0_A_HIGH);
 }
 
 LSM303::~LSM303()

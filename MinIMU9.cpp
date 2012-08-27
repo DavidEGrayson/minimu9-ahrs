@@ -25,10 +25,9 @@ void MinIMU9::enableSensors()
     //compass.enableDefault();
     //gyro.enableDefault();
 
-    compass.writeAccReg(LSM303_CTRL_REG1_A, 0x27); // normal power mode, all axes enabled, 50 Hz
-    compass.writeAccReg(LSM303_CTRL_REG4_A, 0x30); // 8 g full scale
+    compass.writeAccReg(LSM303_CTRL_REG1_A, 0x47); // normal power mode, all axes enabled, 50 Hz
+    compass.writeAccReg(LSM303_CTRL_REG4_A, 0x20); // 8 g full scale
 
-    compass.writeMagReg(LSM303_CRA_REG_M, 0x10);
     compass.writeMagReg(LSM303_MR_REG_M, 0x00); // continuous conversion mode
     // 15 Hz default
 

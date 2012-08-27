@@ -1,6 +1,6 @@
 #include "L3G.h"
 
-#define GYR_ADDRESS 0x69 //(0xD6 >> 1)
+#define GYR_ADDRESS (0xD6 >> 1)
 
 // TODO: rename gyro class
 
