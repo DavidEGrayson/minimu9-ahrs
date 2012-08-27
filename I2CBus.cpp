@@ -8,43 +8,17 @@
 
 // TODO: throw some nicer type of exception that results in a nice error message
 
-I2CBus::I2CBus(const char * devName) : ownFd(true), //currentAddress(-1)
+I2CBus::I2CBus(const char * devName) :  deviceName(devName)
 {
-    // Open up the I2C bus device.
-    fd = open(devName, O_RDWR);
-    if (fd == -1)
-    {
-        perror(devName); // TODO: remove this if a nicer exeption is thrown below
-        throw errno;
-    }
+    //nothing to do here
 }
 
-I2CBus::I2CBus(int fd) : fd(fd), ownFd(false) //currentAddress(-1)
-{
-    // nothing to do here
-}
 
 I2CBus::~I2CBus()
 {
-    if (ownFd)
-    {
-        close(fd);
-    }
+    //nothing to do here
 }
 
-//void I2CBus::setAddress(uint8_t address)
-//{
-//    if (address == currentAddress){ return; }
-
-//    int result = ioctl(fd, I2C_SLAVE, address);
-//    if (result == -1)
-//    {
-//        throw errno;
-//        //throw "Error setting slave address.";
-//    }
-
-//    currentAddress = address;
-//}
 
 void I2CBus::writeByte(int devFd, uint8_t command, uint8_t data)
 {
@@ -70,7 +44,7 @@ uint8_t I2CBus::readByte(int devFd, uint8_t command)
 
 void I2CBus::readBlock(int devFd, uint8_t command, uint8_t size, uint8_t * data)
 {
-    int result = i2c_smbus_read_i2c_block_data(fd, command, size, data);
+    int result = i2c_smbus_read_i2c_block_data(devFd, command, size, data);
     if (result != size)
     {
         throw errno;
@@ -78,9 +52,14 @@ void I2CBus::readBlock(int devFd, uint8_t command, uint8_t size, uint8_t * data)
     }
 }
 
-int  registerI2CDevice(uint_8_t devAddress)
+int  I2CBus::registerI2CDevice(uint8_t devAddress)
 {
-    int devFd = dup(fd);
+    int devFd = open(deviceName, O_RDWR);
+    if (devFd == -1)
+    {
+        perror(deviceName); // TODO: remove this if a nicer exeption is thrown below
+        throw errno;
+    }
     int result = ioctl(devFd, I2C_SLAVE, devAddress);
     if (result == -1)
     {
@@ -89,13 +68,13 @@ int  registerI2CDevice(uint_8_t devAddress)
         return -1;
     }
 
-    return devFd;
+    return dup(devFd);
 }
 
 void I2CBus::deregisterI2CDevice(int devFd)
 {
     int result = close(devFd);
-    if (result != size)
+    if (result == -1)
     {
         throw errno;
         //throw "Error closing file descriptor.";
