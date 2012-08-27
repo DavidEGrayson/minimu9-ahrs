@@ -1,4 +1,5 @@
 #include "LSM303.h"
+#include <stdio.h>
 
 #define MAG_ADDRESS            (0x3C >> 1)
 #define ACC_ADDRESS_SA0_A_LOW  (0x30 >> 1)
@@ -7,7 +8,7 @@
 LSM303::LSM303(I2CBus& i2c) : i2c(i2c)
 {
     fmag = i2c.registerI2CDevice(MAG_ADDRESS);
-    facc = i2c.registerI2CDevice(ACC_ADDRESS_SA0_A_HIGH);
+    facc = i2c.registerI2CDevice(ACC_ADDRESS_SA0_A_LOW);
 }
 
 LSM303::~LSM303()
@@ -16,31 +17,18 @@ LSM303::~LSM303()
    i2c.deregisterI2CDevice(facc);
 }
 
-//void LSM303::addressMag(void)
-//{
-//    i2c.setAddress(MAG_ADDRESS);
-//}
-
-//void LSM303::addressAcc(void)
-//{
-//    i2c.setAddress(ACC_ADDRESS_SA0_A_HIGH);
-//}
-
 uint8_t LSM303::readMagReg(int8_t reg)
 {
-//    addressMag();
     return i2c.readByte(fmag, reg);
 }
 
 void LSM303::writeMagReg(uint8_t reg, uint8_t value)
 {
-//    addressMag();
     i2c.writeByte(fmag, reg, value);
 }
 
 void LSM303::writeAccReg(uint8_t reg, uint8_t value)
 {
-//    addressAcc();
     i2c.writeByte(facc, reg, value);
 }
 
@@ -59,8 +47,6 @@ void LSM303::enableDefault(void)
 
 void LSM303::readAcc(void)
 {
-//    addressAcc();
-
     uint8_t block[6];
     i2c.readBlock(facc, 0x80 | LSM303_OUT_X_L_A, sizeof(block), block);
 
@@ -71,8 +57,6 @@ void LSM303::readAcc(void)
 
 void LSM303::readMag(void)
 {
-//    addressMag();
-
     uint8_t block[6];
     i2c.readBlock(fmag, 0x80 | LSM303_OUT_X_H_M, sizeof(block), block);
 
