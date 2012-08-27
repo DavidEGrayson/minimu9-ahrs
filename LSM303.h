@@ -108,9 +108,13 @@ class LSM303
     void read(void);
 
  protected:
-    void setAddr(uint8_t addr);
-    void addressMag(void);
-    void addressAcc(void);
+//    void setAddr(uint8_t addr);
+//    void addressMag(void);
+//    void addressAcc(void);
+
+private:
+    int fmag;
+    int facc;
 
     I2CBus& i2c;
 };
