@@ -32,23 +32,23 @@ I2CBus::~I2CBus()
     }
 }
 
-void I2CBus::setAddress(uint8_t address)
+//void I2CBus::setAddress(uint8_t address)
+//{
+//    if (address == currentAddress){ return; }
+
+//    int result = ioctl(fd, I2C_SLAVE, address);
+//    if (result == -1)
+//    {
+//        throw errno;
+//        //throw "Error setting slave address.";
+//    }
+
+//    currentAddress = address;
+//}
+
+void I2CBus::writeByte(int devFd, uint8_t command, uint8_t data)
 {
-    if (address == currentAddress){ return; }
-
-    int result = ioctl(fd, I2C_SLAVE, address);
-    if (result == -1)
-    {
-        throw errno;
-        //throw "Error setting slave address.";
-    }
-
-    currentAddress = address;
-}
-
-void I2CBus::writeByte(uint8_t command, uint8_t data)
-{
-    int result = i2c_smbus_write_byte_data(fd, command, data);
+    int result = i2c_smbus_write_byte_data(devFd, command, data);
     if (result == -1)
     {
         throw errno;
@@ -56,9 +56,9 @@ void I2CBus::writeByte(uint8_t command, uint8_t data)
     }
 }
 
-uint8_t I2CBus::readByte(uint8_t command)
+uint8_t I2CBus::readByte(int devFd, uint8_t command)
 {
-    int result = i2c_smbus_read_byte_data(fd, command);
+    int result = i2c_smbus_read_byte_data(devFd, command);
     if (result == -1)
     {
         throw errno;
@@ -68,7 +68,7 @@ uint8_t I2CBus::readByte(uint8_t command)
 }
 
 
-void I2CBus::readBlock(uint8_t command, uint8_t size, uint8_t * data)
+void I2CBus::readBlock(int devFd, uint8_t command, uint8_t size, uint8_t * data)
 {
     int result = i2c_smbus_read_i2c_block_data(fd, command, size, data);
     if (result != size)
@@ -76,4 +76,18 @@ void I2CBus::readBlock(uint8_t command, uint8_t size, uint8_t * data)
         throw errno;
         //throw "Error reading i2c block.";
     }
+}
+
+int  registerI2cDevice(uint_8_t devAddress)
+{
+    int devFd = dup(fd);
+    int result = ioctl(devFd, I2C_SLAVE, devAddress);
+    if (result == -1)
+    {
+        throw errno;
+        //throw "Error setting slave address.";
+        return -1;
+    }
+
+    return devFd;
 }

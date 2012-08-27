@@ -10,15 +10,16 @@ public:
     I2CBus(const char * devName);
     ~I2CBus();
 
-    void setAddress(uint8_t address);
-    void writeByte(uint8_t command, uint8_t data);
-    uint8_t readByte(uint8_t command);
-    void readBlock(uint8_t command, uint8_t size, uint8_t * data);
+//    void setAddress(uint8_t address);
+    void writeByte(int devFd, uint8_t command, uint8_t data);
+    uint8_t readByte(int devFd, uint8_t command);
+    void readBlock(int devFd, uint8_t command, uint8_t size, uint8_t * data);
+    int  registerI2cDevice(uint_8_t devAddress);
 
 private:
     int fd;
-    int currentAddress;
     bool ownFd;
+    //    int currentAddress;
 };
 
 #endif
