@@ -91,3 +91,14 @@ int  registerI2CDevice(uint_8_t devAddress)
 
     return devFd;
 }
+
+void I2CBus::deregisterI2CDevice(int devFd)
+{
+    int result = close(devFd);
+    if (result != size)
+    {
+        throw errno;
+        //throw "Error closing file descriptor.";
+    }
+}
+

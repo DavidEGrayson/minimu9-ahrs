@@ -15,7 +15,7 @@ public:
     uint8_t readByte(int devFd, uint8_t command);
     void readBlock(int devFd, uint8_t command, uint8_t size, uint8_t * data);
     int  registerI2CDevice(uint_8_t devAddress);
-    void  deregisterI2CDevice(devFd);
+    void  deregisterI2CDevice(int devFd);
 
 private:
     int fd;
