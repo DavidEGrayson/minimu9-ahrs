@@ -38,6 +38,7 @@ class L3G
 {
 public:
     L3G(I2CBus& i2c);
+    ~L3G();
 
     // gyro angular velocity readings
     int g[3];
@@ -49,8 +50,10 @@ public:
     void read();
 
 private:
-    void address();
+//    void address();
     I2CBus& i2c;
+
+    int fgyro;
 };
 
 #endif
