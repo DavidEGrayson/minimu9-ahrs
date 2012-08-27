@@ -78,7 +78,7 @@ void I2CBus::readBlock(int devFd, uint8_t command, uint8_t size, uint8_t * data)
     }
 }
 
-int  registerI2cDevice(uint_8_t devAddress)
+int  registerI2CDevice(uint_8_t devAddress)
 {
     int devFd = dup(fd);
     int result = ioctl(devFd, I2C_SLAVE, devAddress);
