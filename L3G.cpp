@@ -14,11 +14,6 @@ L3G::~L3G()
     i2c.deregisterI2CDevice(fgyro);
 }
 
-//void L3G::address()
-//{
-//    i2c.setAddress(GYR_ADDRESS);
-//}
-
 // Turns on the gyro and places it in normal mode.
 void L3G::enableDefault()
 {
