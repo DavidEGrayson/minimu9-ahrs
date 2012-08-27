@@ -1,5 +1,4 @@
 #include "LSM303.h"
-#include <stdio.h>
 
 #define MAG_ADDRESS            (0x3C >> 1)
 #define ACC_ADDRESS_SA0_A_LOW  (0x30 >> 1)
