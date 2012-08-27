@@ -8,7 +8,7 @@
 
 // TODO: throw some nicer type of exception that results in a nice error message
 
-I2CBus::I2CBus(const char * devName) : currentAddress(-1), ownFd(true)
+I2CBus::I2CBus(const char * devName) : ownFd(true), //currentAddress(-1)
 {
     // Open up the I2C bus device.
     fd = open(devName, O_RDWR);
@@ -19,7 +19,7 @@ I2CBus::I2CBus(const char * devName) : currentAddress(-1), ownFd(true)
     }
 }
 
-I2CBus::I2CBus(int fd) : fd(fd), currentAddress(-1), ownFd(false)
+I2CBus::I2CBus(int fd) : fd(fd), ownFd(false) //currentAddress(-1)
 {
     // nothing to do here
 }
