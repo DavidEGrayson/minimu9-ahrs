@@ -8,76 +8,68 @@
 
 // TODO: throw some nicer type of exception that results in a nice error message
 
-I2CBus::I2CBus(const char * devName) :  deviceName(devName)
+I2CBus::I2CBus(const char * devName)
 {
-    //nothing to do here
-}
-
-
-I2CBus::~I2CBus()
-{
-    //nothing to do here
-}
-
-
-void I2CBus::writeByte(int devFd, uint8_t command, uint8_t data)
-{
-    int result = i2c_smbus_write_byte_data(devFd, command, data);
-    if (result == -1)
+    fd = open(devName, O_RDWR);
+    if (fd == -1)
     {
+        perror(devName); // TODO: remove this if a nicer exeption is thrown below
         throw errno;
-        //throw "Error writing i2c byte.";
     }
 }
 
-uint8_t I2CBus::readByte(int devFd, uint8_t command)
+// Copy constructor
+I2CBus::I2CBus(const I2CBus & source)
 {
-    int result = i2c_smbus_read_byte_data(devFd, command);
+    fd = dup(source.fd);
+    fprintf(stderr, "dup fd %d -> fd %d\n", source.fd, fd);
+    if (fd == -1)
+    {
+        throw errno;
+    }
+}
+
+I2CBus::~I2CBus()
+{
+    fprintf(stderr, "close fd %d\n", fd);
+    close(fd);
+}
+
+void I2CBus::addressSet(uint8_t address)
+{
+    fprintf(stderr, "set addr for %d to 0x%02X\n", fd, address);
+    int result = ioctl(fd, I2C_SLAVE, address);
     if (result == -1)
     {
         throw errno;
-        //throw "Error reading i2c byte.";
+    }
+}
+
+void I2CBus::writeByte(uint8_t command, uint8_t data)
+{
+    int result = i2c_smbus_write_byte_data(fd, command, data);
+    if (result == -1)
+    {
+        throw errno;
+    }
+}
+
+uint8_t I2CBus::readByte(uint8_t command)
+{
+    int result = i2c_smbus_read_byte_data(fd, command);
+    if (result == -1)
+    {
+        throw errno;
     }
     return result;
 }
 
-
-void I2CBus::readBlock(int devFd, uint8_t command, uint8_t size, uint8_t * data)
+void I2CBus::readBlock(uint8_t command, uint8_t size, uint8_t * data)
 {
-    int result = i2c_smbus_read_i2c_block_data(devFd, command, size, data);
+    int result = i2c_smbus_read_i2c_block_data(fd, command, size, data);
     if (result != size)
     {
         throw errno;
-        //throw "Error reading i2c block.";
-    }
-}
-
-int  I2CBus::registerI2CDevice(uint8_t devAddress)
-{
-    int devFd = open(deviceName, O_RDWR);
-    if (devFd == -1)
-    {
-        perror(deviceName); // TODO: remove this if a nicer exeption is thrown below
-        throw errno;
-    }
-    int result = ioctl(devFd, I2C_SLAVE, devAddress);
-    if (result == -1)
-    {
-        throw errno;
-        //throw "Error setting slave address.";
-        return -1;
-    }
-
-    return dup(devFd);
-}
-
-void I2CBus::deregisterI2CDevice(int devFd)
-{
-    int result = close(devFd);
-    if (result == -1)
-    {
-        throw errno;
-        //throw "Error closing file descriptor.";
     }
 }
 

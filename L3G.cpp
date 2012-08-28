@@ -6,12 +6,7 @@
 
 L3G::L3G(I2CBus& i2c) : i2c(i2c)
 {
-    fgyro = i2c.registerI2CDevice(GYR_ADDRESS);
-}
-
-L3G::~L3G()
-{
-    i2c.deregisterI2CDevice(fgyro);
+    i2c.addressSet(GYR_ADDRESS);
 }
 
 // Turns on the gyro and places it in normal mode.
@@ -23,21 +18,18 @@ void L3G::enableDefault()
 
 void L3G::writeReg(uint8_t reg, uint8_t value)
 {
-//    address();
-    i2c.writeByte(fgyro, reg, value);
+    i2c.writeByte(reg, value);
 }
 
 uint8_t L3G::readReg(uint8_t reg)
 {
-//    address();
-    return i2c.readByte(fgyro, reg);
+    return i2c.readByte(reg);
 }
 
 void L3G::read()
 {
-//    address();
     uint8_t block[6];
-    i2c.readBlock(fgyro, 0x80 | L3G_OUT_X_L, sizeof(block), block);
+    i2c.readBlock(0x80 | L3G_OUT_X_L, sizeof(block), block);
 
     g[0] = (int16_t)(block[1] << 8 | block[0]);
     g[1] = (int16_t)(block[3] << 8 | block[2]);

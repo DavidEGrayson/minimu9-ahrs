@@ -7,16 +7,16 @@ class I2CBus
 {
 public:
     I2CBus(const char * devName);
+    I2CBus(const I2CBus &);
     ~I2CBus();
 
-    void writeByte(int devFd, uint8_t command, uint8_t data);
-    uint8_t readByte(int devFd, uint8_t command);
-    void readBlock(int devFd, uint8_t command, uint8_t size, uint8_t * data);
-    int  registerI2CDevice(uint8_t devAddress);
-    void  deregisterI2CDevice(int devFd);
+    void addressSet(uint8_t address);
+    void writeByte(uint8_t command, uint8_t data);
+    uint8_t readByte(uint8_t command);
+    void readBlock(uint8_t command, uint8_t size, uint8_t * data);
 
 private:
-    const char * deviceName;
+    int fd;
 };
 
 #endif
