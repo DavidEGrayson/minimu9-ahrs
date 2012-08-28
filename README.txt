@@ -1,4 +1,4 @@
-sudo modeprobe i2c_dev
+sudo modprobe i2c_dev
 
 sudo apt-get install libi2c-dev
 
