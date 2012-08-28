@@ -95,6 +95,7 @@ class LSM303
     int m[3];  // magnetometer readings
 
     LSM303(I2CBus&);
+    ~LSM303();
 
     void enableDefault(void);
 
@@ -107,10 +108,9 @@ class LSM303
     void readMag(void);
     void read(void);
 
- protected:
-    void setAddr(uint8_t addr);
-    void addressMag(void);
-    void addressAcc(void);
+private:
+    int fmag;
+    int facc;
 
     I2CBus& i2c;
 };

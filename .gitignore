@@ -4,3 +4,8 @@
 *~
 \#*\#
 *.gch
+*.config
+*.creator*
+*.files
+*.includes
+*.autosave
