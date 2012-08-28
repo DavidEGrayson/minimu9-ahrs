@@ -33,6 +33,7 @@ void MinIMU9::enableSensors()
 
     gyro.writeReg(L3G_CTRL_REG1, 0x0F); // normal power mode, all axes enabled, 100 Hz
     gyro.writeReg(L3G_CTRL_REG4, 0x20); // 2000 dps full scale
+
 }
 
 void MinIMU9::loadCalibration()

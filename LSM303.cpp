@@ -6,35 +6,29 @@
 
 LSM303::LSM303(I2CBus& i2c) : i2c(i2c)
 {
-    // nothing to do here
+    fmag = i2c.registerI2CDevice(MAG_ADDRESS);
+    facc = i2c.registerI2CDevice(ACC_ADDRESS_SA0_A_HIGH);
 }
 
-void LSM303::addressMag(void)
+LSM303::~LSM303()
 {
-    i2c.setAddress(MAG_ADDRESS);
-}
-
-void LSM303::addressAcc(void)
-{
-    i2c.setAddress(ACC_ADDRESS_SA0_A_HIGH);
+   i2c.deregisterI2CDevice(fmag);
+   i2c.deregisterI2CDevice(facc);
 }
 
 uint8_t LSM303::readMagReg(int8_t reg)
 {
-    addressMag();
-    return i2c.readByte(reg);
+    return i2c.readByte(fmag, reg);
 }
 
 void LSM303::writeMagReg(uint8_t reg, uint8_t value)
 {
-    addressMag();
-    i2c.writeByte(reg, value);
+    i2c.writeByte(fmag, reg, value);
 }
 
 void LSM303::writeAccReg(uint8_t reg, uint8_t value)
 {
-    addressAcc();
-    i2c.writeByte(reg, value);
+    i2c.writeByte(facc, reg, value);
 }
 
 // Turns on the LSM303's accelerometer and magnetometers and places them in normal
@@ -52,10 +46,8 @@ void LSM303::enableDefault(void)
 
 void LSM303::readAcc(void)
 {
-    addressAcc();
-
     uint8_t block[6];
-    i2c.readBlock(0x80 | LSM303_OUT_X_L_A, sizeof(block), block);
+    i2c.readBlock(facc, 0x80 | LSM303_OUT_X_L_A, sizeof(block), block);
 
     a[0] = (int16_t)(block[0] | block[1] << 8) >> 4;
     a[1] = (int16_t)(block[2] | block[3] << 8) >> 4;
@@ -64,10 +56,8 @@ void LSM303::readAcc(void)
 
 void LSM303::readMag(void)
 {
-    addressMag();
-
     uint8_t block[6];
-    i2c.readBlock(0x80 | LSM303_OUT_X_H_M, sizeof(block), block);
+    i2c.readBlock(fmag, 0x80 | LSM303_OUT_X_H_M, sizeof(block), block);
 
     // DLM, DLHC: register address order is X,Z,Y with high bytes first
     m[0] = (int16_t)(block[1] | block[0] << 8);
