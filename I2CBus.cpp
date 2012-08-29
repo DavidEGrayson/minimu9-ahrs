@@ -21,9 +21,7 @@ I2CBus::I2CBus(const I2CBus & source) : deviceName(source.deviceName)
 
 void I2CBus::open_bus()
 {
-    //TODO: fd = ::open(deviceName, O_RDWR);
-    fd = open("/dev/i2c-0", O_RDWR);  // tmphax
-    fprintf(stderr, "open fd %d\n", fd);
+    fd = open(deviceName, O_RDWR);
     if (fd == -1)
     {
         perror(deviceName); // TODO: remove this if a nicer exeption is thrown below
@@ -33,13 +31,12 @@ void I2CBus::open_bus()
 
 I2CBus::~I2CBus()
 {
-    fprintf(stderr, "close fd %d\n", fd);
+    fprintf(stderr, "closing fd=%d\n",fd);
     close(fd);
 }
 
 void I2CBus::addressSet(uint8_t address)
 {
-    fprintf(stderr, "set addr for %d to 0x%02X\n", fd, address);
     int result = ioctl(fd, I2C_SLAVE, address);
     if (result == -1)
     {
@@ -74,4 +71,3 @@ void I2CBus::readBlock(uint8_t command, uint8_t size, uint8_t * data)
         throw errno;
     }
 }
-

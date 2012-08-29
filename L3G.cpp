@@ -2,11 +2,9 @@
 
 #define GYR_ADDRESS (0xD6 >> 1)
 
-// TODO: rename gyro class
-
 L3G::L3G(I2CBus& i2c) : i2c(i2c)
 {
-    i2c.addressSet(GYR_ADDRESS);
+    this->i2c.addressSet(GYR_ADDRESS);
 }
 
 // Turns on the gyro and places it in normal mode.
@@ -18,7 +16,6 @@ void L3G::enableDefault()
 
 void L3G::writeReg(uint8_t reg, uint8_t value)
 {
-    i2c.addressSet(GYR_ADDRESS); // tmphax
     i2c.writeByte(reg, value);
 }
 
