@@ -9,7 +9,6 @@
 
 I2CBus::I2CBus(const char * deviceName)
 {
-    deviceName =  "tmphaxhahaha";
     fd = open(deviceName, O_RDWR);
     if (fd == -1)
     {
