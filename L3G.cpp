@@ -18,6 +18,7 @@ void L3G::enableDefault()
 
 void L3G::writeReg(uint8_t reg, uint8_t value)
 {
+    i2c.addressSet(GYR_ADDRESS); // tmphax
     i2c.writeByte(reg, value);
 }
 
