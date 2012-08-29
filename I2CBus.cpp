@@ -8,23 +8,25 @@
 
 // TODO: throw some nicer type of exception that results in a nice error message
 
-I2CBus::I2CBus(const char * devName)
+I2CBus::I2CBus(const char * deviceName) : deviceName(deviceName)
 {
-    fd = open(devName, O_RDWR);
-    if (fd == -1)
-    {
-        perror(devName); // TODO: remove this if a nicer exeption is thrown below
-        throw errno;
-    }
+    open_bus();
 }
 
 // Copy constructor
-I2CBus::I2CBus(const I2CBus & source)
+I2CBus::I2CBus(const I2CBus & source) : deviceName(source.deviceName)
 {
-    fd = dup(source.fd);
-    fprintf(stderr, "dup fd %d -> fd %d\n", source.fd, fd);
+    open_bus();
+}
+
+void I2CBus::open_bus()
+{
+    //TODO: fd = ::open(deviceName, O_RDWR);
+    fd = open("/dev/i2c-0", O_RDWR);  // tmphax
+    fprintf(stderr, "open fd %d\n", fd);
     if (fd == -1)
     {
+        perror(deviceName); // TODO: remove this if a nicer exeption is thrown below
         throw errno;
     }
 }

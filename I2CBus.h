@@ -6,7 +6,7 @@
 class I2CBus
 {
 public:
-    I2CBus(const char * devName);
+    I2CBus(const char * deviceName);
     I2CBus(const I2CBus &);
     ~I2CBus();
 
@@ -16,7 +16,9 @@ public:
     void readBlock(uint8_t command, uint8_t size, uint8_t * data);
 
 private:
+    void open_bus();
     int fd;
+    const char * deviceName;
 };
 
 #endif

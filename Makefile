@@ -5,9 +5,14 @@ CC := g++
 
 CPPFLAGS += -I.
 
+# All warnings
 CPPFLAGS += -Wall
 
+# Use a modern language
 CPPFLAGS += --std=c++0x
+
+# Put debugging info in there so we can get stack traces.
+CPPFLAGS += -g -rdynamic
 
 # Fix http://gcc.gnu.org/bugzilla/show_bug.cgi?id=42748
 CPPFLAGS += -Wno-psabi
