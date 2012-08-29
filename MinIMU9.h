@@ -2,7 +2,6 @@
 #define _MINIMU9_H
 
 #include "IMU.h"
-#include "I2CBus.h"
 #include "LSM303.h"
 #include "L3G.h"
 

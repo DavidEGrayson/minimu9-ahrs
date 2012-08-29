@@ -1,5 +1,4 @@
 #include "I2CBus.h"
-#include "exceptions.h"
 #include <fcntl.h>
 #include <linux/i2c-dev.h>
 #include <stdio.h>
@@ -45,6 +44,11 @@ uint8_t I2CBus::readByte(uint8_t command)
         throw posix_error();
     }
     return result;
+}
+
+int I2CBus::tryReadByte(uint8_t command)
+{
+    return i2c_smbus_read_byte_data(fd, command);
 }
 
 void I2CBus::readBlock(uint8_t command, uint8_t size, uint8_t * data)

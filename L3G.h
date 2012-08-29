@@ -49,6 +49,7 @@ public:
     void read();
 
 private:
+    void detectAddress();
     I2CBus i2c;
 };
 

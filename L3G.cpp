@@ -1,10 +1,31 @@
 #include "L3G.h"
+#include <stdexcept>
 
-#define GYR_ADDRESS (0xD6 >> 1)
+#define L3G4200D_ADDRESS_SA0_LOW  (0xD0 >> 1)
+#define L3G4200D_ADDRESS_SA0_HIGH (0xD2 >> 1)
+#define L3GD20_ADDRESS_SA0_LOW    (0xD4 >> 1)
+#define L3GD20_ADDRESS_SA0_HIGH   (0xD6 >> 1)
 
 L3G::L3G(const char * i2cDeviceName) : i2c(i2cDeviceName)
 {
-    i2c.addressSet(GYR_ADDRESS);
+    // Auto-detect address
+    // try each possible address and stop if reading WHO_AM_I returns the expected response
+
+    detectAddress();
+}
+
+void L3G::detectAddress()
+{
+    i2c.addressSet(L3G4200D_ADDRESS_SA0_LOW);
+    if (i2c.tryReadByte(L3G_WHO_AM_I) == 0xD3) return;
+    i2c.addressSet(L3G4200D_ADDRESS_SA0_HIGH);
+    if (i2c.tryReadByte(L3G_WHO_AM_I) == 0xD3) return;
+    i2c.addressSet(L3GD20_ADDRESS_SA0_LOW);
+    if (i2c.tryReadByte(L3G_WHO_AM_I) == 0xD4) return;
+    i2c.addressSet(L3GD20_ADDRESS_SA0_HIGH);
+    if (i2c.tryReadByte(L3G_WHO_AM_I) == 0xD4) return;
+
+    throw std::runtime_error("Could not detect gyro.");
 }
 
 // Turns on the gyro and places it in normal mode.
