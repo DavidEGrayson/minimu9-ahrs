@@ -234,13 +234,13 @@ int main(int argc, char *argv[])
     }
     catch(const std::system_error & error)
     {
-        const char * what = error.what();
+        std::string what = error.what();
         const std::error_code & code = error.code();
 
         // Workaround for something that's probably a bug in stdlibc++.
-        if ((what == NULL || what[0] == 0) && code.category() == std::system_category())
+        if (what.empty() && code.category() == std::system_category())
         {
-            what = code.message().c_str();
+            what = code.message();
         }
         std::cerr << "Error: " << what << " (" << code << ")\n";
     }
