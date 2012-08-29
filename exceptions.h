@@ -1,11 +1,12 @@
 #ifndef _AHRS_EXCEPTIONS_H
 #define _AHRS_EXCEPTIONS_H
 
-#include <stdexcept>
+#include <cerrno>
+#include <system_error>
 
-class PosixError : std::runtime_error
+static inline std::system_error posix_error()
 {
-    virtual const char* what() const throw();
-};
+    return std::system_error(std::error_code(errno, std::system_category()));
+}
 
 #endif

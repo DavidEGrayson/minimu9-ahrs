@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <sys/time.h>
+#include <system_error>
 
 int millis()
 {
@@ -230,6 +231,18 @@ int main(int argc, char *argv[])
             ahrs(imu, &fuse_default);
         }        
         return 0;
+    }
+    catch(const std::system_error & error)
+    {
+        const char * what = error.what();
+        const std::error_code & code = error.code();
+
+        // Workaround for something that's probably a bug in stdlibc++.
+        if ((what == NULL || what[0] == 0) && code.category() == std::system_category())
+        {
+            what = code.message().c_str();
+        }
+        std::cerr << "Error: " << what << " (" << code << ")\n";
     }
     catch(const char * error_message)
     {

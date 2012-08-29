@@ -1,20 +1,19 @@
 #include "I2CBus.h"
+#include "exceptions.h"
 #include <fcntl.h>
 #include <linux/i2c-dev.h>
 #include <stdio.h>
-#include <cerrno>
 #include <unistd.h>
-//#include <system_error>
 
 // TODO: throw some nicer type of exception that results in a nice error message
 
 I2CBus::I2CBus(const char * deviceName)
 {
+    deviceName =  "tmphaxhahaha";
     fd = open(deviceName, O_RDWR);
     if (fd == -1)
     {
-        perror(deviceName); // TODO: remove this if a nicer exeption is thrown below
-        throw errno;
+        throw posix_error();
     }
 }
 
