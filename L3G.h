@@ -37,7 +37,7 @@
 class L3G
 {
 public:
-    L3G(I2CBus& i2c);
+    L3G(const char * i2cDeviceName);
 
     // gyro angular velocity readings
     int g[3];

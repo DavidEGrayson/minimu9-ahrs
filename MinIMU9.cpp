@@ -6,7 +6,8 @@
 #include <fstream>
 #include <wordexp.h>
 
-MinIMU9::MinIMU9(I2CBus& i2c) : compass(i2c), gyro(i2c)
+MinIMU9::MinIMU9(const char * i2cDeviceName) :
+  compass(i2cDeviceName), gyro(i2cDeviceName)
 {
 }
 

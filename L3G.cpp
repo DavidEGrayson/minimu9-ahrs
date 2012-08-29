@@ -2,9 +2,9 @@
 
 #define GYR_ADDRESS (0xD6 >> 1)
 
-L3G::L3G(I2CBus& i2c) : i2c(i2c)
+L3G::L3G(const char * i2cDeviceName) : i2c(i2cDeviceName)
 {
-    this->i2c.addressSet(GYR_ADDRESS);
+    i2c.addressSet(GYR_ADDRESS);
 }
 
 // Turns on the gyro and places it in normal mode.

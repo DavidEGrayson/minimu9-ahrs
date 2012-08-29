@@ -200,8 +200,7 @@ int main(int argc, char *argv[])
 {
     try
     {
-        I2CBus i2c("/dev/i2c-0");
-        MinIMU9 imu(i2c);
+        MinIMU9 imu("/dev/i2c-0");
         
         imu.checkConnection();
 

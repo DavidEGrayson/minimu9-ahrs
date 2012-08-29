@@ -8,18 +8,7 @@
 
 // TODO: throw some nicer type of exception that results in a nice error message
 
-I2CBus::I2CBus(const char * deviceName) : deviceName(deviceName)
-{
-    open_bus();
-}
-
-// Copy constructor
-I2CBus::I2CBus(const I2CBus & source) : deviceName(source.deviceName)
-{
-    open_bus();
-}
-
-void I2CBus::open_bus()
+I2CBus::I2CBus(const char * deviceName)
 {
     fd = open(deviceName, O_RDWR);
     if (fd == -1)
@@ -31,7 +20,6 @@ void I2CBus::open_bus()
 
 I2CBus::~I2CBus()
 {
-    fprintf(stderr, "closing fd=%d\n",fd);
     close(fd);
 }
 

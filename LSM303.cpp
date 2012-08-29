@@ -4,7 +4,8 @@
 #define ACC_ADDRESS_SA0_A_LOW  (0x30 >> 1)
 #define ACC_ADDRESS_SA0_A_HIGH (0x32 >> 1)
 
-LSM303::LSM303(I2CBus& i2c) : i2c_mag(i2c), i2c_acc(i2c)
+LSM303::LSM303(const char * i2cDeviceName) :
+  i2c_mag(i2cDeviceName), i2c_acc(i2cDeviceName)
 {
     i2c_mag.addressSet(MAG_ADDRESS);
     i2c_acc.addressSet(ACC_ADDRESS_SA0_A_HIGH);

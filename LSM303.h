@@ -94,7 +94,7 @@ class LSM303
     int a[3];  // accelerometer readings
     int m[3];  // magnetometer readings
 
-    LSM303(I2CBus&);
+    LSM303(const char * i2cDeviceName);
 
     void enableDefault(void);
 

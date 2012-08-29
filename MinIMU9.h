@@ -8,7 +8,7 @@
 
 class MinIMU9 : public IMU {
 public:
-    MinIMU9(I2CBus& i2c);
+    MinIMU9(const char * i2cDeviceName);
 
     LSM303 compass;
     L3G gyro;
