@@ -6,7 +6,12 @@
 
 static inline std::system_error posix_error()
 {
-    return std::system_error(std::error_code(errno, std::system_category()));
+    return std::system_error(errno, std::system_category());
+}
+
+static inline std::system_error posix_error(const char * what)
+{
+    return std::system_error(errno, std::system_category(), what);
 }
 
 #endif

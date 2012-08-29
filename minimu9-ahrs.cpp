@@ -236,21 +236,11 @@ int main(int argc, char *argv[])
     {
         std::string what = error.what();
         const std::error_code & code = error.code();
-
-        // Workaround for something that's probably a bug in stdlibc++.
-        if (what.empty() && code.category() == std::system_category())
-        {
-            what = code.message();
-        }
-        std::cerr << "Error: " << what << " (" << code << ")\n";
+        std::cerr << "Error: " << what << "  " << code.message() << " (" << code << ")\n";
     }
-    catch(const char * error_message)
+    catch(const std::exception & error)    
     {
-        fprintf(stderr, "Error: %s\n", error_message);
-    }
-    catch(const int error_num)
-    {
-        fprintf(stderr, "Error %d: %s\n", error_num, strerror(error_num));
+        std::cerr << "Error: " << error.what() << '\n';
     }
     return 1;
 }

@@ -16,8 +16,7 @@ void MinIMU9::checkConnection()
     uint8_t result = compass.readMagReg(LSM303_WHO_AM_I_M);
     if (result != 0x3C)
     {
-        fprintf(stderr, "Error getting \"Who Am I\" register.\n");
-        exit(2);
+        throw std::runtime_error("Error getting \"Who Am I\" register.\n");
     }
 }
 
@@ -45,14 +44,13 @@ void MinIMU9::loadCalibration()
     std::ifstream file(expansion_result.we_wordv[0]);
     if (file.fail())
     {
-        // TODO: throw a PosixError
-        throw "Failed to open calibration file ~/.minimu9-ahrs-cal.";
+        throw posix_error("Failed to open calibration file ~/.minimu9-ahrs-cal.");
     }
     
     file >> mag_min(0) >> mag_max(0) >> mag_min(1) >> mag_max(1) >> mag_min(2) >> mag_max(2);
     if (file.fail() || file.bad())
     {
-        throw "Failed to parse calibration file ~/.minimu9-ahrs-cal.";
+        throw std::runtime_error("Failed to parse calibration file ~/.minimu9-ahrs-cal.");
     }
     
 }
