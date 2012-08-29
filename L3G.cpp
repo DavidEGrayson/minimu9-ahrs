@@ -8,9 +8,6 @@
 
 L3G::L3G(const char * i2cDeviceName) : i2c(i2cDeviceName)
 {
-    // Auto-detect address
-    // try each possible address and stop if reading WHO_AM_I returns the expected response
-
     detectAddress();
 }
 
