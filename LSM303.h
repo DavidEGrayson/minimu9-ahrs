@@ -83,12 +83,12 @@ class LSM303
 
     LSM303(const char * i2cDeviceName);
 
-    void enableDefault(void);
+    void enable(void);
 
     void writeAccReg(uint8_t reg, uint8_t value);
     uint8_t readAccReg(uint8_t reg);
     void writeMagReg(uint8_t reg, uint8_t value);
-    uint8_t readMagReg(int8_t reg);
+    uint8_t readMagReg(uint8_t reg);
 
     void readAcc(void);
     void readMag(void);

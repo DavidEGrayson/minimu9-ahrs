@@ -7,6 +7,8 @@
 #include <sys/time.h>
 #include <system_error>
 
+// TODO: print warning if accelerometer magnitude is not close to 1 when starting up
+
 int millis()
 {
     struct timeval tv;
@@ -24,7 +26,7 @@ void print(matrix m)
 
 void streamRawValues(IMU& imu)
 {
-    imu.enableSensors();
+    imu.enable();
     while(1)
     {
         imu.read();
@@ -147,7 +149,7 @@ void fuse_default(matrix& rotation, float dt, const vector& angular_velocity,
 void ahrs(IMU& imu, fuse_function * fuse_func)
 {
     imu.loadCalibration();
-    imu.enableSensors();
+    imu.enable();
     imu.measureOffsets();
     
     fprintf(stderr, "Gyro offset: %7f %7f %7f\nAccel offset: %7f %7f %7f (%7f)\n",

@@ -24,24 +24,33 @@ LSM303::LSM303(const char * i2cDeviceName) :
 {
     i2c_mag.addressSet(MAG_ADDRESS);
 
+    // Detect the accelerometer address and device.
     i2c_acc.addressSet(ACC_ADDRESS_SA0_A_LOW);
     bool sa0_a_high = i2c_acc.tryReadByte(LSM303_CTRL_REG1_A) == -1;
     if (sa0_a_high)
     {
         i2c_acc.addressSet(ACC_ADDRESS_SA0_A_HIGH);
+        // Only the DLHC should be responding on the high address.
         device = Device::LSM303DLHC;
     }
     else
     {
-        // otherwise, assume DLH or DLM (pulled low by default on Pololu boards); query magnetometer WHO_AM_I to differentiate these two
-        i2c_acc.addressSet(ACC_ADDRESS_SA0_A_LOW);
-        device = readMagReg(LSM303_WHO_AM_I_M) == 0x3C ? Device::LSM303DLM : Device::LSM303DLH;
+        // Only the DLM has a LSM303_WHO_AM_I_M register.
+        device = i2c_mag.tryReadByte(LSM303_WHO_AM_I_M) == 0x3C ? Device::LSM303DLM : Device::LSM303DLH;
     }
+
+    // Make sure to throw an exception if we don't have the right address.
+    readAccReg(LSM303_CTRL_REG1_A);
 }
 
-uint8_t LSM303::readMagReg(int8_t reg)
+uint8_t LSM303::readMagReg(uint8_t reg)
 {
     return i2c_mag.readByte(reg);
+}
+
+uint8_t LSM303::readAccReg(uint8_t reg)
+{
+    return i2c_acc.readByte(reg);
 }
 
 void LSM303::writeMagReg(uint8_t reg, uint8_t value)
@@ -56,13 +65,22 @@ void LSM303::writeAccReg(uint8_t reg, uint8_t value)
 
 // Turns on the LSM303's accelerometer and magnetometers and places them in normal
 // mode.
-void LSM303::enableDefault(void)
+void LSM303::enable(void)
 {
-    // Enable Accelerometer
-    // Normal power mode, all axes enabled, 50 Hz
-    writeAccReg(LSM303_CTRL_REG1_A, 0b01000111);
+    // Enable accelerometer.
+    if (device == Device::LSM303DLHC)
+    {    
+        writeAccReg(LSM303_CTRL_REG1_A, 0b01000111); // Normal power mode, all axes enabled, 50 Hz
+        writeAccReg(LSM303_CTRL_REG4_A, 0x08); // high resolution output mode
+        writeAccReg(LSM303_CTRL_REG4_A, 0x20); // 8 g full scale: FS = 10 on DLHC
+    }
+    else
+    {
+        writeAccReg(LSM303_CTRL_REG1_A, 0b00100111); // normal power mode, all axes enabled, 50 Hz
+        writeAccReg(LSM303_CTRL_REG4_A, 0b00110000); // 8 g full scale: FS = 11 on DLH, DLM
+    }
 
-    // Enable Magnetometer
+    // Enable magnetometer
     // Continuous conversion mode
     writeMagReg(LSM303_MR_REG_M, 0x00);
 }
@@ -86,6 +104,9 @@ void LSM303::readMag(void)
     m[0] = (int16_t)(block[1] | block[0] << 8);
     m[1] = (int16_t)(block[5] | block[4] << 8);
     m[2] = (int16_t)(block[3] | block[2] << 8);
+
+    // TODO: handle DLH properly here (switch two components?)
+
 }
 
 // Reads all 6 channels of the LSM303 and stores them in the object variables

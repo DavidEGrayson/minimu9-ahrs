@@ -26,10 +26,10 @@ void L3G::detectAddress()
 }
 
 // Turns on the gyro and places it in normal mode.
-void L3G::enableDefault()
+void L3G::enable()
 {
-    // Normal power mode, all axes enabled
-    writeReg(L3G_CTRL_REG1, 0b00001111);
+    writeReg(L3G_CTRL_REG1, 0b00001111); // Normal power mode, all axes enabled
+    writeReg(L3G_CTRL_REG4, 0b00100000); // 2000 dps full scale
 }
 
 void L3G::writeReg(uint8_t reg, uint8_t value)

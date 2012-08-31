@@ -42,7 +42,7 @@ public:
     // gyro angular velocity readings
     int g[3];
 
-    void enableDefault(void);
+    void enable(void);
 
     void writeReg(uint8_t reg, uint8_t value);
     uint8_t readReg(uint8_t reg);

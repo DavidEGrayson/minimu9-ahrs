@@ -13,7 +13,7 @@ public:
 
     virtual void checkConnection() = 0;
     virtual void measureOffsets() = 0;
-    virtual void enableSensors() = 0;
+    virtual void enable() = 0;
     virtual void loadCalibration() = 0;
 
     vector accel_offset, gyro_offset;
