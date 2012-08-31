@@ -1,5 +1,20 @@
 #include "LSM303.h"
 
+/*
+
+Relevant Pololu products:
+
+#1250  LSM303DLH              SA0_A pulled to GND, accessible via.
+#1264  LSM303DLH + L3G4200D   SA0_A pulled to GND, accessible thru-hole.
+#1265  LSM303DLM + L3G4200D   SA0_A pulled to GND, accessible thru-hole.
+#1268  LSM303DLHC + L3GD20
+#1273  LSM303DLM              SA0_A pulled to GND, accessible via.
+#2124  LSM303DLHC
+
+LSM303DLHC has no SA0_A line
+
+ */
+
 #define MAG_ADDRESS            (0x3C >> 1)
 #define ACC_ADDRESS_SA0_A_LOW  (0x30 >> 1)
 #define ACC_ADDRESS_SA0_A_HIGH (0x32 >> 1)
@@ -8,7 +23,20 @@ LSM303::LSM303(const char * i2cDeviceName) :
   i2c_mag(i2cDeviceName), i2c_acc(i2cDeviceName)
 {
     i2c_mag.addressSet(MAG_ADDRESS);
-    i2c_acc.addressSet(ACC_ADDRESS_SA0_A_HIGH);
+
+    i2c_acc.addressSet(ACC_ADDRESS_SA0_A_LOW);
+    bool sa0_a_high = i2c_acc.tryReadByte(LSM303_CTRL_REG1_A) == -1;
+    if (sa0_a_high)
+    {
+        i2c_acc.addressSet(ACC_ADDRESS_SA0_A_HIGH);
+        device = Device::LSM303DLHC;
+    }
+    else
+    {
+        // otherwise, assume DLH or DLM (pulled low by default on Pololu boards); query magnetometer WHO_AM_I to differentiate these two
+        i2c_acc.addressSet(ACC_ADDRESS_SA0_A_LOW);
+        device = readMagReg(LSM303_WHO_AM_I_M) == 0x3C ? Device::LSM303DLM : Device::LSM303DLH;
+    }
 }
 
 uint8_t LSM303::readMagReg(int8_t reg)

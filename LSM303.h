@@ -4,19 +4,6 @@
 #include <stdint.h>
 #include "I2CBus.h"
 
-// device types
-
-#define LSM303DLH_DEVICE   0
-#define LSM303DLM_DEVICE   1
-#define LSM303DLHC_DEVICE  2
-#define LSM303_DEVICE_AUTO 3
-
-// SA0_A states
-
-#define LSM303_SA0_A_LOW  0
-#define LSM303_SA0_A_HIGH 1
-#define LSM303_SA0_A_AUTO 2
-
 // register addresses
 
 #define LSM303_CTRL_REG1_A       0x20
@@ -109,6 +96,11 @@ class LSM303
 
 private:
     I2CBus i2c_mag, i2c_acc;
+    enum class Device {
+        LSM303DLH,
+        LSM303DLM,
+        LSM303DLHC,
+    } device;
 };
 
 #endif
