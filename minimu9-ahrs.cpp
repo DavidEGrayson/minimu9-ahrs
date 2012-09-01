@@ -83,10 +83,10 @@ void fuse_compass_only(quaternion& rotation, float dt, const vector& angular_vel
 void fuse_gyro_only(quaternion& rotation, float dt, const vector& angular_velocity,
   const vector& acceleration, const vector& magnetic_field)
 {
-    rotation = quaternion::Identity();
+    quaternion w = quaternion(1, angular_velocity(0)*dt/2, angular_velocity(1)*dt/2, angular_velocity(2)*dt/2);
 
-    quaternion w = quaternion(1, angular_velocity(0)*dt, angular_velocity(1)*dt, angular_velocity(2)*dt);
-    rotation = w;
+    // UM6 does: rotation += rotation*w;
+    rotation = rotation*w;
     rotation.normalize();
 
     // TODO: finish this algorithm
