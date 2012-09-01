@@ -16,7 +16,7 @@ public:
     virtual void enable() = 0;
     virtual void loadCalibration() = 0;
 
-    vector accel_offset, gyro_offset;
+    vector gyro_offset;
     int_vector mag_min, mag_max;
 
     int_vector raw_m, raw_a, raw_g;

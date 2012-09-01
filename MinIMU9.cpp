@@ -45,33 +45,19 @@ void MinIMU9::loadCalibration()
     
 }
 
-// Calculate offsets, assuming the MinIMU is resting
-// with is z axis pointing up.
 void MinIMU9::measureOffsets()
 {
     // LSM303 accelerometer: 8 g sensitivity.  3.8 mg/digit; 1 g = 256.
     // TODO: unify this with the other place in the code where we scale accelerometer readings.
-    const int gravity = 256;
-
-    gyro_offset = accel_offset = vector::Zero();
+    gyro_offset = vector::Zero();
     const int sampleCount = 32;
     for(int i = 0; i < sampleCount; i++)
     {
         gyro.read();
-        compass.readAcc();
         gyro_offset += vector_from_ints(&gyro.g);
-        accel_offset += vector_from_ints(&compass.a);
         usleep(20*1000);
     }
     gyro_offset /= sampleCount;
-    accel_offset /= sampleCount;
-    accel_offset(2) -= gravity;
-
-    if (accel_offset.norm() > 50)
-    {
-        fprintf(stderr, "Unable to calculate accelerometer offset because board was not resting in the correct orientation.\n");
-        accel_offset = vector::Zero();
-    }
 }
 
 vector MinIMU9::readMag()

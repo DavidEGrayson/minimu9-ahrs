@@ -152,11 +152,6 @@ void ahrs(IMU& imu, fuse_function * fuse_func)
     imu.enable();
     imu.measureOffsets();
     
-    fprintf(stderr, "Gyro offset: %7f %7f %7f\nAccel offset: %7f %7f %7f (%7f)\n",
-            imu.gyro_offset(0), imu.gyro_offset(1), imu.gyro_offset(2),
-            imu.accel_offset(0), imu.accel_offset(1), imu.accel_offset(2),
-            imu.accel_offset.norm());
-
     // The rotation matrix that can convert a vector in body coordinates
     // to ground coordinates.
     matrix rotation = matrix::Identity();
@@ -167,19 +162,13 @@ void ahrs(IMU& imu, fuse_function * fuse_func)
         int last_start = start;
         start = millis();
         float dt = (start-last_start)/1000.0;
-        if (dt < 0){ throw "time went backwards"; }
+        if (dt < 0){ throw std::runtime_error("time went backwards"); }
 
         vector angular_velocity = imu.readGyro();
         vector acceleration = imu.readAcc();
         vector magnetic_field = imu.readMag();
 
         fuse_func(rotation, dt, angular_velocity, acceleration, magnetic_field);
-
-        //fprintf(stderr, "g: %8d %8d %8d\n", gyro.g(0), gyro.g(1), gyro.g(2));
-        //fprintf(stderr, "m: %7.4f %7.4f %7.4f  m_raw: %8d %8d %8d\n", magnetic_field(0), magnetic_field(1), magnetic_field(2), compass.m(0), compass.m(1), compass.m(2)); 
-        //fprintf(stderr, "dt: %7.4f  w: %7.4f %7.4f %7.4f\n", dt, angular_velocity(0), angular_velocity(1), angular_velocity(2));
-
-        //rotation = rotationFromCompass;  // TMPHAX
 
         printf("%7.4f %7.4f %7.4f %7.4f %7.4f %7.4f %7.4f %7.4f %7.4f  %7.4f %7.4f %7.4f  %7.4f %7.4f %7.4f\n",
                rotation(0,0), rotation(0,1), rotation(0,2),
@@ -188,8 +177,6 @@ void ahrs(IMU& imu, fuse_function * fuse_func)
                acceleration(0), acceleration(1), acceleration(2),
                magnetic_field(0), magnetic_field(1), magnetic_field(2));
         fflush(stdout);
-
-        //std::cout << rotation;
 
         // Ensure that each iteration of the loop takes at least 20 ms.
         while(millis() - start < 20)
