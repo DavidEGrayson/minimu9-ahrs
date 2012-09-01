@@ -77,7 +77,7 @@ void MinIMU9::measureOffsets()
 vector MinIMU9::readMag()
 {
     compass.readMag();
-    IMU::m = int_vector_from_ints(&compass.m);
+    IMU::raw_m = int_vector_from_ints(&compass.m);
     
     vector v;
     v(0) = (float)(compass.m[0] - mag_min(0)) / (mag_max(0) - mag_min(0)) * 2 - 1;
@@ -94,7 +94,7 @@ vector MinIMU9::readAcc()
     const float accel_scale = 0.0039;
 
     compass.readAcc();
-    IMU::a = int_vector_from_ints(&compass.a);
+    IMU::raw_a = int_vector_from_ints(&compass.a);
     return ( vector_from_ints(&compass.a) - accel_offset ) * accel_scale;
 }
 
@@ -105,6 +105,6 @@ vector MinIMU9::readGyro()
     const float gyro_scale = 0.07 * 3.14159265 / 180;
 
     gyro.read();
-    IMU::g = int_vector_from_ints(&gyro.g);
+    IMU::raw_g = int_vector_from_ints(&gyro.g);
     return ( vector_from_ints(&gyro.g) - gyro_offset ) * gyro_scale;
 }

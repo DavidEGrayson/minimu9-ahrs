@@ -31,9 +31,9 @@ void streamRawValues(IMU& imu)
     {
         imu.read();
         printf("%7d %7d %7d  %7d %7d %7d  %7d %7d %7d\n",
-               imu.m[0], imu.m[1], imu.m[2],
-               imu.a[0], imu.a[1], imu.a[2],
-               imu.g[0], imu.g[1], imu.g[2]
+               imu.raw_m[0], imu.raw_m[1], imu.raw_m[2],
+               imu.raw_a[0], imu.raw_a[1], imu.raw_a[2],
+               imu.raw_g[0], imu.raw_g[1], imu.raw_g[2]
         );
         usleep(20*1000);
     }
