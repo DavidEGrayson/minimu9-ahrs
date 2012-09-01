@@ -1,8 +1,6 @@
 #include "I2CBus.h"
 #include <fcntl.h>
 #include <linux/i2c-dev.h>
-#include <stdio.h>
-#include <unistd.h>
 
 I2CBus::I2CBus(const char * deviceName)
 {
