@@ -86,8 +86,6 @@ void fuse_gyro_only(quaternion& rotation, float dt, const vector& angular_veloci
     // First order approximation of the quaternion representing this rotation.
     quaternion w = quaternion(1, angular_velocity(0)*dt/2, angular_velocity(1)*dt/2, angular_velocity(2)*dt/2);
 
-    // UM6 does: rotation += rotation*w, except their w has a 0 for the first component;
-    // Is that the same as what we are doing?
     rotation *= w;
     rotation.normalize();
 }
