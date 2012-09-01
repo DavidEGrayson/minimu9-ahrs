@@ -81,7 +81,7 @@ vector MinIMU9::readAcc()
 
     compass.readAcc();
     IMU::raw_a = int_vector_from_ints(&compass.a);
-    return ( vector_from_ints(&compass.a) - accel_offset ) * accel_scale;
+    return vector_from_ints(&compass.a) * accel_scale;
 }
 
 vector MinIMU9::readGyro()

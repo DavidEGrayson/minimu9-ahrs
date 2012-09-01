@@ -39,33 +39,6 @@ void streamRawValues(IMU& imu)
     }
 }
 
-static matrix updateMatrix(const vector& w, float dt)
-{
-    matrix u = matrix::Identity();
-    u(2,0) = -w(1) * dt;
-    u(0,2) =  w(1) * dt;
-
-    u(0,1) = -w(2) * dt;
-    u(1,0) =  w(2) * dt;
-
-    u(1,2) = -w(0) * dt;
-    u(2,1) =  w(0) * dt;
-    return u;
-}
-
-static matrix normalize(const matrix & m)
-{
-    //float error = m.row(0).dot(m.row(1));
-    matrix norm;
-    norm.row(0) = m.row(0) + m.row(1).cross(m.row(2))/10;
-    norm.row(1) = m.row(1) + m.row(2).cross(m.row(0))/10;
-    norm.row(2) = m.row(2) + m.row(0).cross(m.row(1))/10;
-    norm.row(0).normalize();
-    norm.row(1).normalize();
-    norm.row(2).normalize();
-    return norm;
-}
-
 matrix rotationFromCompass(const vector& acceleration, const vector& magnetic_field)
 {
     vector up = acceleration;     // usually true
@@ -96,22 +69,30 @@ float heading(matrix rotation)
     return atan2(x(1), x(0));
 }
 
-typedef void fuse_function(matrix& rotation, float dt, const vector& angular_velocity,
+typedef void fuse_function(quaternion& rotation, float dt, const vector& angular_velocity,
                   const vector& acceleration, const vector& magnetic_field);
 
 
-void fuse_compass_only(matrix& rotation, float dt, const vector& angular_velocity,
+void fuse_compass_only(quaternion& rotation, float dt, const vector& angular_velocity,
   const vector& acceleration, const vector& magnetic_field)
 {
     rotation = rotationFromCompass(acceleration, magnetic_field);
 }
 
 
-void fuse_gyro_only(matrix& rotation, float dt, const vector& angular_velocity,
+void fuse_gyro_only(quaternion& rotation, float dt, const vector& angular_velocity,
   const vector& acceleration, const vector& magnetic_field)
 {
-   rotation *= updateMatrix(angular_velocity, dt);
-   rotation = normalize(rotation);
+    rotation = quaternion::Identity();
+
+    quaternion w = quaternion(1, angular_velocity(0)*dt, angular_velocity(1)*dt, angular_velocity(2)*dt);
+    rotation = w;
+    rotation.normalize();
+
+    // TODO: finish this algorithm
+
+    //rotation *= updateMatrix(angular_velocity, dt);
+    //rotation = normalize(rotation);
 }
 
 #define Kp_ROLLPITCH 1
@@ -121,30 +102,31 @@ void fuse_gyro_only(matrix& rotation, float dt, const vector& angular_velocity,
 
 #define PI 3.14159265
 
-void fuse_default(matrix& rotation, float dt, const vector& angular_velocity,
+void fuse_default(quaternion& rotation, float dt, const vector& angular_velocity,
   const vector& acceleration, const vector& magnetic_field)
 {
-    matrix rotationCompass = rotationFromCompass(acceleration, magnetic_field);
+    rotation = quaternion::Identity();
+    // TODO: finish this algorithm
+
+    //matrix rotationCompass = rotationFromCompass(acceleration, magnetic_field);
 
     // We trust the accelerometer more if it is telling us 1G.
-    float accel_weight = 1 - 2*abs(1 - acceleration.norm());
-    if (accel_weight < 0){ accel_weight = 0; }
+    //float accel_weight = 1 - 2*abs(1 - acceleration.norm());
+    //if (accel_weight < 0){ accel_weight = 0; }
 
     // Add a "torque" that makes our up vector (rotation.row(2))
     // get closer to the acceleration vector.
-    vector errorRollPitch = acceleration.cross(rotation.row(2)) * accel_weight;
+    //vector errorRollPitch = acceleration.cross(rotation.row(2)) * accel_weight;
  
     // Add a "torque" that makes our east vector (rotation.row(0))
     // get closer to east vector calculated from the compass.
-    vector errorYaw = rotationCompass.row(0).cross(rotation.row(0));
+    //vector errorYaw = rotationCompass.row(0).cross(rotation.row(0));
 
-    vector drift_correction = errorYaw * Kp_YAW + errorRollPitch * Kp_ROLLPITCH;
- 
-    rotation *= updateMatrix(angular_velocity + drift_correction, dt);
-    rotation = normalize(rotation);
+    //vector drift_correction = errorYaw * Kp_YAW + errorRollPitch * Kp_ROLLPITCH;
+
+    //rotation *= updateMatrix(angular_velocity + drift_correction, dt);
+    //rotation = normalize(rotation);
 }
-
-// DCM algorithm: http://diydrones.com/forum/topics/robust-estimator-of-the
 
 void ahrs(IMU& imu, fuse_function * fuse_func)
 {
@@ -152,9 +134,9 @@ void ahrs(IMU& imu, fuse_function * fuse_func)
     imu.enable();
     imu.measureOffsets();
     
-    // The rotation matrix that can convert a vector in body coordinates
-    // to ground coordinates.
-    matrix rotation = matrix::Identity();
+    // The quaternion that can convert a vector in body coordinates
+    // to ground coordinates when it its changed to a matrix.
+    quaternion rotation = quaternion::Identity();
 
     int start = millis(); // truncate 64-bit return value
     while(1)
@@ -170,10 +152,11 @@ void ahrs(IMU& imu, fuse_function * fuse_func)
 
         fuse_func(rotation, dt, angular_velocity, acceleration, magnetic_field);
 
+        matrix r = rotation.matrix();
         printf("%7.4f %7.4f %7.4f %7.4f %7.4f %7.4f %7.4f %7.4f %7.4f  %7.4f %7.4f %7.4f  %7.4f %7.4f %7.4f\n",
-               rotation(0,0), rotation(0,1), rotation(0,2),
-               rotation(1,0), rotation(1,1), rotation(1,2),
-               rotation(2,0), rotation(2,1), rotation(2,2),
+               r(0,0), r(0,1), r(0,2),
+               r(1,0), r(1,1), r(1,2),
+               r(2,0), r(2,1), r(2,2),
                acceleration(0), acceleration(1), acceleration(2),
                magnetic_field(0), magnetic_field(1), magnetic_field(2));
         fflush(stdout);
