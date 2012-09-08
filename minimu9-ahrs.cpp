@@ -42,8 +42,7 @@ void streamRawValues(IMU& imu)
 matrix rotationFromCompass(const vector& acceleration, const vector& magnetic_field)
 {
     vector up = acceleration;     // usually true
-    vector magnetic_east = magnetic_field.cross(up);
-    vector east = magnetic_east;  // a rough approximation
+    vector east = magnetic_field.cross(up); // actual it's magnetic east
     vector north = up.cross(east);
 
     matrix rotationFromCompass;
@@ -63,7 +62,6 @@ float heading(matrix rotation)
     vector x = rotation.col(0);
     x.normalize();
     x(2) = 0;
-    //float heading_weight = x.norm();
 
     // 0 = east, pi/2 = north
     return atan2(x(1), x(0));
