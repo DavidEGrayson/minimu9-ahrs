@@ -76,51 +76,50 @@ typedef void fuse_function(quaternion& rotation, float dt, const vector& angular
 void fuse_compass_only(quaternion& rotation, float dt, const vector& angular_velocity,
   const vector& acceleration, const vector& magnetic_field)
 {
+    // Implicit conversion of rotation matrix to quaternion.
     rotation = rotationFromCompass(acceleration, magnetic_field);
 }
 
+// w is angular velocity in radiands per second.
+// dt is the time.
+void rotate(quaternion& rotation, const vector& w, float dt)
+{
+    // First order approximation of the quaternion representing this rotation.
+    quaternion q = quaternion(1, w(0)*dt/2, w(1)*dt/2, w(2)*dt/2);
+    rotation *= q;
+    rotation.normalize();
+}
 
 void fuse_gyro_only(quaternion& rotation, float dt, const vector& angular_velocity,
   const vector& acceleration, const vector& magnetic_field)
 {
-    // First order approximation of the quaternion representing this rotation.
-    quaternion w = quaternion(1, angular_velocity(0)*dt/2, angular_velocity(1)*dt/2, angular_velocity(2)*dt/2);
-
-    rotation *= w;
-    rotation.normalize();
+    rotate(rotation, angular_velocity, dt);
 }
-
-#define Kp_ROLLPITCH 1
-#define Ki_ROLLPITCH 0.00002
-#define Kp_YAW 1
-#define Ki_YAW 0.00002
-
-#define PI 3.14159265
 
 void fuse_default(quaternion& rotation, float dt, const vector& angular_velocity,
   const vector& acceleration, const vector& magnetic_field)
 {
-    rotation = quaternion::Identity();
-    // TODO: finish this algorithm
+    vector correction = vector(0, 0, 0);
 
-    //matrix rotationCompass = rotationFromCompass(acceleration, magnetic_field);
+    if (abs(acceleration.norm() - 1) <= 0.3)
+    {
+        // The magnetidude of acceleration is close to 1 g, so
+        // it might be pointing up and we can do drift correction.
 
-    // We trust the accelerometer more if it is telling us 1G.
-    //float accel_weight = 1 - 2*abs(1 - acceleration.norm());
-    //if (accel_weight < 0){ accel_weight = 0; }
+        const float correction_strength = 1;
 
-    // Add a "torque" that makes our up vector (rotation.row(2))
-    // get closer to the acceleration vector.
-    //vector errorRollPitch = acceleration.cross(rotation.row(2)) * accel_weight;
- 
-    // Add a "torque" that makes our east vector (rotation.row(0))
-    // get closer to east vector calculated from the compass.
-    //vector errorYaw = rotationCompass.row(0).cross(rotation.row(0));
+        matrix rotationCompass = rotationFromCompass(acceleration, magnetic_field);
+        matrix rotationMatrix = rotation.toRotationMatrix();
 
-    //vector drift_correction = errorYaw * Kp_YAW + errorRollPitch * Kp_ROLLPITCH;
+        correction = (
+            rotationCompass.row(0).cross(rotationMatrix.row(0)) +
+            rotationCompass.row(1).cross(rotationMatrix.row(1)) +
+            rotationCompass.row(2).cross(rotationMatrix.row(2))
+          ) * correction_strength;
 
-    //rotation *= updateMatrix(angular_velocity + drift_correction, dt);
-    //rotation = normalize(rotation);
+    }
+
+    rotate(rotation, angular_velocity + correction, dt);
 }
 
 void ahrs(IMU& imu, fuse_function * fuse_func)
@@ -147,7 +146,7 @@ void ahrs(IMU& imu, fuse_function * fuse_func)
 
         fuse_func(rotation, dt, angular_velocity, acceleration, magnetic_field);
 
-        matrix r = rotation.matrix();
+        matrix r = rotation.toRotationMatrix();
         printf("%7.4f %7.4f %7.4f %7.4f %7.4f %7.4f %7.4f %7.4f %7.4f  %7.4f %7.4f %7.4f  %7.4f %7.4f %7.4f\n",
                r(0,0), r(0,1), r(0,2),
                r(1,0), r(1,1), r(1,2),
@@ -196,7 +195,7 @@ int main(int argc, char *argv[])
         else
         {
             ahrs(imu, &fuse_default);
-        }        
+        }
         return 0;
     }
     catch(const std::system_error & error)
