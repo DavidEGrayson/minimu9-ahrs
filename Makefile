@@ -11,6 +11,9 @@ CPPFLAGS += -Wall
 # Use a modern language
 CPPFLAGS += --std=c++0x
 
+# Use boost libraries
+LDFLAGS += -lboost_program_options
+
 # Put debugging info in there so we can get stack traces.
 CPPFLAGS += -g -rdynamic
 

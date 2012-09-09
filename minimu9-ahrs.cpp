@@ -6,7 +6,11 @@
 #include <time.h>
 #include <sys/time.h>
 #include <system_error>
+#include <boost/program_options.hpp>
 
+namespace opts = boost::program_options;
+
+// TODO: see if we can switch from Eigen to boost for the math stuff
 // TODO: print warning if accelerometer magnitude is not close to 1 when starting up
 
 int millis()
@@ -165,6 +169,15 @@ int main(int argc, char *argv[])
 {
     try
     {
+        opts::options_description desc("Allowed options");
+        desc.add_options()
+          ("help", "produce help message")
+          ("compression", opts::value<int>(), "set compression level")
+        ;
+        opts::variables_map vm;
+        opts::store(opts::parse_command_line(argc, argv, desc), vm);
+        opts::notify(vm);
+
         MinIMU9 imu("/dev/i2c-0");
         
         imu.checkConnection();
