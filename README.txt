@@ -1,6 +1,6 @@
 sudo modprobe i2c_dev
 
-sudo apt-get install libi2c-dev
+sudo apt-get install libi2c-dev libboost-all-dev
 
 == Connections ==
 
