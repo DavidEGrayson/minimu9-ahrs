@@ -165,59 +165,92 @@ void ahrs(IMU& imu, fuse_function * fuse_func)
     }
 }
 
+std::pair<std::string, std::string> option_translator(const std::string& s)
+{
+    if (s == "--gyro-only")
+    {
+        return std::make_pair("mode", "gyro-only");
+    }
+    else if (s == "--compass-only")
+    {
+        return std::make_pair("mode", "compass-only");
+    }
+    else if (s == "--raw")
+    {
+        return std::make_pair("mode", "raw");
+    }
+    else
+    {
+        return std::make_pair(std::string(), std::string());
+    }
+}
+
 int main(int argc, char *argv[])
 {
     try
     {
+        std::string mode;
         opts::options_description desc("Allowed options");
         desc.add_options()
-          ("help", "produce help message")
-          ("compression", opts::value<int>(), "set compression level")
-        ;
+            ("help", "produce help message")
+            ("mode", opts::value<std::string>(&mode)->default_value("normal"),
+             "normal (default): Fuse compass and gyro.\n"
+             "gyro-only:  Use only gyro (drifts).\n"
+             "compass-only:  Use only compass (noisy).\n"
+             "raw: Just print raw values from sensors.")
+            ;
         opts::variables_map vm;
-        opts::store(opts::parse_command_line(argc, argv, desc), vm);
+        opts::store(opts::command_line_parser(argc, argv).options(desc).extra_parser(option_translator).run(), vm);
         opts::notify(vm);
+
+        if(vm.count("help"))
+        {
+            std::cout << desc << std::endl;
+            return 0;
+        }
 
         MinIMU9 imu("/dev/i2c-0");
         
         imu.checkConnection();
 
-        if (argc > 1)
+        if (mode == "raw")
         {
-            const char * action = argv[1];
-            if (0 == strcmp("raw", action))
-            {
-                streamRawValues(imu);
-            }
-            else if (0 == strcmp("gyro-only", action))
-            {
-                ahrs(imu, &fuse_gyro_only);
-            }
-            else if (0 == strcmp("compass-only", action))
-            {
-                ahrs(imu, &fuse_compass_only);
-            }
-            else
-            {
-                fprintf(stderr, "Unknown action '%s'.\n", action);
-                return 3;
-            }
+            streamRawValues(imu);
+        }
+        else if (mode == "gyro-only")
+        {
+            ahrs(imu, &fuse_gyro_only);
+        }
+        else if (mode == "compass-only")
+        {
+            ahrs(imu, &fuse_compass_only);
+        }
+        else if (mode == "normal")
+        {
+            ahrs(imu, &fuse_default);
         }
         else
         {
-            ahrs(imu, &fuse_default);
+            std::cerr << "Unknown mode '" << mode << "'" << std::endl;
+            return 1;
         }
         return 0;
     }
     catch(const std::system_error & error)
     {
-        std::string what = error.what();
+        auto what = error.what();
         const std::error_code & code = error.code();
-        std::cerr << "Error: " << what << "  " << code.message() << " (" << code << ")\n";
+        std::cerr << "Error: " << what << "  " << code.message() << " (" << code << ")" << std::endl;
+        return 2;
+    }
+    catch(const opts::multiple_occurrences & error)
+    {
+        std::cerr << "Error: " << error.what() << " of " << error.get_option_name() << " option." << std::endl;
+        return 1;
     }
     catch(const std::exception & error)    
     {
-        std::cerr << "Error: " << error.what() << '\n';
+        std::cerr << "Error: " << error.what() << std::endl;
+        return 9;
     }
-    return 1;
 }
