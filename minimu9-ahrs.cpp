@@ -2,6 +2,7 @@
 #include "MinIMU9.h"
 #include "version.h"
 #include <iostream>
+#include <iomanip>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -18,14 +19,6 @@ int millis()
     struct timeval tv;
     gettimeofday(&tv, NULL);
     return (tv.tv_sec) * 1000 + (tv.tv_usec)/1000;
-}
-
-void print(matrix m)
-{
-    printf("%7.4f %7.4f %7.4f %7.4f %7.4f %7.4f %7.4f %7.4f %7.4f",
-           m(0,0), m(0,1), m(0,2),
-           m(1,0), m(1,1), m(1,2),
-           m(2,0), m(2,1), m(2,2));
 }
 
 void streamRawValues(IMU& imu)
@@ -124,10 +117,17 @@ void fuse_default(quaternion& rotation, float dt, const vector& angular_velocity
     rotate(rotation, angular_velocity + correction, dt);
 }
 
-std::ostream& operator << (std::ostream& os, const matrix& mc)
+static std::ostream & operator << (std::ostream & ostream, const vector & vector)
 {
-    os << "woohoo! ";
-    return os;
+    ostream << std::fixed << std::setprecision(4) << std::setw(7) << vector(0) << ' ';
+    ostream << std::fixed << std::setprecision(4) << std::setw(7) << vector(1) << ' ';
+    ostream << std::fixed << std::setprecision(4) << std::setw(7) << vector(2);
+    return ostream;
+}
+
+static std::ostream & operator << (std::ostream & ostream, const matrix & m)
+{
+    return ostream << m.row(0) << ' ' << m.row(1) << ' ' << m.row(2);
 }
 
 
@@ -147,7 +147,7 @@ void ahrs(IMU& imu, fuse_function * fuse_func)
         int last_start = start;
         start = millis();
         float dt = (start-last_start)/1000.0;
-        if (dt < 0){ throw std::runtime_error("time went backwards"); }
+        if (dt < 0){ throw std::runtime_error("Time went backwards."); }
 
         vector angular_velocity = imu.readGyro();
         vector acceleration = imu.readAcc();
@@ -156,14 +156,7 @@ void ahrs(IMU& imu, fuse_function * fuse_func)
         fuse_func(rotation, dt, angular_velocity, acceleration, magnetic_field);
 
         matrix r = rotation.toRotationMatrix();
-        std::cout << r;
-        printf("%7.4f %7.4f %7.4f %7.4f %7.4f %7.4f %7.4f %7.4f %7.4f  %7.4f %7.4f %7.4f  %7.4f %7.4f %7.4f\n",
-               r(0,0), r(0,1), r(0,2),
-               r(1,0), r(1,1), r(1,2),
-               r(2,0), r(2,1), r(2,2),
-               acceleration(0), acceleration(1), acceleration(2),
-               magnetic_field(0), magnetic_field(1), magnetic_field(2));
-        fflush(stdout);
+        std::cout << r << "  " << acceleration << "  " << magnetic_field << std::endl << std::flush;
 
         // Ensure that each iteration of the loop takes at least 20 ms.
         while(millis() - start < 20)
@@ -203,7 +196,7 @@ int main(int argc, char *argv[])
             ("help,h", "produce help message")
             ("version,v", "print version number")
             ("mode", opts::value<std::string>(&mode)->default_value("normal"),
-             "normal (default): Fuse compass and gyro.\n"
+             "normal: Fuse compass and gyro.\n"
              "gyro-only:  Use only gyro (drifts).\n"
              "compass-only:  Use only compass (noisy).\n"
              "raw: Just print raw values from sensors.")
