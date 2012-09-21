@@ -14,11 +14,13 @@ namespace opts = boost::program_options;
 
 // TODO: print warning if accelerometer magnitude is not close to 1 when starting up
 
+#define FLOAT_FORMAT std::fixed << std::setprecision(4) << std::setw(7)
+
 std::ostream & operator << (std::ostream & os, const vector & vector)
 {
-    return os << std::fixed << std::setprecision(4) << std::setw(7) << vector(0) << ' '
-              << std::fixed << std::setprecision(4) << std::setw(7) << vector(1) << ' '
-              << std::fixed << std::setprecision(4) << std::setw(7) << vector(2);
+    return os << FLOAT_FORMAT << vector(0) << ' '
+              << FLOAT_FORMAT << vector(1) << ' '
+              << FLOAT_FORMAT << vector(2);
 }
 
 std::ostream & operator << (std::ostream & os, const matrix & matrix)
@@ -26,6 +28,14 @@ std::ostream & operator << (std::ostream & os, const matrix & matrix)
     return os << (vector)matrix.row(0) << ' '
               << (vector)matrix.row(1) << ' '
               << (vector)matrix.row(2);
+}
+
+std::ostream & operator << (std::ostream & os, const quaternion & quat)
+{
+    return os << FLOAT_FORMAT << quat.w() << ' '
+              << FLOAT_FORMAT << quat.x() << ' '
+              << FLOAT_FORMAT << quat.y() << ' '
+              << FLOAT_FORMAT << quat.z();
 }
 
 int millis()
@@ -81,6 +91,22 @@ float heading(matrix rotation)
 typedef void fuse_function(quaternion& rotation, float dt, const vector& angular_velocity,
                   const vector& acceleration, const vector& magnetic_field);
 
+typedef void rotation_output_function(quaternion& rotation);
+
+void output_matrix(quaternion & rotation)
+{
+    std::cout << rotation.toRotationMatrix();
+}
+
+void output_quaternion(quaternion & rotation)
+{
+    std::cout << rotation;
+}
+
+void output_euler(quaternion & rotation)
+{
+    throw std::runtime_error("Euler angle output not implemented yet"); // TODO
+}
 
 void fuse_compass_only(quaternion& rotation, float dt, const vector& angular_velocity,
   const vector& acceleration, const vector& magnetic_field)
@@ -131,7 +157,7 @@ void fuse_default(quaternion& rotation, float dt, const vector& angular_velocity
     rotate(rotation, angular_velocity + correction, dt);
 }
 
-void ahrs(IMU& imu, fuse_function * fuse_func)
+void ahrs(IMU & imu, fuse_function * fuse, rotation_output_function * output)
 {
     imu.loadCalibration();
     imu.enable();
@@ -153,10 +179,10 @@ void ahrs(IMU& imu, fuse_function * fuse_func)
         vector acceleration = imu.readAcc();
         vector magnetic_field = imu.readMag();
 
-        fuse_func(rotation, dt, angular_velocity, acceleration, magnetic_field);
+        fuse(rotation, dt, angular_velocity, acceleration, magnetic_field);
 
-        matrix r = rotation.toRotationMatrix();
-        std::cout << r << "  " << acceleration << "  " << magnetic_field << std::endl << std::flush;
+        output(rotation);
+        std::cout << "  " << acceleration << "  " << magnetic_field << std::endl << std::flush;
 
         // Ensure that each iteration of the loop takes at least 20 ms.
         while(millis() - start < 20)
@@ -190,7 +216,8 @@ int main(int argc, char *argv[])
 {
     try
     {
-        std::string mode;
+        // Define what all the command-line parameters are.
+        std::string mode, output_mode;
         opts::options_description desc("Allowed options");
         desc.add_options()
             ("help,h", "produce help message")
@@ -200,6 +227,10 @@ int main(int argc, char *argv[])
              "gyro-only:  Use only gyro (drifts).\n"
              "compass-only:  Use only compass (noisy).\n"
              "raw: Just print raw values from sensors.")
+            ("output", opts::value<std::string>(&output_mode)->default_value("matrix"),
+             "matrix: Direction Cosine Matrix.\n"
+             "quaternion: Quaternion.\n"
+             "euler: Euler angle (yaw, pitch, roll).\n")
             ;
         opts::variables_map options;
         opts::store(opts::command_line_parser(argc, argv).options(desc).extra_parser(option_translator).run(), options);
@@ -221,21 +252,43 @@ int main(int argc, char *argv[])
         
         imu.checkConnection();
 
+        rotation_output_function * output;
+
+        // Figure out the output mode.
+        if (output_mode == "matrix")
+        {
+            output = &output_matrix;
+        }
+        else if (output_mode == "quaternion")
+        {
+            output = &output_quaternion;
+        }
+        else if (output_mode == "euler")
+        {
+            output = &output_euler;
+        }
+        else
+        {
+            std::cerr << "Unknown output mode '" << output_mode << "'" << std::endl;
+            return 1;
+        }
+
+        // Figure out the basic operating mode and start running.
         if (mode == "raw")
         {
             streamRawValues(imu);
         }
         else if (mode == "gyro-only")
         {
-            ahrs(imu, &fuse_gyro_only);
+            ahrs(imu, &fuse_gyro_only, output);
         }
         else if (mode == "compass-only")
         {
-            ahrs(imu, &fuse_compass_only);
+            ahrs(imu, &fuse_compass_only, output);
         }
         else if (mode == "normal")
         {
-            ahrs(imu, &fuse_default);
+            ahrs(imu, &fuse_default, output);
         }
         else
         {
