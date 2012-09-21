@@ -1,5 +1,6 @@
 #include "vector.h"
 #include "MinIMU9.h"
+#include "version.h"
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,7 +11,6 @@
 
 namespace opts = boost::program_options;
 
-// TODO: see if we can switch from Eigen to boost for the math stuff
 // TODO: print warning if accelerometer magnitude is not close to 1 when starting up
 
 int millis()
@@ -124,6 +124,13 @@ void fuse_default(quaternion& rotation, float dt, const vector& angular_velocity
     rotate(rotation, angular_velocity + correction, dt);
 }
 
+std::ostream& operator << (std::ostream& os, const matrix& mc)
+{
+    os << "woohoo! ";
+    return os;
+}
+
+
 void ahrs(IMU& imu, fuse_function * fuse_func)
 {
     imu.loadCalibration();
@@ -149,6 +156,7 @@ void ahrs(IMU& imu, fuse_function * fuse_func)
         fuse_func(rotation, dt, angular_velocity, acceleration, magnetic_field);
 
         matrix r = rotation.toRotationMatrix();
+        std::cout << r;
         printf("%7.4f %7.4f %7.4f %7.4f %7.4f %7.4f %7.4f %7.4f %7.4f  %7.4f %7.4f %7.4f  %7.4f %7.4f %7.4f\n",
                r(0,0), r(0,1), r(0,2),
                r(1,0), r(1,1), r(1,2),
@@ -192,20 +200,27 @@ int main(int argc, char *argv[])
         std::string mode;
         opts::options_description desc("Allowed options");
         desc.add_options()
-            ("help", "produce help message")
+            ("help,h", "produce help message")
+            ("version,v", "print version number")
             ("mode", opts::value<std::string>(&mode)->default_value("normal"),
              "normal (default): Fuse compass and gyro.\n"
              "gyro-only:  Use only gyro (drifts).\n"
              "compass-only:  Use only compass (noisy).\n"
              "raw: Just print raw values from sensors.")
             ;
-        opts::variables_map vm;
-        opts::store(opts::command_line_parser(argc, argv).options(desc).extra_parser(option_translator).run(), vm);
-        opts::notify(vm);
+        opts::variables_map options;
+        opts::store(opts::command_line_parser(argc, argv).options(desc).extra_parser(option_translator).run(), options);
+        opts::notify(options);
 
-        if(vm.count("help"))
+        if(options.count("help"))
         {
             std::cout << desc << std::endl;
+            return 0;
+        }
+        
+        if (options.count("version"))
+        {
+            std::cout << VERSION << std::endl;
             return 0;
         }
 
@@ -238,7 +253,7 @@ int main(int argc, char *argv[])
     }
     catch(const std::system_error & error)
     {
-        auto what = error.what();
+        std::string what = error.what();
         const std::error_code & code = error.code();
         std::cerr << "Error: " << what << "  " << code.message() << " (" << code << ")" << std::endl;
         return 2;
