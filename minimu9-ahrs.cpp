@@ -192,26 +192,6 @@ void ahrs(IMU & imu, fuse_function * fuse, rotation_output_function * output)
     }
 }
 
-std::pair<std::string, std::string> option_translator(const std::string& s)
-{
-    if (s == "--gyro-only")
-    {
-        return std::make_pair("mode", "gyro-only");
-    }
-    else if (s == "--compass-only")
-    {
-        return std::make_pair("mode", "compass-only");
-    }
-    else if (s == "--raw")
-    {
-        return std::make_pair("mode", "raw");
-    }
-    else
-    {
-        return std::make_pair(std::string(), std::string());
-    }
-}
-
 int main(int argc, char *argv[])
 {
     try
@@ -233,7 +213,7 @@ int main(int argc, char *argv[])
              "euler: Euler angle (yaw, pitch, roll).\n")
             ;
         opts::variables_map options;
-        opts::store(opts::command_line_parser(argc, argv).options(desc).extra_parser(option_translator).run(), options);
+        opts::store(opts::command_line_parser(argc, argv).options(desc).run(), options);
         opts::notify(options);
 
         if(options.count("help"))
