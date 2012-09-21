@@ -14,6 +14,20 @@ namespace opts = boost::program_options;
 
 // TODO: print warning if accelerometer magnitude is not close to 1 when starting up
 
+std::ostream & operator << (std::ostream & os, const vector & vector)
+{
+    return os << std::fixed << std::setprecision(4) << std::setw(7) << vector(0) << ' '
+              << std::fixed << std::setprecision(4) << std::setw(7) << vector(1) << ' '
+              << std::fixed << std::setprecision(4) << std::setw(7) << vector(2);
+}
+
+std::ostream & operator << (std::ostream & os, const matrix & matrix)
+{
+    return os << (vector)matrix.row(0) << ' '
+              << (vector)matrix.row(1) << ' '
+              << (vector)matrix.row(2);
+}
+
 int millis()
 {
     struct timeval tv;
@@ -116,20 +130,6 @@ void fuse_default(quaternion& rotation, float dt, const vector& angular_velocity
 
     rotate(rotation, angular_velocity + correction, dt);
 }
-
-static std::ostream & operator << (std::ostream & ostream, const vector & vector)
-{
-    ostream << std::fixed << std::setprecision(4) << std::setw(7) << vector(0) << ' ';
-    ostream << std::fixed << std::setprecision(4) << std::setw(7) << vector(1) << ' ';
-    ostream << std::fixed << std::setprecision(4) << std::setw(7) << vector(2);
-    return ostream;
-}
-
-static std::ostream & operator << (std::ostream & ostream, const matrix & m)
-{
-    return ostream << m.row(0) << ' ' << m.row(1) << ' ' << m.row(2);
-}
-
 
 void ahrs(IMU& imu, fuse_function * fuse_func)
 {
