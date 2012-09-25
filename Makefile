@@ -32,7 +32,12 @@ DEPs := $(OBJs:%.o=%.d)
 vector.h.gch: vector.h
 	$(CC) $(CPPFLAGS) $< -o $@
 
+.PHONY: clean
 clean:
-	@rm -fv $(BIN) $(OBJs) $(DEPs) *.o *.gch *.d
+	@rm -fv $(BIN) $(OBJs) $(DEPs) *.o *.gch *.d docs
+
+.PHONY: docs
+docs:
+	doxygen
 
 -include $(DEPs) vector.h.d

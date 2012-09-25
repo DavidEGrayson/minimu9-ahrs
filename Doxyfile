@@ -1,0 +1,59 @@
+PROJECT_NAME = "minimu9-rpi-ahrs"
+
+INPUT_ENCODING = UTF-8
+INPUT = .
+FILE_PATTERNS          = *.cpp *.h
+EXCLUDE = Eigen
+RECURSIVE = NO
+
+OUTPUT_DIRECTORY = docs
+GENERATE_HTML          = YES
+HTML_OUTPUT            = html
+
+#BRIEF_MEMBER_DESC = YES
+#REPEAT_BRIEF = YES
+#ABBREVIATE_BRIEF       = "The $name class" \
+#                         "The $name widget" \
+#                         "The $name file" \
+#                         is \
+#                         provides \
+#                         specifies \
+#                         contains \
+#                         represents \
+#                         a \
+#                         an \
+#                         the
+
+#FULL_PATH_NAMES = YES
+#SHORT_NAMES = NO
+
+# Discourage people from putting tabs in their code.
+TAB_SIZE = 16
+
+# Document as much stuff as possible
+EXTRACT_ALL = YES
+EXTRACT_PRIVATE = YES
+EXTRACT_STATIC = YES
+EXTRACT_LOCAL_CLASSES = YES
+EXTRACT_ANON_NSPACES = YES
+
+HIDE_SCOPE_NAMES = YES
+
+GENERATE_TODOLIST = YES
+
+WARNINGS = YES
+WARN_IF_UNDOCUMENTED = YES
+WARN_IF_DOC_ERROR = YES
+
+SOURCE_BROWSER = YES
+
+REFERENCED_BY_RELATION = YES
+REFERENCES_RELATION = YES
+REFERENCES_LINK_SOURCE = NO
+
+
+HTML_COLORSTYLE_HUE = 340
+HTML_COLORSTYLE_SAT = 100
+HTML_TIMESTAMP = YES
+
+GENERATE_LATEX = NO

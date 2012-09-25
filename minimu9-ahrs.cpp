@@ -14,7 +14,9 @@ namespace opts = boost::program_options;
 
 // TODO: print warning if accelerometer magnitude is not close to 1 when starting up
 
-#define FLOAT_FORMAT std::fixed << std::setprecision(4) << std::setw(7)
+// An Euler angle could take 8 chars: -234.678, but usually we only need 6.
+float field_width = 6;
+#define FLOAT_FORMAT std::fixed << std::setprecision(3) << std::setw(field_width)
 
 std::ostream & operator << (std::ostream & os, const vector & vector)
 {
@@ -36,6 +38,23 @@ std::ostream & operator << (std::ostream & os, const quaternion & quat)
               << FLOAT_FORMAT << quat.x() << ' '
               << FLOAT_FORMAT << quat.y() << ' '
               << FLOAT_FORMAT << quat.z();
+}
+
+typedef void rotation_output_function(quaternion& rotation);
+
+void output_quaternion(quaternion & rotation)
+{
+    std::cout << rotation;
+}
+
+void output_matrix(quaternion & rotation)
+{
+    std::cout << rotation.toRotationMatrix();
+}
+
+void output_euler(quaternion & rotation)
+{
+    std::cout << (vector)(rotation.toRotationMatrix().eulerAngles(0, 1, 2) * (180 / M_PI));
 }
 
 int millis()
@@ -63,7 +82,7 @@ void streamRawValues(IMU& imu)
 matrix rotationFromCompass(const vector& acceleration, const vector& magnetic_field)
 {
     vector up = acceleration;     // usually true
-    vector east = magnetic_field.cross(up); // actual it's magnetic east
+    vector east = magnetic_field.cross(up); // actually it's magnetic east
     vector north = up.cross(east);
 
     matrix rotationFromCompass;
@@ -77,36 +96,8 @@ matrix rotationFromCompass(const vector& acceleration, const vector& magnetic_fi
     return rotationFromCompass;
 }
 
-float heading(matrix rotation)
-{
-    // The board's x axis in earth coordinates.
-    vector x = rotation.col(0);
-    x.normalize();
-    x(2) = 0;
-
-    // 0 = east, pi/2 = north
-    return atan2(x(1), x(0));
-}
-
 typedef void fuse_function(quaternion& rotation, float dt, const vector& angular_velocity,
                   const vector& acceleration, const vector& magnetic_field);
-
-typedef void rotation_output_function(quaternion& rotation);
-
-void output_matrix(quaternion & rotation)
-{
-    std::cout << rotation.toRotationMatrix();
-}
-
-void output_quaternion(quaternion & rotation)
-{
-    std::cout << rotation;
-}
-
-void output_euler(quaternion & rotation)
-{
-    throw std::runtime_error("Euler angle output not implemented yet"); // TODO
-}
 
 void fuse_compass_only(quaternion& rotation, float dt, const vector& angular_velocity,
   const vector& acceleration, const vector& magnetic_field)
@@ -115,13 +106,15 @@ void fuse_compass_only(quaternion& rotation, float dt, const vector& angular_vel
     rotation = rotationFromCompass(acceleration, magnetic_field);
 }
 
-// w is angular velocity in radiands per second.
+// Uses the given angular velocity and time interval to calculate
+// a rotation and applies that rotation to the given quaternion.
+// w is angular velocity in radians per second.
 // dt is the time.
 void rotate(quaternion& rotation, const vector& w, float dt)
 {
-    // First order approximation of the quaternion representing this rotation.
-    quaternion q = quaternion(1, w(0)*dt/2, w(1)*dt/2, w(2)*dt/2);
-    rotation *= q;
+    // Multiply by first order approximation of the
+    // quaternion representing this rotation.
+    rotation *= quaternion(1, w(0)*dt/2, w(1)*dt/2, w(2)*dt/2);
     rotation.normalize();
 }
 
@@ -203,14 +196,16 @@ int main(int argc, char *argv[])
             ("help,h", "produce help message")
             ("version,v", "print version number")
             ("mode", opts::value<std::string>(&mode)->default_value("normal"),
+             "specifies what algorithm to use."
              "normal: Fuse compass and gyro.\n"
              "gyro-only:  Use only gyro (drifts).\n"
              "compass-only:  Use only compass (noisy).\n"
              "raw: Just print raw values from sensors.")
             ("output", opts::value<std::string>(&output_mode)->default_value("matrix"),
+             "specifies how to output the orientation."
              "matrix: Direction Cosine Matrix.\n"
              "quaternion: Quaternion.\n"
-             "euler: Euler angle (yaw, pitch, roll).\n")
+             "euler: Euler angles (bank, elevation, heading).\n")
             ;
         opts::variables_map options;
         opts::store(opts::command_line_parser(argc, argv).options(desc).run(), options);
@@ -245,6 +240,7 @@ int main(int argc, char *argv[])
         }
         else if (output_mode == "euler")
         {
+            field_width += 2;  // See comment above for field_width.
             output = &output_euler;
         }
         else
