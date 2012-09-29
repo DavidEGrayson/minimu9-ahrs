@@ -11,15 +11,6 @@ MinIMU9::MinIMU9(const char * i2cDeviceName) :
 {
 }
 
-void MinIMU9::checkConnection()
-{
-    uint8_t result = compass.readMagReg(LSM303_WHO_AM_I_M);
-    if (result != 0x3C)
-    {
-        throw std::runtime_error("Error getting \"Who Am I\" register.\n");
-    }
-}
-
 void MinIMU9::enable()
 {
     compass.enable();

@@ -11,7 +11,6 @@ public:
     virtual vector readGyro() = 0; // In body coords, with units = rad/sec
     void read(){ readAcc(); readMag(); readGyro(); }
 
-    virtual void checkConnection() = 0;
     virtual void measureOffsets() = 0;
     virtual void enable() = 0;
     virtual void loadCalibration() = 0;
