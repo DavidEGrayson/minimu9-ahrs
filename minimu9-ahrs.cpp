@@ -85,9 +85,9 @@ void streamRawValues(IMU& imu)
 // for the ground coords:  North, East, Down.
 matrix rotationFromCompass(const vector& acceleration, const vector& magnetic_field)
 {
-    vector up = acceleration;     // usually true
-    vector east = magnetic_field.cross(up); // actually it's magnetic east
-    vector north = up.cross(east);
+    vector down = -acceleration;     // usually true
+    vector east = down.cross(magnetic_field); // actually it's magnetic east
+    vector north = east.cross(down);
 
     up.normalize();
     east.normalize();
@@ -96,7 +96,7 @@ matrix rotationFromCompass(const vector& acceleration, const vector& magnetic_fi
     matrix r;
     r.row(0) = north;
     r.row(1) = east;
-    r.row(2) = -up;
+    r.row(2) = down;
     return r;
 }
 
