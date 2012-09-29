@@ -54,7 +54,7 @@ void output_matrix(quaternion & rotation)
 
 void output_euler(quaternion & rotation)
 {
-    std::cout << (vector)(rotation.toRotationMatrix().eulerAngles(0, 1, 2) * (180 / M_PI));
+    std::cout << (vector)(rotation.toRotationMatrix().eulerAngles(2, 1, 0) * (180 / M_PI));
 }
 
 int millis()
@@ -79,21 +79,25 @@ void streamRawValues(IMU& imu)
     }
 }
 
+//! Uses the acceleration and magnetic field readings from the compass
+// to get a noisy estimate of the current rotation matrix.
+// This function is where we define the coordinate system we are using
+// for the ground coords:  North, East, Down.
 matrix rotationFromCompass(const vector& acceleration, const vector& magnetic_field)
 {
     vector up = acceleration;     // usually true
     vector east = magnetic_field.cross(up); // actually it's magnetic east
     vector north = up.cross(east);
 
-    matrix rotationFromCompass;
-    rotationFromCompass.row(0) = east;
-    rotationFromCompass.row(1) = north;
-    rotationFromCompass.row(2) = up;
-    rotationFromCompass.row(0).normalize();
-    rotationFromCompass.row(1).normalize();
-    rotationFromCompass.row(2).normalize();
+    up.normalize();
+    east.normalize();
+    north.normalize();
 
-    return rotationFromCompass;
+    matrix r;
+    r.row(0) = north;
+    r.row(1) = east;
+    r.row(2) = -up;
+    return r;
 }
 
 typedef void fuse_function(quaternion& rotation, float dt, const vector& angular_velocity,
@@ -205,7 +209,7 @@ int main(int argc, char *argv[])
              "specifies how to output the orientation."
              "matrix: Direction Cosine Matrix.\n"
              "quaternion: Quaternion.\n"
-             "euler: Euler angles (bank, elevation, heading).\n")
+             "euler: Euler angles (yaw, pitch, roll).\n")
             ;
         opts::variables_map options;
         opts::store(opts::command_line_parser(argc, argv).options(desc).run(), options);
