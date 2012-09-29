@@ -16,7 +16,6 @@ public:
     virtual vector readMag();
     virtual vector readGyro();
 
-    virtual void checkConnection();
     virtual void enable();
     virtual void loadCalibration();
     virtual void measureOffsets();

@@ -41,6 +41,11 @@ LSM303::LSM303(const char * i2cDeviceName) :
 
     // Make sure to throw an exception if we don't have the right address.
     readAccReg(LSM303_CTRL_REG1_A);
+
+    if (readMagReg(LSM303_WHO_AM_I_M) != 0x3C)
+    {
+        throw std::runtime_error("Error getting \"Who Am I\" register.\n");
+    }
 }
 
 uint8_t LSM303::readMagReg(uint8_t reg)

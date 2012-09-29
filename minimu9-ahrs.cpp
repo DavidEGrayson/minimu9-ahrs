@@ -224,8 +224,6 @@ int main(int argc, char *argv[])
         }
 
         MinIMU9 imu("/dev/i2c-0");
-        
-        imu.checkConnection();
 
         rotation_output_function * output;
 
