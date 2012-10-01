@@ -33,7 +33,7 @@ $(BIN) : $(OBJs)
 DEPs := $(OBJs:%.o=%.d)
 
 vector.h.gch: vector.h
-	$(CC) $(CPPFLAGS) $< -o $@
+	$(CC) $(CFLAGS) $(CPPFLAGS) $< -o $@
 
 .PHONY: clean
 clean:
@@ -50,8 +50,9 @@ sharedir = $(prefix)/share
 mandir = $(sharedir)/man
 man1dir = $(mandir)/man1
 
+.PHONY: install
 install: $(BIN)
-	install $(INSTALL_OPTS) $(BIN) $(DESTDIR)$(bindir)
-	install $(INSTALL_OPTS) -m 0644 $(BIN).1 $(DESTDIR)$(man1dir)
+	install $(BIN) $(DESTDIR)$(bindir)
+	install -m 0644 $(BIN).1 $(DESTDIR)$(man1dir)
 
 -include $(DEPs) vector.h.d
