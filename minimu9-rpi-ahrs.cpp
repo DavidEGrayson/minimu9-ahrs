@@ -89,9 +89,9 @@ matrix rotationFromCompass(const vector& acceleration, const vector& magnetic_fi
     vector east = down.cross(magnetic_field); // actually it's magnetic east
     vector north = east.cross(down);
 
-    up.normalize();
     east.normalize();
     north.normalize();
+    down.normalize();
 
     matrix r;
     r.row(0) = north;

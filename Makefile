@@ -1,5 +1,5 @@
 OBJs := $(patsubst %.cpp, %.o, $(wildcard *.cpp))
-BIN := minimu9-ahrs
+BIN := minimu9-rpi-ahrs
 
 CC := g++
 
@@ -34,10 +34,21 @@ vector.h.gch: vector.h
 
 .PHONY: clean
 clean:
-	@rm -fv $(BIN) $(OBJs) $(DEPs) *.o *.gch *.d docs
+	@rm -fv $(BIN) $(OBJs) $(DEPs) *.o *.gch *.d
+	@rm -fr docs
 
 .PHONY: docs
 docs:
 	doxygen
+
+prefix = /usr
+bindir = $(prefix)/bin
+sharedir = $(prefix)/share
+mandir = $(sharedir)/man
+man1dir = $(mandir)/man1
+
+install: $(BIN)
+	install $(INSTALL_OPTS) $(BIN) $(DESTDIR)$(bindir)
+	install $(INSTALL_OPTS) -m 0644 $(BIN).1 $(DESTDIR)$(man1dir)
 
 -include $(DEPs) vector.h.d
