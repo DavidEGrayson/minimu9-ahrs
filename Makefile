@@ -1,5 +1,5 @@
 OBJs := $(patsubst %.cpp, %.o, $(wildcard *.cpp))
-BIN := minimu9-rpi-ahrs
+BIN := minimu9-ahrs
 
 CC := g++
 
