@@ -15,7 +15,10 @@ CPPFLAGS += --std=c++0x
 LDFLAGS += -lboost_program_options
 
 # Put debugging info in there so we can get stack traces.
-CPPFLAGS += -g -rdynamic
+#CPPFLAGS += -g -rdynamic
+
+# Optimize the code.
+CPPFLAGS += -O3
 
 # Fix http://gcc.gnu.org/bugzilla/show_bug.cgi?id=42748
 CPPFLAGS += -Wno-psabi
