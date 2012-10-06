@@ -200,13 +200,13 @@ int main(int argc, char *argv[])
             ("help,h", "produce help message")
             ("version,v", "print version number")
             ("mode", opts::value<std::string>(&mode)->default_value("normal"),
-             "specifies what algorithm to use."
+             "specifies what algorithm to use.\n"
              "normal: Fuse compass and gyro.\n"
              "gyro-only:  Use only gyro (drifts).\n"
              "compass-only:  Use only compass (noisy).\n"
              "raw: Just print raw values from sensors.")
             ("output", opts::value<std::string>(&output_mode)->default_value("matrix"),
-             "specifies how to output the orientation."
+             "specifies how to output the orientation.\n"
              "matrix: Direction Cosine Matrix.\n"
              "quaternion: Quaternion.\n"
              "euler: Euler angles (yaw, pitch, roll).\n")
