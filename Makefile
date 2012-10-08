@@ -53,6 +53,8 @@ man1dir = $(mandir)/man1
 .PHONY: install
 install: $(BIN)
 	install $(BIN) $(DESTDIR)$(bindir)
+	install $(BIN)-calibrate $(DESTDIR)$(bindir)
+	install $(BIN)-calibrator $(DESTDIR)$(bindir)
 	install -m 0644 $(BIN).1 $(DESTDIR)$(man1dir)
 
 -include $(DEPs) vector.h.d
