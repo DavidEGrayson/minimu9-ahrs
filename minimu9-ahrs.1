@@ -9,7 +9,7 @@ minimu9-ahrs is a program for reading data from the Pololu MinIMU-9
 It can output the raw sensor data from the magnetometor, accelerometer,
 and gyro or it can use that raw data to compute the orientation of the IMU.
 
-The program options \fB/dev/i2c-0\fP and auto-detects what
+The program opens \fB/dev/i2c-0\fP and auto-detects what
 version of MinIMU-9 is connected.
 
 .SS OPTIONS
@@ -64,7 +64,7 @@ Unless \fB--mode raw\fP is specified, the output format will be of the form:
 .IP
 \fIORIENTATION\fB AX AY AZ BX BY BZ\fR
 .P
-where the format of \fIORIENTATION\fB is determined by the
+where the format of \fIORIENTATION\fP is determined by the
 \fB--output\fP argument,
 \fBAX AY AZ\fP is the scaled acceleration vector in units of 1 g, and
 \fBBX BY BZ\fP is the scaled magnetic field vector, whose magnitude should
@@ -73,7 +73,7 @@ normally be close to 1.
 .SS ORIENTATION AS A MATRIX
 
 The default output format is \fB--output matrix\fP.
-In this mode, the a 3x3 transformation matrix
+In this mode, a 3x3 transformation matrix
 (also known as the direction cosine matrix) is sent to the standard output.
 The matrix is sent in row-major order; the first three numbers on the line
 are row 0, etc.
@@ -88,12 +88,41 @@ north·x  north·y  north·z
 east·x   east·y   east·z
 down·x   down·y   down·z
 .fi
-.P
 
 .SS ORIENTATION AS A QUATERNION
-
 If \fB--output quaternion\fP is specified, the orientation is formatted
-as a unit quaternion (four numbers).
+as a unit quaternion (four numbers).  It is a left quaternion that
+transforms vectors from the \fBbody coordinate system\fP to the
+\fBground coordinate system\fP.
+
+.SS ORIENTATION AS EULER ANGLES
+If \fB--output euler\fP is specified, the orintation is formatted as three
+Euler angles in the following order: pitch, yaw, and roll.
+These are the standard angles to represent the orientation of a plane.
+The angles are output in degrees.
+.P
+The Euler angles represent that amount of rotation needed in three
+distinct steps that turns the ground coordinate system into the body
+coordinate system.
+.P
+Imagine you start with a coordinate system that is equal to ground
+coordinate system: north, east, down.
+.P
+Now rotate the coordinate system about its third axis
+(still pointing down) by a certain angle that we will call the \fByaw\fP.
+When viewed from above, the yaw rotation goes in the clockwise direction.
+.P
+Now rotate the coordinate system about its second axis by a certain
+angle that we will call the \fBpitch\fP.  A positive pitch makes
+the first axis of the coordinate system go up.  A pitch of 90.0
+would make the first axis point straight up, while a pitch of -90.0
+would make the first axis point straight down.
+.P
+Now rotate the coordinate system about is first axis by a certain
+angle that we will call the \fBroll\fP.
+.P
+The coordinate system you now have is equal to the
+\fBbody coordinate system\fP (x, y, z).
 
 .SH FILES
 .TP 22
@@ -104,7 +133,8 @@ minimum x, maximum x, minimum y, maximum y, minimum z, maximum z.
 These numbers specify the linear mapping from the raw ellipsoid to
 the unit sphere. For example, if “minimum x” is -414, it means that a
 magnetometer reading of -414 on the X axis will get mapped to -1.0 when
-the readings are scaled.
+the readings are scaled.  Run \fBminimu9-ahrs-calibrate\fP to generate this
+file.
 .TP
 /dev/i2c-0
 I²C bus used to communicate with MinIMU-9.
