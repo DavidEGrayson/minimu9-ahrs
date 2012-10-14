@@ -1,10 +1,45 @@
 .TH MINIMU9-AHRS 1
 .SH NAME
-minimu9-ahrs - 
+minimu9-ahrs - Reads data from the Pololu MinIMU-9 (all versions) over I²C. 
 .SH SYNOPSIS
-.B minimu9-ahrs
-.RI [options]
+.B minimu9-ahrs [\fIOPTIONS\fP]
 .SH DESCRIPTION
-For help, run
-.B minimu9-ahrs --help
-More to come here later.
+minimu9-ahrs is a program for reading data from the Pololu MinIMU-9
+(all versions) over I²C.
+It can output the raw sensor data from the magnetometor, accelerometer,
+and gyro or it can use that raw data to compute the orientation of the IMU.
+
+.SS OPTIONS
+.TP
+\fB-h, --help\fP
+produce help message
+.TP
+\fB-v, --version\fP
+print version number
+.TP
+\fB--mode \fIMODE\fR
+Specify what algorithm to use.
+.nf
+\fBnormal\fP (default): Fuse compass and gyro.
+\fBgyro-only\fP:  Use only gyro (drifts).
+\fBcompass-only\fP:  Use only compass (noisy).
+\fBraw\fP: Just print raw values from sensors.
+.fi
+.TP
+\fB--output \fIFORMAT\fR
+Specify how to output the orientation.
+Has no effect if \fB--mode raw\fP is specified.
+.nf
+\fBmatrix\fP (default): Direction Cosine Matrix.
+\fBquaternion\fP: Quaternion.
+\fBeuler\fP: Euler angles (yaw, pitch roll).
+
+.SH FILES
+.TP 22
+~/.minimu9-ahrs-cal
+Calibration file for the magnetomer, needed unless \fB--mode raw\fP is specified.
+.TP
+/dev/i2c-0
+I²C bus used to communication with MinIMU-9.
+.SH AUTHOR
+David Grayson <davidegrayson@gmail.com>
