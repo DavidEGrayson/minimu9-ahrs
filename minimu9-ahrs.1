@@ -9,6 +9,9 @@ minimu9-ahrs is a program for reading data from the Pololu MinIMU-9
 It can output the raw sensor data from the magnetometor, accelerometer,
 and gyro or it can use that raw data to compute the orientation of the IMU.
 
+The program options \fB/dev/i2c-0\fP and auto-detects what
+version of MinIMU-9 is connected.
+
 .SS OPTIONS
 .TP
 \fB-h, --help\fP
@@ -34,12 +37,81 @@ Has no effect if \fB--mode raw\fP is specified.
 \fBquaternion\fP: Quaternion.
 \fBeuler\fP: Euler angles (yaw, pitch roll).
 
+.SS COORDINATE SYSTEMS
+There are two coordinate systems in use.
+.P
+The \fBground coordinate system\fP uses the following axes, in this order:
+\fBNorth\fP, \fBEast\fP, and \fBDown\fP.
+.P
+The \fBbody coordinate system\fP represents the orientation of the IMU, and
+uses the following axes, as labeled on the IMU:
+\fBX\fP, \fBY\fP, and \fBZ\fP.
+
+.SS RAW OUTPUT FORMAT
+
+If \fB--mode raw\fP is specified, the format of the output will be
+nine integers:
+.IP
+\fBMX MY MZ  AX AY AZ  GX GY GZ\fP
+.P
+where \fBMX MY MZ\fP if the raw reading from the magnetometer,
+\fBAX AY AZ\fP is the raw reading from the accelerometer, and
+\fBGX GY GZ\fP is the raw reading from the magnetometer.
+
+.SS ORIENTATION OUTPUT FORMATS
+
+Unless \fB--mode raw\fP is specified, the output format will be of the form:
+.IP
+\fIORIENTATION\fB AX AY AZ BX BY BZ\fR
+.P
+where the format of \fIORIENTATION\fB is determined by the
+\fB--output\fP argument,
+\fBAX AY AZ\fP is the scaled acceleration vector in units of 1 g, and
+\fBBX BY BZ\fP is the scaled magnetic field vector, whose magnitude should
+normally be close to 1.
+
+.SS ORIENTATION AS A MATRIX
+
+The default output format is \fB--output matrix\fP.
+In this mode, the a 3x3 transformation matrix
+(also known as the direction cosine matrix) is sent to the standard output.
+The matrix is sent in row-major order; the first three numbers on the line
+are row 0, etc.
+.P
+The matrix is defined as the matrix that transforms column vectors from
+the \fBbody coordinate system\fP to the \fBground coordinate system\fP.
+Accordingly, its nine elements can be specified as dot products of the
+unit vectors representing the two coordinate systems:
+.IP
+.nf
+north·x  north·y  north·z
+east·x   east·y   east·z
+down·x   down·y   down·z
+.fi
+.P
+
+.SS ORIENTATION AS A QUATERNION
+
+If \fB--output quaternion\fP is specified, the orientation is formatted
+as a unit quaternion (four numbers).
+
 .SH FILES
 .TP 22
 ~/.minimu9-ahrs-cal
 Calibration file for the magnetomer, needed unless \fB--mode raw\fP is specified.
+This file should be a one-line file with 6 integers separated by spaces:
+minimum x, maximum x, minimum y, maximum y, minimum z, maximum z.
+These numbers specify the linear mapping from the raw ellipsoid to
+the unit sphere. For example, if “minimum x” is -414, it means that a
+magnetometer reading of -414 on the X axis will get mapped to -1.0 when
+the readings are scaled.
 .TP
 /dev/i2c-0
-I²C bus used to communication with MinIMU-9.
+I²C bus used to communicate with MinIMU-9.
 .SH AUTHOR
+.nf
 David Grayson <davidegrayson@gmail.com>
+http://www.github.com/DavidEGrayson/
+.fi
+.SH SEE ALSO
+minimu9-ahrs-calibrate(1), minimu9-ahrs-calibrator(1)
