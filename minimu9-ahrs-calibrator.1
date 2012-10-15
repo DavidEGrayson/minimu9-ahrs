@@ -1,22 +1,51 @@
 .TH MINIMU9-AHRS-CALIBRATOR 1
 .SH NAME
 minimu9-ahrs-calibrator - Reads raw IMU data on standard
-input and output an optimal linear calibration.
+input and outputs an optimal linear calibration.
 .SH SYNOPSIS
 .B minimu9-ahrs-calibrator
 .SH DESCRIPTION
 
-This is a python script that takes raw IMU readings on its standard
-input and uses the readings to compute a linear calibation of the
-magnetometer.
+This is a Python 2 script that takes raw IMU readings on its standard
+input and uses the readings to compute an optimal linear calibation
+of the magnetometer.
+The IMU should be rotated through as many different orientations
+while generating the input.
 .P
-The input format is:
+The input format consists of lines wher each line has the format:
 .IP
-\fBMX MY MZ\fP
+\fBMX MY MZ [EXTRA INPUT]\fP
 .P
 where \fBMX MY MZ\fP are integers that represent the raw reading from
 the magnetometor.
 Extra input on the line after the magnetomer readings is ignored.
+.P
+When the input stream ends, the script will begin creating an
+optimal calibration.
+This could take a couple minutes.
+When the calibration is ready, it is output on the standard output.
+.P
+The output format is:
+.IP
+\fBMIN_X MAX_X MIN_Y MAX_Y MIN_Z MAX_Z\fP
+.P
+The scaling formulae to convert raw readings to scaled readings are:
+.IP
+.nf
+scaled_x = (raw_x - min_x) / (max_x - min_x) * 2 - 1
+scaled_y = (raw_y - min_y) / (max_y - min_y) * 2 - 1
+scaled_z = (raw_z - min_z) / (max_z - min_z) * 2 - 1
+.fi
+.P
+Therefore, if the raw X value is equal to MIN_X
+(the first number in the calibration), then
+the scaled X value would be -1.0.  
+.P
+The calibration is chosen to make the scaled readings take a shape
+that is as close as possible to the unit sphere.
+.SH NOTES
+This Python script is intended for use with the MinIMU-9 from Pololu,
+but it is general and will probably work with any magnetometer.
 
 .SH AUTHOR
 .nf
