@@ -1,0 +1,23 @@
+.TH MINIMU9-AHRS-CALIBRATE 1
+.SH NAME
+minimu9-ahrs-calibrate - Generates a calibration file for the MinIMU-9
+magnetometer.
+.SH SYNOPSIS
+.B minimu9-ahrs-calibrate
+.SH DESCRIPTION
+This is a small shell script that pipe the output from
+\fBminimu9-ahrs --mode raw\fP to \fBminimu9-calibrator\fP to
+create the calibration file needed by minimu9-ahrs, which is
+\fB~/.minimu9-ahrs-cal\fP.
+
+.SH FILES
+.TP
+~/.minimu9-ahrs-cal
+Calibration file for the magnetomer.
+.SH AUTHOR
+.nf
+David Grayson <davidegrayson@gmail.com>
+http://www.github.com/DavidEGrayson/
+.fi
+.SH SEE ALSO
+minimu9-ahrs(1), minimu9-ahrs-calibrator(1)
