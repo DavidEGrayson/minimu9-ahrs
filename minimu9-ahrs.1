@@ -6,7 +6,7 @@ minimu9-ahrs - Reads data from the Pololu MinIMU-9 (all versions) over I²C.
 .SH DESCRIPTION
 minimu9-ahrs is a program for reading data from the Pololu MinIMU-9
 (all versions) over I²C.
-It can output the raw sensor data from the magnetometor, accelerometer,
+It can output the raw sensor data from the magnetometer, accelerometer,
 and gyro or it can use that raw data to compute the orientation of the IMU.
 
 The program opens \fB/dev/i2c-0\fP and auto-detects what
@@ -36,6 +36,9 @@ Has no effect if \fB--mode raw\fP is specified.
 \fBmatrix\fP (default): Direction Cosine Matrix.
 \fBquaternion\fP: Quaternion.
 \fBeuler\fP: Euler angles (yaw, pitch roll).
+.TP
+\fB-b, --i2c-bus\fP
+I²C-bus the IMU is connected to (default: /dev/i2c-0)
 
 .SS COORDINATE SYSTEMS
 There are two coordinate systems in use.
@@ -135,9 +138,6 @@ the unit sphere. For example, if "minimum x" is -414, it means that a
 magnetometer reading of -414 on the X axis will get mapped to -1.0 when
 the readings are scaled.  Run \fBminimu9-ahrs-calibrate\fP to generate this
 file.
-.TP
-/dev/i2c-0
-I²C bus used to communicate with MinIMU-9.
 .SH AUTHOR
 .nf
 David Grayson <davidegrayson@gmail.com>
