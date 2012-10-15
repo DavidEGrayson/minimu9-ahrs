@@ -194,11 +194,13 @@ int main(int argc, char *argv[])
     try
     {
         // Define what all the command-line parameters are.
-        std::string mode, output_mode;
+        std::string mode, output_mode, i2cDevice;
         opts::options_description desc("Allowed options");
         desc.add_options()
             ("help,h", "produce help message")
             ("version,v", "print version number")
+            ("i2c-bus,b", opts::value<std::string>(&i2cDevice)->default_value("/dev/i2c-0"),
+             "i2c-bus the IMU is connected to")
             ("mode", opts::value<std::string>(&mode)->default_value("normal"),
              "specifies what algorithm to use.\n"
              "normal: Fuse compass and gyro.\n"
@@ -227,7 +229,7 @@ int main(int argc, char *argv[])
             return 0;
         }
 
-        MinIMU9 imu("/dev/i2c-0");
+        MinIMU9 imu(i2cDevice.c_str());
 
         rotation_output_function * output;
 
