@@ -1,0 +1,27 @@
+.TH MINIMU9-AHRS-CALIBRATOR 1
+.SH NAME
+minimu9-ahrs-calibrator - Reads raw IMU data on standard
+input and output an optimal linear calibration.
+.SH SYNOPSIS
+.B minimu9-ahrs-calibrator
+.SH DESCRIPTION
+
+This is a python script that takes raw IMU readings on its standard
+input and uses the readings to compute a linear calibation of the
+magnetometer.
+.P
+The input format is:
+.IP
+\fBMX MY MZ\fP
+.P
+where \fBMX MY MZ\fP are integers that represent the raw reading from
+the magnetometor.
+Extra input on the line after the magnetomer readings is ignored.
+
+.SH AUTHOR
+.nf
+David Grayson <davidegrayson@gmail.com>
+http://www.github.com/DavidEGrayson/
+.fi
+.SH SEE ALSO
+minimu9-ahrs(1), minimu9-ahrs-calibrate(1)

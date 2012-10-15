@@ -125,13 +125,13 @@ The coordinate system you now have is equal to the
 \fBbody coordinate system\fP (x, y, z).
 
 .SH FILES
-.TP 22
+.TP
 ~/.minimu9-ahrs-cal
 Calibration file for the magnetomer, needed unless \fB--mode raw\fP is specified.
 This file should be a one-line file with 6 integers separated by spaces:
 minimum x, maximum x, minimum y, maximum y, minimum z, maximum z.
 These numbers specify the linear mapping from the raw ellipsoid to
-the unit sphere. For example, if “minimum x” is -414, it means that a
+the unit sphere. For example, if "minimum x" is -414, it means that a
 magnetometer reading of -414 on the X axis will get mapped to -1.0 when
 the readings are scaled.  Run \fBminimu9-ahrs-calibrate\fP to generate this
 file.
