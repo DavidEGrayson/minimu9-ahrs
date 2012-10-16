@@ -9,8 +9,7 @@ minimu9-ahrs is a program for reading data from the Pololu MinIMU-9
 It can output the raw sensor data from the magnetometer, accelerometer,
 and gyro or it can use that raw data to compute the orientation of the IMU.
 
-The program opens \fB/dev/i2c-0\fP and auto-detects what
-version of MinIMU-9 is connected.
+The program auto-detects what version of MinIMU-9 is connected.
 
 .SS OPTIONS
 .TP
@@ -101,11 +100,11 @@ transforms vectors from the \fBbody coordinate system\fP to the
 .SS ORIENTATION AS EULER ANGLES
 If \fB--output euler\fP is specified, the orintation is formatted as three
 Euler angles in the following order: pitch, yaw, and roll.
-These are the standard angles to represent the orientation of a plane.
+These are the standard angles used to represent the orientation of an airplane.
 The angles are output in degrees.
 .P
-The Euler angles represent that amount of rotation needed in three
-distinct steps that turns the ground coordinate system into the body
+The Euler angles represent the amount of rotation needed in three
+distinct steps to turn the ground coordinate system into the body
 coordinate system.
 .P
 Imagine you start with a coordinate system that is equal to ground
