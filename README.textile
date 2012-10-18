@@ -8,8 +8,6 @@ h2. Building From Source
 
 Just run:
 
-<pre><code>
-sudo apt-get install libi2c-dev libboost-program-options-dev
-make
-</code></pre>
+<pre><code>sudo apt-get install libi2c-dev libboost-program-options-dev
+make</code></pre>
 
