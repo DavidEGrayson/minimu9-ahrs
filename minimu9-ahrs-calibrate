@@ -1,5 +1,5 @@
 #!/bin/sh
 echo "To calibrate the magnetometer, start rotating the IMU through "
 echo "as many different orientations as possible."
-minimu9-ahrs --mode raw | head -n2000 | minimu9-ahrs-calibrator > ~/.minimu9-ahrs-cal
+minimu9-ahrs --mode raw $@ | head -n2000 | minimu9-ahrs-calibrator > ~/.minimu9-ahrs-cal
 
