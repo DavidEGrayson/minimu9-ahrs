@@ -220,6 +220,7 @@ int main(int argc, char *argv[])
         if(options.count("help"))
         {
             std::cout << desc << std::endl;
+            std::cout << "For more information, run: man minimu9-ahrs" << std::endl;
             return 0;
         }
         
