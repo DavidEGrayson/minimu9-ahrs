@@ -44,7 +44,7 @@ clean:
 docs:
 	doxygen
 
-prefix = /usr
+prefix = $(DESTDIR)/usr
 bindir = $(prefix)/bin
 sharedir = $(prefix)/share
 mandir = $(sharedir)/man
@@ -52,11 +52,11 @@ man1dir = $(mandir)/man1
 
 .PHONY: install
 install: $(BIN)
-	install $(BIN) $(DESTDIR)$(bindir)
-	install $(BIN)-calibrate $(DESTDIR)$(bindir)
-	install $(BIN)-calibrator $(DESTDIR)$(bindir)
-	install -m 0644 $(BIN).1 $(DESTDIR)$(man1dir)
-	install -m 0644 $(BIN)-calibrate.1 $(DESTDIR)$(man1dir)
+	install $(BIN) $(bindir)
+	install $(BIN)-calibrate $(bindir)
+	install $(BIN)-calibrator $(bindir)
+	install -m 0644 $(BIN).1 $(man1dir)
+	install -m 0644 $(BIN)-calibrate.1 $(man1dir)
 	install -m 0644 $(BIN)-calibrator.1 $(DESTDIR)$(man1dir)
 
 -include $(DEPs) vector.h.d
