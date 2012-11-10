@@ -1,8 +1,6 @@
 *minimu9-ahrs* is a program for reading data from the "Pololu MinIMU-9":http://www.pololu.com/catalog/product/1268 (all versions) over I²C.  It can output the raw sensor data from the magnetometor, accelerometer, and gyro or it can use that raw data to compute the orientation of the IMU.  This program was designed and tested on the "Raspberry Pi":http://www.raspberrypi.org, but it will probably work on any embedded Linux board that supports I²C.  A Debian package is available for easy installation and the "minimu9-ahrs source code":https://github.com/DavidEGrayson/minimu9-ahrs is on github.
 
-For help getting started, please see:
-
-https://github.com/DavidEGrayson/minimu9-ahrs/wiki
+*For help getting started, please see: https://github.com/DavidEGrayson/minimu9-ahrs/wiki.*
 
 h2. Building From Source
 
