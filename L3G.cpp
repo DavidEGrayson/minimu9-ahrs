@@ -13,14 +13,47 @@ L3G::L3G(const char * i2cDeviceName) : i2c(i2cDeviceName)
 
 void L3G::detectAddress()
 {
+    int whoami;
+
     i2c.addressSet(L3G4200D_ADDRESS_SA0_LOW);
-    if (i2c.tryReadByte(L3G_WHO_AM_I) == 0xD3) return;
+    if (i2c.tryReadByte(L3G_WHO_AM_I) == 0xD3)
+    {
+        // Detected L3G4200D with the SA0 pin low.
+        return;
+    }
+
     i2c.addressSet(L3G4200D_ADDRESS_SA0_HIGH);
-    if (i2c.tryReadByte(L3G_WHO_AM_I) == 0xD3) return;
+    if (i2c.tryReadByte(L3G_WHO_AM_I) == 0xD3)
+    {
+        // Detected L3G4200D with the SA0 pin high.
+        return;
+    }
+
     i2c.addressSet(L3GD20_ADDRESS_SA0_LOW);
-    if (i2c.tryReadByte(L3G_WHO_AM_I) == 0xD4) return;
+    whoami = i2c.tryReadByte(L3G_WHO_AM_I);
+    if (whoami == 0xD4)
+    {
+        // Detected L3GD20 with the SA0 pin low.
+        return;
+    }
+    if (whoami == 0xD7)
+    {
+        // Detected L3GD20H with the SA0 pin low.
+        return;
+    }
+
     i2c.addressSet(L3GD20_ADDRESS_SA0_HIGH);
-    if (i2c.tryReadByte(L3G_WHO_AM_I) == 0xD4) return;
+    whoami = i2c.tryReadByte(L3G_WHO_AM_I);
+    if (whoami == 0xD4)
+    {
+        // Detected L3GD20 with the SA0 pin high.
+        return;
+    }
+    if (whoami == 0xD7)
+    {
+        // Detected L3GD20H with the SA0 pin high.
+        return;
+    }
 
     throw std::runtime_error("Could not detect gyro.");
 }

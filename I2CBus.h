@@ -16,6 +16,12 @@ public:
     int tryReadByte(uint8_t command);
     void readBlock(uint8_t command, uint8_t size, uint8_t * data);
 
+    int tryReadByte(uint8_t address, uint8_t command)
+    {
+        addressSet(address);
+        return tryReadByte(command);
+    }
+
 private:
     int fd;
 };

@@ -5,7 +5,7 @@ minimu9-ahrs - Reads data from the Pololu MinIMU-9 over I²C.
 .B minimu9-ahrs [\fIOPTIONS\fP]
 .SH DESCRIPTION
 minimu9-ahrs is a program for reading data from the Pololu MinIMU-9 over I²C.
-Currently, only the MinIMU-9 v1 and MinIMU-9 v2 are supported.
+It supports MinIMU-9 versions v0, v1, v2, and v3.
 The program can output the raw sensor data from the magnetometer, accelerometer,
 and gyro or it can use that raw data to compute the orientation of the IMU.
 
@@ -56,7 +56,7 @@ nine integers:
 .IP
 \fBMX MY MZ  AX AY AZ  GX GY GZ\fP
 .P
-where \fBMX MY MZ\fP if the raw reading from the magnetometer,
+where \fBMX MY MZ\fP is the raw reading from the magnetometer,
 \fBAX AY AZ\fP is the raw reading from the accelerometer, and
 \fBGX GY GZ\fP is the raw reading from the magnetometer.
 

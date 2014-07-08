@@ -65,10 +65,12 @@ vector MinIMU9::readMag()
 
 vector MinIMU9::readAcc()
 {
-    // LSM303 accelerometer: At 8 g sensitivity, the datasheet says
-    // we get 3.9 mg/digit.
-    // TODO: double check this figure using the correct datasheet
-    const float accel_scale = 0.0039;
+    // Info about linear acceleration sensitivity from datasheets:
+    // LSM303DLM: at FS = 8 g, 3.9 mg/digit (12-bit reading)
+    // LSM303DLHC: at FS = 8 g, 4 mg/digit (12-bit reading probably an approximation)
+    // LSM303DLH: at FS = 8 g, 3.9 mg/digit (12-bit reading)
+    // LSM303D: at FS = 8 g, 0.244 mg/LSB (16-bit reading)
+    const float accel_scale = 0.000244;
 
     compass.readAcc();
     IMU::raw_a = int_vector_from_ints(&compass.a);
@@ -77,8 +79,10 @@ vector MinIMU9::readAcc()
 
 vector MinIMU9::readGyro()
 {
-    // At the full-scale=2000 dps setting, the gyro datasheet says
-    // we get 0.07 dps/digit.
+    // Info about sensitivity from datasheets:
+    // L3G4200D: at FS = 2000 dps, 70 mdps/digit
+    // L3GD20: at FS = 2000 dps, 70 mdps/digit
+    // L3GD20H: at FS = 2000 dps, 70 mdps/digit
     const float gyro_scale = 0.07 * 3.14159265 / 180;
 
     gyro.read();
