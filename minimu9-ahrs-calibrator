@@ -1,37 +1,14 @@
 #!/usr/bin/env python
 
 from __future__ import print_function
-from functools import partial
 import sys
 import math
+import scipy.optimize
 
 verbose = False
 
 class UserError(Exception):
   pass
-
-# from http://code.activestate.com/recipes/577452-a-memoize-decorator-for-instance-methods/
-class memoize(object):
-  def __init__(self, func):
-    self.func = func
-    
-  def __get__(self, obj, objtype=None):
-    if obj is None:
-      return self.func
-    return partial(self, obj)
-  
-  def __call__(self, *args, **kw):
-    obj = args[0]
-    try:
-      cache = obj.__cache
-    except AttributeError:
-      cache = obj.__cache = {}
-    key = (self.func, args[1:], frozenset(kw.items()))
-    try:
-      res = cache[key]
-    except KeyError:
-      res = cache[key] = self.func(*args, **kw)
-    return res
 
 def average(list):
   return sum(list)/len(list)
@@ -51,7 +28,7 @@ class Vector(object):
   def __init__(self, x, y, z):
     self.x, self.y, self.z = x, y, z
   def __str__(self):
-    return "(" + str(self.x) + ", " + str(self.y) + ", " + str(self.z) + ")"      
+    return "(" + str(self.x) + ", " + str(self.y) + ", " + str(self.z) + ")"
 
   def __getitem__(self, key):
     if key == 0:
@@ -62,10 +39,10 @@ class Vector(object):
       return self.z
     else:
       raise Exception("Invalid key")
-      
+
   def magnitude(self):
     return math.sqrt(self.x**2 + self.y**2 + self.z**2)
-    
+
 Axes = range(3)
 
 class Calibration:
@@ -82,48 +59,52 @@ class Calibration:
     return "%d %d %d %d %d %d" % tuple(self.values)
 
   def info_string(self):
-    return "%-32s %7.4f %7.4f %7.4f" % (
+    return "%-32s  avg=%7.4f stdev=%7.4f score=%7.4f" % (
       str(self),
       average(self.scaled_magnitudes()),
       std_deviation(self.scaled_magnitudes()),
       self.score()
     )
-    
-  def switch_readings(self, raw_readings):
-    return Calibration(self.values, raw_readings)
-  
-  @memoize
+
   def scaled_magnitudes(self):
     return [s.magnitude() for s in self.scaled_readings()]
-    
-  @memoize
+
   def scaled_readings(self):
     return [self.scale(r) for r in self.raw_readings]
-  
-  @memoize
+
   def score(self):
     return -average([(m - 1.0)**2 for m in self.scaled_magnitudes()])
-  
-  def increment(self, value_id, dir):
-    values = list(self.values)
-    values[value_id] += dir
-    return Calibration(values, self.raw_readings)
-    
-  
+
+def negative_score(values):
+  cal = Calibration(values, raw_readings)
+  return -cal.score()
+
 def run(file=sys.stdin):
+  global raw_readings
   try:
     print("Reading data...", end="", file=sys.stderr)
     raw_readings = read_vectors(file)
- 
-    print(" done.", file=sys.stderr) 
-    print("Optimizing calibration...", end="", file=sys.stderr)
-    raw_readings_sample = raw_readings[0::(len(raw_readings)/300)]
-    cal1 = guess(raw_readings)
-    cal2 = tune(cal1, raw_readings_sample)
-    cal3 = tune(cal2, raw_readings)
+
     print(" done.", file=sys.stderr)
-  
-    print(cal3)
+
+    print("Optimizing calibration...", end="", file=sys.stderr)
+    if verbose:
+      print("", file=sys.stderr)
+
+    cal1 = guess(raw_readings)
+    if verbose:
+      print("Initial calibration: " + cal1.info_string(), file=sys.stderr)
+
+    cal_values = scipy.optimize.fmin(negative_score, cal1.values, \
+                                 args=(), maxiter=1000, \
+                                 full_output=False, disp=verbose, retall=False)
+    cal = Calibration(cal_values, raw_readings)
+    print(" done.", file=sys.stderr)
+
+    if verbose:
+      print("Final calibration: " + cal.info_string())
+
+    print(cal)
 
   except UserError as e:
     print("Error: " + str(e), file=sys.stderr)
@@ -144,36 +125,7 @@ def guess(readings):
   for axis in Axes:
     values = [v[axis] for v in readings]
     guess.extend(percentile_to_value(values, 1, 99))
-  return Calibration(guess)
+  return Calibration(guess, readings)
 
-def try_dir(cal, value_id, dir):
-  improved_cal = None
-  while True:
-    new_cal = cal.increment(value_id, dir)
-    if not new_cal.score() > cal.score():
-      return improved_cal
-    improved_cal = cal = new_cal
-  return None
-  
-def tune(cal, readings):
-  cal = cal.switch_readings(readings)
-
-  if verbose:
-    print(cal.info_string(), file=sys.stderr)
-
-  while True:
-    last_cal = cal
-    
-    for value_id in range(len(cal.values)):
-      cal = try_dir(cal, value_id, 1) or try_dir(cal, value_id, -1) or cal
-
-    if verbose:
-      print(cal.info_string(), file=sys.stderr)
-
-    if last_cal == cal:
-      return cal 
-    
-  
-  
 if __name__=='__main__':
   run()
