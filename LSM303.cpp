@@ -220,17 +220,17 @@ void LSM303::readMag(void)
         m[1] = (int16_t)(block[2] | block[3] << 8);
         m[2] = (int16_t)(block[4] | block[5] << 8);
     }
-    else if (device == Device::LSM303DLHC)
+    else if (device == Device::LSM303DLH)
     {
-        // LSM303DLHC: XYZ order, big endian
-        i2c_mag.readBlock(0x80 | LSM303DLHC_OUT_X_H_M, sizeof(block), block);
+        // LSM303DLH: XYZ order, big endian
+        i2c_mag.readBlock(0x80 | LSM303DLH_OUT_X_H_M, sizeof(block), block);
         m[0] = (int16_t)(block[1] | block[0] << 8);
         m[1] = (int16_t)(block[3] | block[2] << 8);
         m[2] = (int16_t)(block[5] | block[4] << 8);
     }
     else
     {
-        // LSM303DLM, LSM303DLHC: XZY order, big endian
+        // LSM303DLM, LSM303DLHC: XZY order, big endian (and same addresses)
         i2c_mag.readBlock(0x80 | LSM303DLM_OUT_X_H_M, sizeof(block), block);
         m[0] = (int16_t)(block[1] | block[0] << 8);
         m[1] = (int16_t)(block[5] | block[4] << 8);
