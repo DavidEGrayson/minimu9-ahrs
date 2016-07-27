@@ -283,7 +283,7 @@ int main(int argc, char *argv[])
     {
         std::string what = error.what();
         const std::error_code & code = error.code();
-        std::cerr << "Error: " << what << "  " << code.message() << " (" << code << ")" << std::endl;
+        std::cerr << "Error: " << what << " (" << code << ")" << std::endl;
         return 2;
     }
     catch(const opts::multiple_occurrences & error)
@@ -291,7 +291,7 @@ int main(int argc, char *argv[])
         std::cerr << "Error: " << error.what() << " of " << error.get_option_name() << " option." << std::endl;
         return 1;
     }
-    catch(const std::exception & error)    
+    catch(const std::exception & error)
     {
         std::cerr << "Error: " << error.what() << std::endl;
         return 9;
