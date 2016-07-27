@@ -2,6 +2,7 @@
 #include "MinIMU9.h"
 #include "exceptions.h"
 #include <stdio.h>
+#include <unistd.h>
 #include <iostream>
 #include <fstream>
 #include <wordexp.h>
