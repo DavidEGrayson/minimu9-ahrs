@@ -6,7 +6,7 @@ h2. Building From Source
 
 Navigate to the top-level directory of the source code and then run the following two commands:
 
-<pre><code>sudo apt-get install libi2c-dev libboost-program-options-dev python-scipy
+<pre><code>sudo apt-get install libi2c-dev libeigen3-dev libboost-program-options-dev python-scipy
 make</code></pre>
 
 Then, to install minimu9-ahrs onto your system, run:

@@ -5,6 +5,10 @@ CC := g++
 
 CPPFLAGS += -I.
 
+# Use the Eigen library.
+EIGEN_NAME = eigen3
+CPPFLAGS += $(shell pkg-config --cflags $(EIGEN_NAME))
+
 # All warnings
 CPPFLAGS += -Wall
 
