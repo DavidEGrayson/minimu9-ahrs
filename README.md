@@ -17,6 +17,10 @@ Then, to install minimu9-ahrs onto your system, run:
 
 <pre><code>sudo make install</code></pre>
 
+## Visualization
+
+See the [ahrs-visualizer project] if you are interesting in displaying the output of minimu9-ahrs in 3D.
+
 ## Version History
 
 - 2.0.0 (2014-07-08):
@@ -29,6 +33,7 @@ Then, to install minimu9-ahrs onto your system, run:
 - 1.1.0 (2012-10-15)
 - 1.0.0 (2012-10-06)
 
+[ahrs-visualizer project]: https://github.com/DavidEGrayson/ahrs-visualizer
 [minimu9-ahrs source code]: https://github.com/DavidEGrayson/minimu9-ahrs
 [Raspberry Pi]: http://www.raspberrypi.org
 [AltIMU-10 v4]: https://www.pololu.com/product/2470
