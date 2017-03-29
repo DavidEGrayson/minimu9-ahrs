@@ -13,7 +13,7 @@ CPPFLAGS += $(shell pkg-config --cflags $(EIGEN_NAME))
 CPPFLAGS += -Wall
 
 # Use a modern language
-CPPFLAGS += --std=c++0x
+CPPFLAGS += --std=gnu++11
 
 # Use boost libraries
 LDFLAGS += -lboost_program_options
@@ -22,7 +22,7 @@ LDFLAGS += -lboost_program_options
 #CPPFLAGS += -g -rdynamic
 
 # Optimize the code.
-CPPFLAGS += -O3
+CPPFLAGS += -O2
 
 # Fix http://gcc.gnu.org/bugzilla/show_bug.cgi?id=42748
 CPPFLAGS += -Wno-psabi
