@@ -7,9 +7,20 @@
 #include <fstream>
 #include <wordexp.h>
 
+minimu9_config minimu9_auto_detect(const std::string & i2c_bus)
+{
+  I2CBus bus(i2c_bus.c_str());
+  minimu9_config config;
+
+  // TODO: finish
+
+  return config;
+}
+
 MinIMU9::MinIMU9(const char * i2cDeviceName) :
   compass(i2cDeviceName), gyro(i2cDeviceName)
 {
+  // TODO: use a minimu9_config to set up the MinIMU9
 }
 
 void MinIMU9::enable()

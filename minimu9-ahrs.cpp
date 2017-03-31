@@ -233,6 +233,8 @@ int main_with_exceptions(int argc, char **argv)
     return 0;
   }
 
+  auto config = minimu9_auto_detect(i2cDevice);
+
   MinIMU9 imu(i2cDevice.c_str());
 
   rotation_output_function * output;
