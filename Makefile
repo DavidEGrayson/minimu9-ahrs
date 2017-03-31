@@ -24,9 +24,6 @@ LDFLAGS += -lboost_program_options
 # Optimize the code.
 CPPFLAGS += -O2
 
-# Fix http://gcc.gnu.org/bugzilla/show_bug.cgi?id=42748
-CPPFLAGS += -Wno-psabi
-
 # Generate .d files with dependency info
 CPPFLAGS += -MD -MP
 
