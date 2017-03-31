@@ -7,9 +7,9 @@
 #include <fstream>
 #include <wordexp.h>
 
-minimu9_config minimu9_auto_detect(const std::string & i2c_bus)
+minimu9_config minimu9_auto_detect(const std::string & i2c_bus_name)
 {
-  I2CBus bus(i2c_bus.c_str());
+  i2c_bus bus(i2c_bus_name.c_str());
   minimu9_config config;
 
   // TODO: finish

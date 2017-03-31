@@ -1,4 +1,5 @@
 #include "LSM303.h"
+#include <stdexcept>
 
 /*
 Relevant Pololu products:
@@ -26,20 +27,21 @@ Relevant Pololu products:
 #define DLM_WHO_ID  0x3C
 
 LSM303::LSM303(const char * i2cDeviceName) :
-  i2c_mag(i2cDeviceName), i2c_acc(i2cDeviceName)
+  i2c(i2cDeviceName)
 {
-    I2CBus i2c(i2cDeviceName);
     bool sa0;
 
-    if (i2c.tryReadByte(D_SA0_HIGH_ADDRESS, LSM303_WHO_AM_I) == D_WHO_ID)
+    if (i2c.try_write_byte_and_read_byte(D_SA0_HIGH_ADDRESS, LSM303_WHO_AM_I)
+        == D_WHO_ID)
     {
         // Detected LSM303D with SA0 high.
         device = Device::LSM303D;
         sa0 = true;
     }
-    else if (i2c.tryReadByte(D_SA0_LOW_ADDRESS, LSM303_WHO_AM_I) == D_WHO_ID)
+    else if (i2c.try_write_byte_and_read_byte(D_SA0_LOW_ADDRESS, LSM303_WHO_AM_I)
+        == D_WHO_ID)
     {
-        // device responds to address 0011110 with D ID; it's a D with SA0 low
+        // Device responds to address 0011110 with D ID; it's a D with SA0 low.
         device = Device::LSM303D;
         sa0 = false;
     }
@@ -50,7 +52,8 @@ LSM303::LSM303(const char * i2cDeviceName) :
     // accelerometer address, because Pololu boards with the LSM303DLM or LSM303DLH
     // pull SA0 low.  The LSM303DLHC doesn't have SA0 but uses same accelerometer address
     // as LSM303DLH/LSM303DLM with SA0 high).
-    else if (i2c.tryReadByte(NON_D_ACC_SA0_HIGH_ADDRESS, LSM303_CTRL_REG1_A) >= 0)
+    else if (i2c.try_write_byte_and_read_byte(NON_D_ACC_SA0_HIGH_ADDRESS,
+      LSM303_CTRL_REG1_A) >= 0)
     {
         // Guess that it's an LSM303DLHC.
         device = Device::LSM303DLHC;
@@ -58,11 +61,11 @@ LSM303::LSM303(const char * i2cDeviceName) :
     }
     // Remaining possibilities: LSM303DLM or LSM303DLH.
     // Check accelerometer with SA0 low address to make sure it's responsive.
-    else if (i2c.tryReadByte(NON_D_ACC_SA0_LOW_ADDRESS, LSM303_CTRL_REG1_A) >= 0)
+    else if (i2c.try_write_byte_and_read_byte(NON_D_ACC_SA0_LOW_ADDRESS, LSM303_CTRL_REG1_A) >= 0)
     {
         sa0 = false;
 
-        if (i2c.tryReadByte(NON_D_MAG_ADDRESS, LSM303_WHO_AM_I_M) == DLM_WHO_ID)
+        if (i2c.try_write_byte_and_read_byte(NON_D_MAG_ADDRESS, LSM303_WHO_AM_I_M) == DLM_WHO_ID)
         {
             // Detected LSM303DLM with SA0 low.
             device = Device::LSM303DLM;
@@ -81,14 +84,13 @@ LSM303::LSM303(const char * i2cDeviceName) :
     // Set the I2C addresses.
     if (device == Device::LSM303D)
     {
-        uint8_t address = sa0 ? D_SA0_HIGH_ADDRESS : D_SA0_LOW_ADDRESS;
-        i2c_acc.addressSet(address);
-        i2c_mag.addressSet(address);
+        address_acc = address_mag =
+          sa0 ? D_SA0_HIGH_ADDRESS : D_SA0_LOW_ADDRESS;
     }
     else
     {
-        i2c_acc.addressSet(sa0 ? NON_D_ACC_SA0_HIGH_ADDRESS : NON_D_ACC_SA0_LOW_ADDRESS);
-        i2c_mag.addressSet(NON_D_MAG_ADDRESS);
+        address_acc = sa0 ? NON_D_ACC_SA0_HIGH_ADDRESS : NON_D_ACC_SA0_LOW_ADDRESS;
+        address_mag = NON_D_MAG_ADDRESS;
     }
 
     // Make sure we can actually read an accelerometer control register.
@@ -105,22 +107,22 @@ LSM303::LSM303(const char * i2cDeviceName) :
 
 uint8_t LSM303::readMagReg(uint8_t reg)
 {
-    return i2c_mag.readByte(reg);
+    return i2c.write_byte_and_read_byte(address_mag, reg);
 }
 
 uint8_t LSM303::readAccReg(uint8_t reg)
 {
-    return i2c_acc.readByte(reg);
+    return i2c.write_byte_and_read_byte(address_acc, reg);
 }
 
 void LSM303::writeMagReg(uint8_t reg, uint8_t value)
 {
-    i2c_mag.writeByte(reg, value);
+    i2c.write_two_bytes(address_mag, reg, value);
 }
 
 void LSM303::writeAccReg(uint8_t reg, uint8_t value)
 {
-    i2c_acc.writeByte(reg, value);
+    i2c.write_two_bytes(address_acc, reg, value);
 }
 
 // Turns on the LSM303's accelerometer and magnetometers and places them in normal
@@ -202,7 +204,7 @@ void LSM303::enable(void)
 void LSM303::readAcc(void)
 {
     uint8_t block[6];
-    i2c_acc.readBlock(0x80 | LSM303_OUT_X_L_A, sizeof(block), block);
+    i2c.write_byte_and_read(address_acc, 0x80 | LSM303_OUT_X_L_A, block, sizeof(block));
     a[0] = (int16_t)(block[0] | block[1] << 8);
     a[1] = (int16_t)(block[2] | block[3] << 8);
     a[2] = (int16_t)(block[4] | block[5] << 8);
@@ -215,7 +217,7 @@ void LSM303::readMag(void)
     if (device == Device::LSM303D)
     {
         // LSM303D: XYZ order, little endian
-        i2c_mag.readBlock(0x80 | LSM303D_OUT_X_L_M, sizeof(block), block);
+        i2c.write_byte_and_read(address_mag, 0x80 | LSM303D_OUT_X_L_M, block, sizeof(block));
         m[0] = (int16_t)(block[0] | block[1] << 8);
         m[1] = (int16_t)(block[2] | block[3] << 8);
         m[2] = (int16_t)(block[4] | block[5] << 8);
@@ -223,7 +225,7 @@ void LSM303::readMag(void)
     else if (device == Device::LSM303DLH)
     {
         // LSM303DLH: XYZ order, big endian
-        i2c_mag.readBlock(0x80 | LSM303DLH_OUT_X_H_M, sizeof(block), block);
+        i2c.write_byte_and_read(address_mag, 0x80 | LSM303DLH_OUT_X_H_M, block, sizeof(block));
         m[0] = (int16_t)(block[1] | block[0] << 8);
         m[1] = (int16_t)(block[3] | block[2] << 8);
         m[2] = (int16_t)(block[5] | block[4] << 8);
@@ -231,7 +233,7 @@ void LSM303::readMag(void)
     else
     {
         // LSM303DLM, LSM303DLHC: XZY order, big endian (and same addresses)
-        i2c_mag.readBlock(0x80 | LSM303DLM_OUT_X_H_M, sizeof(block), block);
+        i2c.write_byte_and_read(address_mag, 0x80 | LSM303DLM_OUT_X_H_M, block, sizeof(block));
         m[0] = (int16_t)(block[1] | block[0] << 8);
         m[1] = (int16_t)(block[5] | block[4] << 8);
         m[2] = (int16_t)(block[3] | block[2] << 8);

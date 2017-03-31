@@ -2,7 +2,7 @@
 #define LSM303_h
 
 #include <stdint.h>
-#include "I2CBus.h"
+#include "i2c_bus.h"
 
 // register addresses
 
@@ -158,7 +158,8 @@ class LSM303
     void read(void);
 
 private:
-    I2CBus i2c_mag, i2c_acc;
+    i2c_bus i2c;
+    uint8_t address_mag, address_acc;
     enum class Device {
         LSM303DLH,
         LSM303DLM,

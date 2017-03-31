@@ -1,7 +1,7 @@
 #ifndef _L3G_h
 #define _L3G_h
 
-#include "I2CBus.h"
+#include "i2c_bus.h"
 
 #define L3G_WHO_AM_I      0x0F
 
@@ -38,11 +38,11 @@
 class L3G
 {
 public:
-    L3G(const char * i2cDeviceName);
+    L3G(const std::string & i2c_bus);
 
     // gyro angular velocity readings
     int g[3];
-
+ 
     void enable(void);
 
     void writeReg(uint8_t reg, uint8_t value);
@@ -51,7 +51,8 @@ public:
 
 private:
     void detectAddress();
-    I2CBus i2c;
+    i2c_bus i2c;
+    uint8_t address;
 };
 
 #endif
