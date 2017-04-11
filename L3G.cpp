@@ -80,7 +80,7 @@ uint8_t L3G::readReg(uint8_t reg)
 void L3G::read()
 {
   uint8_t block[6];
-  i2c.write_byte_and_read(0x80 | L3G_OUT_X_L, block, sizeof(block));
+  i2c.write_byte_and_read(address, 0x80 | L3G_OUT_X_L, block, sizeof(block));
 
   g[0] = (int16_t)(block[1] << 8 | block[0]);
   g[1] = (int16_t)(block[3] << 8 | block[2]);
