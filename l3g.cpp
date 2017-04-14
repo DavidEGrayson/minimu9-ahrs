@@ -8,6 +8,8 @@ l3g::l3g(const std::string & i2cDeviceName) : i2c(i2cDeviceName)
 
 void l3g::detectAddress()
 {
+  // TODO: remove
+
   int whoami;
 
   if (i2c.try_write_byte_and_read_byte(l3g::L3G4200D_SA0_LOW_ADDR, WHO_AM_I) == 0xD3)

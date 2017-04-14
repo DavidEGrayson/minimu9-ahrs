@@ -1,7 +1,7 @@
 #pragma once
 
 #include "IMU.h"
-#include "LSM303.h"
+#include "lsm303.h"
 #include "l3g.h"
 #include "lsm6.h"
 #include "lis3mdl.h"
@@ -24,7 +24,7 @@ class MinIMU9 : public IMU {
 public:
   MinIMU9(const char * i2cDeviceName);
 
-  LSM303 compass;
+  lsm303 compass;
   l3g gyro;
 
   virtual vector readAcc();

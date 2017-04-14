@@ -53,7 +53,6 @@ public:
     LOW_ODR = 0x39,
   };
 
-public:
   l3g(const std::string & i2c_bus);
 
   // gyro angular velocity readings
