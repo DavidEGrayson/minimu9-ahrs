@@ -15,7 +15,7 @@ public:
   void write(uint8_t device_address, const uint8_t * data, size_t size);
 
   int try_write_byte_and_read(uint8_t address, uint8_t byte,
-    uint8_t * data, size_t size);          
+    uint8_t * data, size_t size);
 
   void write_two_bytes(uint8_t address, uint8_t byte1, uint8_t byte2)
   {

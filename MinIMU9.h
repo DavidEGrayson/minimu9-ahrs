@@ -3,12 +3,13 @@
 #include "IMU.h"
 #include "LSM303.h"
 #include "L3G.h"
+#include "lsm6.h"
 
 struct minimu9_sensor_config {
-  bool has_sensor;
-  unsigned int model_code;
-  std::string i2c_bus;
-  uint8_t i2c_address;
+  bool use_sensor = false;
+  unsigned int device_type = 0;
+  std::string i2c_bus_name;
+  uint8_t i2c_address = 0;
 };
 
 // Represents the sensors of the MinIMU-9 and how to communicate with them.

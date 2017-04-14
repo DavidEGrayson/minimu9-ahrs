@@ -12,7 +12,29 @@ minimu9_config minimu9_auto_detect(const std::string & i2c_bus_name)
   i2c_bus bus(i2c_bus_name.c_str());
   minimu9_config config;
 
-  // TODO: finish
+  // Detect LSM6 devices.
+  {
+    std::vector<uint8_t> addrs = { lsm6::SA0_LOW_ADDR, lsm6::SA0_HIGH_ADDR};
+    for (uint8_t addr : addrs)
+    {
+      int result = bus.try_write_byte_and_read_byte(addr, lsm6::WHO_AM_I);
+      if (result == lsm6::LSM6DS33)
+      {
+        config.lsm6.use_sensor = true;
+        config.lsm6.device_type = lsm6::LSM6DS33;
+        config.lsm6.i2c_bus_name = i2c_bus_name;
+        config.lsm6.i2c_address = addr;
+        break;
+      }
+    }
+  }
+
+  std::cout << "hey\n" << config.lsm6.use_sensor << std::endl;  //tmphax
+
+  // Detect LIS3MDL devices.
+  {
+    
+  }
 
   return config;
 }
@@ -66,7 +88,7 @@ vector MinIMU9::readMag()
 {
     compass.readMag();
     IMU::raw_m = int_vector_from_ints(&compass.m);
-    
+
     vector v;
     v(0) = (float)(compass.m[0] - mag_min(0)) / (mag_max(0) - mag_min(0)) * 2 - 1;
     v(1) = (float)(compass.m[1] - mag_min(1)) / (mag_max(1) - mag_min(1)) * 2 - 1;

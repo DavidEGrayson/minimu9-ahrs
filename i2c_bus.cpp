@@ -62,8 +62,8 @@ int i2c_bus::try_write_byte_and_read(uint8_t address, uint8_t byte,
   uint8_t * data, size_t size)
 {
   i2c_msg messages[2] = {
-    { address, 0, 1, (typeof(i2c_msg().buf)) &byte },
-    { address, I2C_M_RD, (typeof(i2c_msg().len))size, (typeof(i2c_msg().buf)) data },
+    { address, 0, 1, (typeof(i2c_msg().buf))&byte },
+    { address, I2C_M_RD, (typeof(i2c_msg().len))size, (typeof(i2c_msg().buf))data },
   };
   i2c_rdwr_ioctl_data ioctl_data = { messages, 2 };
 
