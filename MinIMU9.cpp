@@ -69,6 +69,77 @@ minimu9_config minimu9_auto_detect(const std::string & i2c_bus_name)
     }
   }
 
+  // Detect LSM303 devices.
+  {
+    if (lsm303::LSM303D == bus.try_write_byte_and_read_byte(
+        lsm303::LSM303D_SA0_HIGH_ADDR, lsm303::WHO_AM_I))
+    {
+      config.lsm303.use_sensor = true;
+      config.lsm303.device_type = lsm303::LSM303D;
+      config.lsm303.i2c_bus_name = i2c_bus_name;
+      config.lsm303.i2c_address_acc = config.lsm303.i2c_address_mag =
+        lsm303::LSM303D_SA0_HIGH_ADDR;
+    }
+    else if (lsm303::LSM303D == bus.try_write_byte_and_read_byte(
+        lsm303::LSM303D_SA0_LOW_ADDR, lsm303::WHO_AM_I))
+    {
+      config.lsm303.use_sensor = true;
+      config.lsm303.device_type = lsm303::LSM303D;
+      config.lsm303.i2c_bus_name = i2c_bus_name;
+      config.lsm303.i2c_address_acc = config.lsm303.i2c_address_mag =
+        lsm303::LSM303D_SA0_LOW_ADDR;
+    }
+    // Remaining possibilities: LSM303DLHC, LSM303DLM, or LSM303DLH.
+    //
+    // LSM303DLHC seems to respond to WHO_AM_I request the same way as DLM, even
+    // though this register isn't documented in its datasheet, and LSM303DLH does
+    // not have a WHO_AM_I.
+    //
+    // Lets assume that if it's a LSM303DLM and LSM303DLH then SA0 is low,
+    // because that is how the Pololu boards pull that pin and this lets us
+    // distinguish between the LSM303DLHC and those other chips.
+    else if (bus.try_write_byte_and_read_byte(
+        lsm303::LSM303_NON_D_ACC_SA0_HIGH_ADDR, lsm303::CTRL_REG1_A) >= 0)
+    {
+      // There's an accelerometer on a chip with SA0 high, so by the
+      // logic above, guess that it's an LSM303DLHC.
+      config.lsm303.use_sensor = true;
+      config.lsm303.device_type = lsm303::LSM303DLHC;
+      config.lsm303.i2c_bus_name = i2c_bus_name;
+      config.lsm303.i2c_address_acc = lsm303::LSM303_NON_D_ACC_SA0_HIGH_ADDR;
+      config.lsm303.i2c_address_mag = lsm303::LSM303_NON_D_MAG_ADDR;
+    }
+    // Remaining possibilities: LSM303DLM or LSM303DLH, SA0 assumed low.
+    else if (bus.try_write_byte_and_read_byte(
+        lsm303::LSM303_NON_D_ACC_SA0_LOW_ADDR, lsm303::CTRL_REG1_A) >= 0)
+    {
+      // Found the acceleromter for an LSM303DLM or LSM303DLH.
+      // Use the WHO_AM_I register to distinguish the two.
+
+      int result = bus.try_write_byte_and_read_byte(
+        lsm303::LSM303_NON_D_MAG_ADDR, lsm303::WHO_AM_I_M);
+
+      if (result == lsm303::LSM303DLM)
+      {
+        // Detected LSM303DLM with SA0 low.
+        config.lsm303.use_sensor = true;
+        config.lsm303.device_type = lsm303::LSM303DLM;
+        config.lsm303.i2c_bus_name = i2c_bus_name;
+        config.lsm303.i2c_address_acc = lsm303::LSM303_NON_D_ACC_SA0_LOW_ADDR;
+        config.lsm303.i2c_address_mag = lsm303::LSM303_NON_D_MAG_ADDR;
+      }
+      else
+      {
+        // Guess that it's an LSM303DLH with SA0 low.
+        config.lsm303.use_sensor = true;
+        config.lsm303.device_type = lsm303::LSM303DLH;
+        config.lsm303.i2c_bus_name = i2c_bus_name;
+        config.lsm303.i2c_address_acc = lsm303::LSM303_NON_D_ACC_SA0_LOW_ADDR;
+        config.lsm303.i2c_address_mag = lsm303::LSM303_NON_D_MAG_ADDR;
+      }
+    }
+  }
+
   return config;
 }
 

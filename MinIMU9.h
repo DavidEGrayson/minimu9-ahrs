@@ -8,14 +8,23 @@
 
 struct minimu9_sensor_config {
   bool use_sensor = false;
-  unsigned int device_type = 0;
+  uint32_t device_type = 0;
   std::string i2c_bus_name;
   uint8_t i2c_address = 0;
 };
 
+struct minimu9_lsm303_config {
+  bool use_sensor = false;
+  uint32_t device_type = 0;
+  std::string i2c_bus_name;
+  uint8_t i2c_address_acc = 0;
+  uint8_t i2c_address_mag = 0;
+};
+
 // Represents the sensors of the MinIMU-9 and how to communicate with them.
 struct minimu9_config {
-  minimu9_sensor_config lsm303, l3g, lis3mdl, lsm6;
+  minimu9_lsm303_config lsm303;
+  minimu9_sensor_config l3g, lis3mdl, lsm6;
 };
 
 minimu9_config minimu9_auto_detect(const std::string & i2c_bus);
