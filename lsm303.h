@@ -182,7 +182,7 @@ public:
 
 private:
   i2c_bus i2c;
-  uint8_t address_mag;
-  uint8_t address_acc;
+  i2c_addr address_mag;
+  i2c_addr address_acc;
   device_type device;
 };
