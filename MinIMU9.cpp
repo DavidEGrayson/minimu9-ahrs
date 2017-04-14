@@ -21,7 +21,7 @@ minimu9_config minimu9_auto_detect(const std::string & i2c_bus_name)
       if (result == lsm6::LSM6DS33)
       {
         config.lsm6.use_sensor = true;
-        config.lsm6.device_type = lsm6::LSM6DS33;
+        config.lsm6.device_type = result;
         config.lsm6.i2c_bus_name = i2c_bus_name;
         config.lsm6.i2c_address = addr;
         break;
@@ -38,7 +38,30 @@ minimu9_config minimu9_auto_detect(const std::string & i2c_bus_name)
       if (result == lis3mdl::LIS3MDL)
       {
         config.lis3mdl.use_sensor = true;
-        config.lis3mdl.device_type = lis3mdl::LIS3MDL;
+        config.lis3mdl.device_type = result;
+        config.lis3mdl.i2c_bus_name = i2c_bus_name;
+        config.lis3mdl.i2c_address = addr;
+        break;
+      }
+    }
+  }
+
+  // Detect L3G devices.
+  {
+    auto addrs = {
+      l3g::L3GD20_SA0_LOW_ADDR,
+      l3g::L3GD20_SA0_HIGH_ADDR,
+      l3g::L3G4200D_SA0_LOW_ADDR,
+      l3g::L3G4200D_SA0_HIGH_ADDR,
+    };
+    for (uint8_t addr : addrs)
+    {
+      int result = bus.try_write_byte_and_read_byte(addr, l3g::WHO_AM_I);
+      if (result == l3g::L3G4200D || result == l3g::L3GD20
+        || result == l3g::L3GD20H)
+      {
+        config.lis3mdl.use_sensor = true;
+        config.lis3mdl.device_type = result;
         config.lis3mdl.i2c_bus_name = i2c_bus_name;
         config.lis3mdl.i2c_address = addr;
         break;

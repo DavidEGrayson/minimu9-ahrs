@@ -2,7 +2,7 @@
 
 #include "IMU.h"
 #include "LSM303.h"
-#include "L3G.h"
+#include "l3g.h"
 #include "lsm6.h"
 #include "lis3mdl.h"
 
@@ -25,7 +25,7 @@ public:
   MinIMU9(const char * i2cDeviceName);
 
   LSM303 compass;
-  L3G gyro;
+  l3g gyro;
 
   virtual vector readAcc();
   virtual vector readMag();
