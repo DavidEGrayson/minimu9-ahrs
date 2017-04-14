@@ -3,18 +3,18 @@
 #include <i2c_bus.h>
 #include <cstdint>
 
-class lsm6
+class lis3mdl
 {
 public:
   enum device_type
   {
-    LSM6DS33 = 0x69,
+    LIS3MDL = 0x3D,
   };
 
   enum i2c_addr
   {
-    SA0_LOW_ADDR = 0x6A,
-    SA0_HIGH_ADDR = 0x6B,
+    SA1_LOW_ADDR = 0x1E,
+    SA1_HIGH_ADDR = 0x1C,
   };
 
   enum reg_addr

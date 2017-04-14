@@ -14,7 +14,7 @@ minimu9_config minimu9_auto_detect(const std::string & i2c_bus_name)
 
   // Detect LSM6 devices.
   {
-    std::vector<uint8_t> addrs = { lsm6::SA0_LOW_ADDR, lsm6::SA0_HIGH_ADDR};
+    auto addrs = { lsm6::SA0_LOW_ADDR, lsm6::SA0_HIGH_ADDR };
     for (uint8_t addr : addrs)
     {
       int result = bus.try_write_byte_and_read_byte(addr, lsm6::WHO_AM_I);
@@ -29,11 +29,21 @@ minimu9_config minimu9_auto_detect(const std::string & i2c_bus_name)
     }
   }
 
-  std::cout << "hey\n" << config.lsm6.use_sensor << std::endl;  //tmphax
-
   // Detect LIS3MDL devices.
   {
-    
+    auto addrs = { lis3mdl::SA1_LOW_ADDR, lis3mdl::SA1_LOW_ADDR };
+    for (uint8_t addr : addrs)
+    {
+      int result = bus.try_write_byte_and_read_byte(addr, lis3mdl::WHO_AM_I);
+      if (result == lis3mdl::LIS3MDL)
+      {
+        config.lis3mdl.use_sensor = true;
+        config.lis3mdl.device_type = lis3mdl::LIS3MDL;
+        config.lis3mdl.i2c_bus_name = i2c_bus_name;
+        config.lis3mdl.i2c_address = addr;
+        break;
+      }
+    }
   }
 
   return config;

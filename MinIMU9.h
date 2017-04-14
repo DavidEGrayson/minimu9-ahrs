@@ -4,6 +4,7 @@
 #include "LSM303.h"
 #include "L3G.h"
 #include "lsm6.h"
+#include "lis3mdl.h"
 
 struct minimu9_sensor_config {
   bool use_sensor = false;
