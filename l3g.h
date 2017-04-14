@@ -53,7 +53,14 @@ public:
     LOW_ODR = 0x39,
   };
 
-  l3g(const std::string & i2c_bus);
+  struct comm_config {
+    bool use_sensor = false;
+    device_type device;
+    std::string i2c_bus_name;
+    i2c_addr i2c_address;
+  };
+
+  void open(const comm_config &);
 
   // gyro angular velocity readings
   int g[3];  // TODO: use int16_t, right?
@@ -65,8 +72,6 @@ public:
   void read();
 
 private:
-  void detectAddress();
   i2c_bus i2c;
-  i2c_addr address;
-  device_type device;
+  comm_config config;
 };

@@ -164,10 +164,18 @@ public:
     D_OUT_Z_H_M       = 0x0D,
   };
 
+  struct comm_config {
+    bool use_sensor = false;
+    device_type device;
+    std::string i2c_bus_name;
+    i2c_addr i2c_address_acc;
+    i2c_addr i2c_address_mag;
+  };
+
+  void open(const comm_config &);
+
   int a[3];  // accelerometer readings
   int m[3];  // magnetometer readings
-
-  lsm303(const char * i2cDeviceName);
 
   void enable(void);
 
@@ -182,7 +190,5 @@ public:
 
 private:
   i2c_bus i2c;
-  i2c_addr address_mag;
-  i2c_addr address_acc;
-  device_type device;
+  comm_config config;
 };

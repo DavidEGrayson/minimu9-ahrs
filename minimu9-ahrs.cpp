@@ -226,7 +226,7 @@ int main_with_exceptions(int argc, char **argv)
     std::cout << "For more information, run: man minimu9-ahrs" << std::endl;
     return 0;
   }
-        
+
   if (options.count("version"))
   {
     std::cout << VERSION << std::endl;
@@ -235,7 +235,8 @@ int main_with_exceptions(int argc, char **argv)
 
   auto config = minimu9_auto_detect(i2cDevice);
 
-  MinIMU9 imu(i2cDevice.c_str());
+  MinIMU9 imu;
+  imu.open(config);
 
   rotation_output_function * output;
 

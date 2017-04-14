@@ -22,6 +22,15 @@ public:
     WHO_AM_I = 0x0F,
   };
 
+  struct comm_config {
+    bool use_sensor = false;
+    device_type device;
+    std::string i2c_bus_name;
+    i2c_addr i2c_address;
+  };
+
+  lis3mdl(const comm_config &);
+
 private:
   i2c_bus i2c;
   i2c_addr address;
