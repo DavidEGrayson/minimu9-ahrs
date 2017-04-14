@@ -12,18 +12,65 @@ static inline std::system_error posix_error(const std::string & what)
     return std::system_error(errno, std::system_category(), what);
 }
 
-i2c_bus::i2c_bus(const std::string & name)
+i2c_bus::i2c_bus() : fd(-1)
 {
-  fd = open(name.c_str(), O_RDWR);
+}
+
+i2c_bus::i2c_bus(const std::string & name) : fd(-1)
+{
+  open(name);
+}
+
+i2c_bus::i2c_bus(const i2c_bus & other) : fd(-1)
+{
+  *this = other;
+}
+
+i2c_bus & i2c_bus::operator=(const i2c_bus & other)
+{
+  if (other.fd == -1)
+  {
+    close();
+  }
+  else
+  {
+    open_from_fd(other.fd);
+  }
+  return *this;
+}
+
+i2c_bus::~i2c_bus()
+{
+  close();
+}
+
+void i2c_bus::open(const std::string & name)
+{
+  close();
+  fd = ::open(name.c_str(), O_RDWR);
   if (fd == -1)
   {
     throw posix_error(std::string("Failed to open I2C device ") + name);
   }
 }
 
-i2c_bus::~i2c_bus()
+void i2c_bus::open_from_fd(int other_fd)
 {
-  close(fd);
+  close();
+  fd = dup(other_fd);
+  if (fd == -1)
+  {
+    throw posix_error("Failed to dup I2C device.");
+  }
+}
+
+void i2c_bus::close()
+{
+  if (fd != -1)
+  {
+    ::close(fd);
+    fd = -1;
+  }
 }
 
 void i2c_bus::write_byte_and_read(uint8_t address, uint8_t command,

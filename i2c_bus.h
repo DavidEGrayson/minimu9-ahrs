@@ -6,8 +6,26 @@
 class i2c_bus
 {
 public:
-  i2c_bus(const std::string & name);
+  explicit i2c_bus(const std::string & name);
+  i2c_bus();
+
+  // Move constructor
+  i2c_bus(i2c_bus &&) = default;
+
+  // Copy constructor
+  i2c_bus(const i2c_bus &);
+
+  // Move assignment operator
+  i2c_bus & operator=(i2c_bus &&) = default;
+
+  // Copy assignment operator
+  i2c_bus & operator=(const i2c_bus &);
+
   ~i2c_bus();
+
+  void open(const std::string & name);
+  void open_from_fd(int other_fd);
+  void close();
 
   void write_byte_and_read(uint8_t address, uint8_t byte,
     uint8_t * data, size_t size);
