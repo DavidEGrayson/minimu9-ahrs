@@ -2,7 +2,7 @@
 // Eigen lirbary and the 'vector' type we made from it.
 
 #include "vector.h"
-#include "MinIMU9.h"
+#include "minimu9.h"
 #include "version.h"
 #include <iostream>
 #include <iomanip>
@@ -197,12 +197,13 @@ void ahrs(imu & imu, fuse_function * fuse, rotation_output_function * output)
 int main_with_exceptions(int argc, char **argv)
 {
   // Define what all the command-line parameters are.
-  std::string mode, output_mode, i2cDevice;
+  std::string mode, output_mode, i2c_bus_name;
   opts::options_description desc("Allowed options");
   desc.add_options()
     ("help,h", "produce help message")
     ("version,v", "print version number")
-    ("i2c-bus,b", opts::value<std::string>(&i2cDevice)->default_value("/dev/i2c-0"),
+    ("i2c-bus,b",
+      opts::value<std::string>(&i2c_bus_name)->default_value("/dev/i2c-0"),
      "i2c-bus the IMU is connected to")
     ("mode", opts::value<std::string>(&mode)->default_value("normal"),
      "specifies what algorithm to use.\n"
@@ -233,9 +234,9 @@ int main_with_exceptions(int argc, char **argv)
     return 0;
   }
 
-  auto config = minimu9_auto_detect(i2cDevice);
+  auto config = minimu9::auto_detect(i2c_bus_name);
 
-  MinIMU9 imu;
+  minimu9::handle imu;
   imu.open(config);
 
   rotation_output_function * output;

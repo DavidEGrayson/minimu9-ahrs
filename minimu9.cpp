@@ -1,5 +1,5 @@
 #include "vector.h"
-#include "MinIMU9.h"
+#include "minimu9.h"
 #include "exceptions.h"
 #include <stdio.h>
 #include <unistd.h>
@@ -7,10 +7,10 @@
 #include <fstream>
 #include <wordexp.h>
 
-minimu9_comm_config minimu9_auto_detect(const std::string & i2c_bus_name)
+minimu9::comm_config minimu9::auto_detect(const std::string & i2c_bus_name)
 {
   i2c_bus bus(i2c_bus_name.c_str());
-  minimu9_comm_config config;
+  minimu9::comm_config config;
 
   // Detect LSM6 devices.
   {
@@ -144,7 +144,7 @@ minimu9_comm_config minimu9_auto_detect(const std::string & i2c_bus_name)
   return config;
 }
 
-void MinIMU9::open(const minimu9_comm_config & config)
+void minimu9::handle::open(const minimu9::comm_config & config)
 {
   // TODO: need to do some cool stuff here
   if (config.lsm6.use_sensor)
@@ -153,13 +153,13 @@ void MinIMU9::open(const minimu9_comm_config & config)
   }
 }
 
-void MinIMU9::enable()
+void minimu9::handle::enable()
 {
   compass.enable();
   gyro.enable();
 }
 
-void MinIMU9::load_calibration()
+void minimu9::handle::load_calibration()
 {
     wordexp_t expansion_result;
     wordexp("~/.minimu9-ahrs-cal", &expansion_result, 0);
@@ -177,7 +177,7 @@ void MinIMU9::load_calibration()
     }
 }
 
-void MinIMU9::measure_offsets()
+void minimu9::handle::measure_offsets()
 {
     // LSM303 accelerometer: 8 g sensitivity.  3.8 mg/digit; 1 g = 256.
     // TODO: unify this with the other place in the code where we scale accelerometer readings.
@@ -192,7 +192,7 @@ void MinIMU9::measure_offsets()
     gyro_offset /= sampleCount;
 }
 
-vector MinIMU9::read_mag()
+vector minimu9::handle::read_mag()
 {
     compass.read_mag();
     raw_m = int_vector_from_ints(&compass.m);
@@ -204,7 +204,7 @@ vector MinIMU9::read_mag()
     return v;
 }
 
-vector MinIMU9::read_acc()
+vector minimu9::handle::read_acc()
 {
     // Info about linear acceleration sensitivity from datasheets:
     // LSM303DLM: at FS = 8 g, 3.9 mg/digit (12-bit reading)
@@ -218,7 +218,7 @@ vector MinIMU9::read_acc()
     return vector_from_ints(&compass.a) * accel_scale;
 }
 
-vector MinIMU9::read_gyro()
+vector minimu9::handle::read_gyro()
 {
     // Info about sensitivity from datasheets:
     // L3G4200D: at FS = 2000 dps, 70 mdps/digit
