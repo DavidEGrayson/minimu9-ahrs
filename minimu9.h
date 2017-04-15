@@ -42,6 +42,9 @@ namespace minimu9
     virtual void read_mag_raw();
     virtual void read_gyro_raw();
 
+    virtual float get_acc_scale() const;
+    virtual float get_gyro_scale() const;
+
     virtual vector read_acc();
     virtual vector read_mag();
     virtual vector read_gyro();

@@ -343,6 +343,27 @@ void minimu9::handle::read_gyro_raw()
   }
 }
 
+float minimu9::handle::get_acc_scale() const
+{
+  // Info about linear acceleration sensitivity from datasheets:
+  // LSM303DLM: at FS = 8 g, 3.9 mg/digit (12-bit reading)
+  // LSM303DLHC: at FS = 8 g, 4 mg/digit (12-bit reading probably an approximation)
+  // LSM303DLH: at FS = 8 g, 3.9 mg/digit (12-bit reading)
+  // LSM303D: at FS = 8 g, 0.244 mg/LSB (16-bit reading)
+  // LSM6DS33: at FS = 8 g, 0.244 mg/LSB (16-bit reading)
+  return 0.000244;
+}
+
+float minimu9::handle::get_gyro_scale() const
+{
+  // Info about sensitivity from datasheets:
+  // L3G4200D, FS = 2000 dps: 70 mdps/digit
+  // L3GD20,   FS = 2000 dps: 70 mdps/digit
+  // L3GD20H,  FS = 2000 dps: 70 mdps/digit
+  // LSM6DS33, FS = 2000 dps: 70 mdps/digit
+  return 0.07 * 3.14159265 / 180;
+}
+
 void minimu9::handle::measure_offsets()
 {
   // LSM303 accelerometer: 8 g sensitivity.  3.8 mg/digit; 1 g = 256.
@@ -352,7 +373,7 @@ void minimu9::handle::measure_offsets()
   {
     read_gyro_raw();
     gyro_offset += vector_from_ints(&g);
-    usleep(20*1000);
+    usleep(20 * 1000);
   }
   gyro_offset /= sampleCount;
 }
@@ -370,25 +391,12 @@ vector minimu9::handle::read_mag()
 
 vector minimu9::handle::read_acc()
 {
-  // Info about linear acceleration sensitivity from datasheets:
-  // LSM303DLM: at FS = 8 g, 3.9 mg/digit (12-bit reading)
-  // LSM303DLHC: at FS = 8 g, 4 mg/digit (12-bit reading probably an approximation)
-  // LSM303DLH: at FS = 8 g, 3.9 mg/digit (12-bit reading)
-  // LSM303D: at FS = 8 g, 0.244 mg/LSB (16-bit reading)
-  const float accel_scale = 0.000244;
-
   read_acc_raw();
-  return vector_from_ints(&a) * accel_scale;
+  return vector_from_ints(&a) * get_acc_scale();
 }
 
 vector minimu9::handle::read_gyro()
 {
-  // Info about sensitivity from datasheets:
-  // L3G4200D: at FS = 2000 dps, 70 mdps/digit
-  // L3GD20: at FS = 2000 dps, 70 mdps/digit
-  // L3GD20H: at FS = 2000 dps, 70 mdps/digit
-  const float gyro_scale = 0.07 * 3.14159265 / 180;
-
   read_gyro_raw();
-  return (vector_from_ints(&g) - gyro_offset) * gyro_scale;
+  return (vector_from_ints(&g) - gyro_offset) * get_gyro_scale();
 }

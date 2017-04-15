@@ -16,10 +16,12 @@ public:
   virtual void read_mag_raw() = 0;
   virtual void read_gyro_raw() = 0;
 
+  virtual float get_acc_scale() const = 0;
+  virtual float get_gyro_scale() const = 0;
+
   int32_t m[3];
   int32_t a[3];
   int32_t g[3];
-
 
   // TODO: remove stuff below this point
 
