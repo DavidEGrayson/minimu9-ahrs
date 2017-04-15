@@ -33,6 +33,10 @@ void lis3mdl::handle::enable()
     // OMZ = 11 (ultra-high-performance mode for Z)
     write_reg(CTRL_REG4, 0b00001100);
   }
+  else
+  {
+    std::runtime_error("Cannot enable unknown LIS3MDL device.");
+  }
 }
 
 void lis3mdl::handle::read()

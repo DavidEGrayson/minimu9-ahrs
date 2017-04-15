@@ -13,7 +13,7 @@ public:
   virtual vector read_mag() = 0;  // In body coords, scaled to -1..1 range
   virtual vector read_acc() = 0;  // In body coords, with units = g
   virtual vector read_gyro() = 0; // In body coords, with units = rad/sec
-  void read(){ read_acc(); read_mag(); read_gyro(); }
+  void read(){ read_mag(); read_acc(); read_gyro(); }
 
   virtual void measure_offsets() = 0;
   virtual void enable() = 0;

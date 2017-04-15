@@ -37,6 +37,10 @@ void lsm6::handle::enable()
     // IF_INC = 1 (automatically increment address register)
     write_reg(CTRL3_C, 0b00000100);
   }
+  else
+  {
+    throw std::runtime_error("Cannot enable unknown LSM6 device.");
+  }
 }
 
 void lsm6::handle::write_reg(reg_addr addr, uint8_t value)
