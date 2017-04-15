@@ -194,7 +194,7 @@ void MinIMU9::measure_offsets()
 
 vector MinIMU9::read_mag()
 {
-    compass.readMag();
+    compass.read_mag();
     raw_m = int_vector_from_ints(&compass.m);
 
     vector v;
@@ -213,7 +213,7 @@ vector MinIMU9::read_acc()
     // LSM303D: at FS = 8 g, 0.244 mg/LSB (16-bit reading)
     const float accel_scale = 0.000244;
 
-    compass.readAcc();
+    compass.read_acc();
     imu::raw_a = int_vector_from_ints(&compass.a);
     return vector_from_ints(&compass.a) * accel_scale;
 }

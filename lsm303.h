@@ -182,13 +182,13 @@ namespace lsm303
 
     void enable();
 
-    void writeAccReg(uint8_t reg, uint8_t value);
-    uint8_t readAccReg(uint8_t reg);
-    void writeMagReg(uint8_t reg, uint8_t value);
-    uint8_t readMagReg(uint8_t reg);
+    void write_acc_reg(uint8_t reg, uint8_t value);
+    uint8_t read_acc_reg(uint8_t reg);
+    void write_mag_reg(uint8_t reg, uint8_t value);
+    uint8_t read_mag_reg(uint8_t reg);
 
-    void readAcc();
-    void readMag();
+    void read_acc();
+    void read_mag();
     void read();
 
   protected:

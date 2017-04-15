@@ -69,8 +69,8 @@ namespace l3g
 
     void enable();
 
-    void writeReg(uint8_t reg, uint8_t value);
-    uint8_t readReg(uint8_t reg);
+    void write_reg(uint8_t reg, uint8_t value);
+    uint8_t read_reg(uint8_t reg);
     void read();
 
   protected:

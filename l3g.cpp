@@ -15,16 +15,16 @@ void l3g::handle::open(const comm_config & config)
 // Turns on the gyro and places it in normal mode.
 void l3g::handle::enable()
 {
-  writeReg(CTRL_REG1, 0b00001111); // Normal power mode, all axes enabled
-  writeReg(CTRL_REG4, 0b00100000); // 2000 dps full scale
+  write_reg(CTRL_REG1, 0b00001111); // Normal power mode, all axes enabled
+  write_reg(CTRL_REG4, 0b00100000); // 2000 dps full scale
 }
 
-void l3g::handle::writeReg(uint8_t reg, uint8_t value)
+void l3g::handle::write_reg(uint8_t reg, uint8_t value)
 {
   i2c.write_two_bytes(config.i2c_address, reg, value);
 }
 
-uint8_t l3g::handle::readReg(uint8_t reg)
+uint8_t l3g::handle::read_reg(uint8_t reg)
 {
   return i2c.write_byte_and_read_byte(config.i2c_address, reg);
 }
