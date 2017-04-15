@@ -45,7 +45,7 @@ void lsm303::handle::writeAccReg(uint8_t reg, uint8_t value)
 
 // Turns on the LSM303's accelerometer and magnetometers and places them in normal
 // mode.
-void lsm303::handle::enable(void)
+void lsm303::handle::enable()
 {
   if (config.device == LSM303D)
   {
@@ -119,7 +119,7 @@ void lsm303::handle::enable(void)
   }
 }
 
-void lsm303::handle::readAcc(void)
+void lsm303::handle::readAcc()
 {
   uint8_t block[6];
   i2c.write_byte_and_read(config.i2c_address_acc,
@@ -129,7 +129,7 @@ void lsm303::handle::readAcc(void)
   a[2] = (int16_t)(block[4] | block[5] << 8);
 }
 
-void lsm303::handle::readMag(void)
+void lsm303::handle::readMag()
 {
   uint8_t block[6];
 
@@ -162,7 +162,7 @@ void lsm303::handle::readMag(void)
   }
 }
 
-void lsm303::handle::read(void)
+void lsm303::handle::read()
 {
   readAcc();
   readMag();

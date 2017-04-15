@@ -69,7 +69,7 @@ int millis()
     return (tv.tv_sec) * 1000 + (tv.tv_usec)/1000;
 }
 
-void stream_raw_values(IMU & imu)
+void stream_raw_values(imu & imu)
 {
   imu.enable();
   while(1)
@@ -159,12 +159,12 @@ void fuse_default(quaternion & rotation, float dt, const vector & angular_veloci
   rotate(rotation, angular_velocity + correction, dt);
 }
 
-void ahrs(IMU & imu, fuse_function * fuse, rotation_output_function * output)
+void ahrs(imu & imu, fuse_function * fuse, rotation_output_function * output)
 {
-  imu.loadCalibration();
+  imu.load_calibration();
   imu.enable();
-  imu.measureOffsets();
-    
+  imu.measure_offsets();
+
   // The quaternion that can convert a vector in body coordinates
   // to ground coordinates when it its changed to a matrix.
   quaternion rotation = quaternion::Identity();
@@ -177,9 +177,9 @@ void ahrs(IMU & imu, fuse_function * fuse, rotation_output_function * output)
     float dt = (start-last_start)/1000.0;
     if (dt < 0){ throw std::runtime_error("Time went backwards."); }
 
-    vector angular_velocity = imu.readGyro();
-    vector acceleration = imu.readAcc();
-    vector magnetic_field = imu.readMag();
+    vector angular_velocity = imu.read_gyro();
+    vector acceleration = imu.read_acc();
+    vector magnetic_field = imu.read_mag();
 
     fuse(rotation, dt, angular_velocity, acceleration, magnetic_field);
 

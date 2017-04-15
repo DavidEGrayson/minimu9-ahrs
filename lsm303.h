@@ -180,7 +180,7 @@ namespace lsm303
     int a[3];  // accelerometer readings
     int m[3];  // magnetometer readings
 
-    void enable(void);
+    void enable();
 
     void writeAccReg(uint8_t reg, uint8_t value);
     uint8_t readAccReg(uint8_t reg);

@@ -159,7 +159,7 @@ void MinIMU9::enable()
   gyro.enable();
 }
 
-void MinIMU9::loadCalibration()
+void MinIMU9::load_calibration()
 {
     wordexp_t expansion_result;
     wordexp("~/.minimu9-ahrs-cal", &expansion_result, 0);
@@ -177,7 +177,7 @@ void MinIMU9::loadCalibration()
     }
 }
 
-void MinIMU9::measureOffsets()
+void MinIMU9::measure_offsets()
 {
     // LSM303 accelerometer: 8 g sensitivity.  3.8 mg/digit; 1 g = 256.
     // TODO: unify this with the other place in the code where we scale accelerometer readings.
@@ -192,10 +192,10 @@ void MinIMU9::measureOffsets()
     gyro_offset /= sampleCount;
 }
 
-vector MinIMU9::readMag()
+vector MinIMU9::read_mag()
 {
     compass.readMag();
-    IMU::raw_m = int_vector_from_ints(&compass.m);
+    raw_m = int_vector_from_ints(&compass.m);
 
     vector v;
     v(0) = (float)(compass.m[0] - mag_min(0)) / (mag_max(0) - mag_min(0)) * 2 - 1;
@@ -204,7 +204,7 @@ vector MinIMU9::readMag()
     return v;
 }
 
-vector MinIMU9::readAcc()
+vector MinIMU9::read_acc()
 {
     // Info about linear acceleration sensitivity from datasheets:
     // LSM303DLM: at FS = 8 g, 3.9 mg/digit (12-bit reading)
@@ -214,11 +214,11 @@ vector MinIMU9::readAcc()
     const float accel_scale = 0.000244;
 
     compass.readAcc();
-    IMU::raw_a = int_vector_from_ints(&compass.a);
+    imu::raw_a = int_vector_from_ints(&compass.a);
     return vector_from_ints(&compass.a) * accel_scale;
 }
 
-vector MinIMU9::readGyro()
+vector MinIMU9::read_gyro()
 {
     // Info about sensitivity from datasheets:
     // L3G4200D: at FS = 2000 dps, 70 mdps/digit
@@ -227,6 +227,6 @@ vector MinIMU9::readGyro()
     const float gyro_scale = 0.07 * 3.14159265 / 180;
 
     gyro.read();
-    IMU::raw_g = int_vector_from_ints(&gyro.g);
+    raw_g = int_vector_from_ints(&gyro.g);
     return ( vector_from_ints(&gyro.g) - gyro_offset ) * gyro_scale;
 }
