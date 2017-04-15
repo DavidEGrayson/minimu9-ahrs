@@ -67,3 +67,4 @@ void lsm6::handle::read_acc()
   a[1] = (int16_t)(block[2] | block[3] << 8);
   a[2] = (int16_t)(block[4] | block[5] << 8);
 }
+

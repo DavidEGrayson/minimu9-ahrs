@@ -2,8 +2,9 @@
 // Eigen lirbary and the 'vector' type we made from it.
 
 #include "vector.h"
-#include "minimu9.h"
 #include "version.h"
+#include "prog_options.h"
+#include "minimu9.h"
 #include <iostream>
 #include <iomanip>
 #include <stdio.h>
@@ -12,9 +13,6 @@
 #include <time.h>
 #include <sys/time.h>
 #include <system_error>
-#include <boost/program_options.hpp>
-
-namespace opts = boost::program_options;
 
 // TODO: print warning if accelerometer magnitude is not close to 1 when starting up
 
@@ -196,39 +194,16 @@ void ahrs(imu & imu, fuse_function * fuse, rotation_output_function * output)
 
 int main_with_exceptions(int argc, char **argv)
 {
-  // Define what all the command-line parameters are.
-  std::string mode, output_mode, i2c_bus_name;
-  opts::options_description desc("Allowed options");
-  desc.add_options()
-    ("help,h", "produce help message")
-    ("version,v", "print version number")
-    ("i2c-bus,b",
-      opts::value<std::string>(&i2c_bus_name)->default_value("/dev/i2c-0"),
-     "i2c-bus the IMU is connected to")
-    ("mode", opts::value<std::string>(&mode)->default_value("normal"),
-     "specifies what algorithm to use.\n"
-     "normal: Fuse compass and gyro.\n"
-     "gyro-only:  Use only gyro (drifts).\n"
-     "compass-only:  Use only compass (noisy).\n"
-     "raw: Just print raw values from sensors.")
-    ("output", opts::value<std::string>(&output_mode)->default_value("matrix"),
-     "specifies how to output the orientation.\n"
-     "matrix: Direction Cosine Matrix.\n"
-     "quaternion: Quaternion.\n"
-     "euler: Euler angles (yaw, pitch, roll).\n")
-    ;
-  opts::variables_map options;
-  opts::store(opts::command_line_parser(argc, argv).options(desc).run(), options);
-  opts::notify(options);
+  prog_options options = get_prog_options(argc, argv);
 
-  if(options.count("help"))
+  if(options.show_help)
   {
-    std::cout << desc << std::endl;
+    print_command_line_options_desc();
     std::cout << "For more information, run: man minimu9-ahrs" << std::endl;
     return 0;
   }
 
-  if (options.count("version"))
+  if (options.show_version)
   {
     std::cout << VERSION << std::endl;
     return 0;
@@ -238,7 +213,7 @@ int main_with_exceptions(int argc, char **argv)
   sensor_set set;
   set.mag = set.acc = set.gyro = true;
 
-  minimu9::comm_config config = minimu9::auto_detect(i2c_bus_name);
+  minimu9::comm_config config = minimu9::auto_detect(options.i2c_bus_name);
 
   sensor_set missing = set - minimu9::config_sensor_set(config);
   if (missing)
@@ -267,45 +242,45 @@ int main_with_exceptions(int argc, char **argv)
   rotation_output_function * output;
 
   // Figure out the output mode.
-  if (output_mode == "matrix")
+  if (options.output_mode == "matrix")
   {
     output = &output_matrix;
   }
-  else if (output_mode == "quaternion")
+  else if (options.output_mode == "quaternion")
   {
     output = &output_quaternion;
   }
-  else if (output_mode == "euler")
+  else if (options.output_mode == "euler")
   {
     field_width += 2;  // See comment above for field_width.
     output = &output_euler;
   }
   else
   {
-    std::cerr << "Unknown output mode '" << output_mode << "'" << std::endl;
+    std::cerr << "Unknown output mode '" << options.output_mode << "'" << std::endl;
     return 1;
   }
 
   // Figure out the basic operating mode and start running.
-  if (mode == "raw")
+  if (options.mode == "raw")
   {
     stream_raw_values(imu);
   }
-  else if (mode == "gyro-only")
+  else if (options.mode == "gyro-only")
   {
     ahrs(imu, &fuse_gyro_only, output);
   }
-  else if (mode == "compass-only")
+  else if (options.mode == "compass-only")
   {
     ahrs(imu, &fuse_compass_only, output);
   }
-  else if (mode == "normal")
+  else if (options.mode == "normal")
   {
     ahrs(imu, &fuse_default, output);
   }
   else
   {
-    std::cerr << "Unknown mode '" << mode << "'" << std::endl;
+    std::cerr << "Unknown mode '" << options.mode << "'" << std::endl;
     return 1;
   }
   return 0;
