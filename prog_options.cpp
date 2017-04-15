@@ -1,5 +1,7 @@
 #include "prog_options.h"
 #include <iostream>
+#include <fstream>
+#include <wordexp.h>
 #include <boost/program_options.hpp>
 namespace opts = boost::program_options;
 
@@ -56,6 +58,11 @@ static opts::options_description command_line_options_desc(prog_options & option
     ;
 }
 
+static opts::options_description config_file_options_desc(prog_options & options)
+{
+  return sensor_options_desc(options);
+}
+
 void print_command_line_options_desc()
 {
   prog_options options;
@@ -66,15 +73,31 @@ prog_options get_prog_options(int argc, char ** argv)
 {
   prog_options options;
 
-  // TODO: reject positional args
-
-  auto desc = command_line_options_desc(options);
-  auto parser = opts::command_line_parser(argc, argv).options(desc);
   opts::variables_map vmap;
-  opts::store(parser.run(), vmap);
-  opts::notify(vmap);
-  if (vmap.count("help")) { options.show_help = true; }
-  if (vmap.count("version")) { options.show_version = true; }
+
+  // Command-line options
+  {
+    // TODO: reject positional args
+    auto desc = command_line_options_desc(options);
+    auto parser = opts::command_line_parser(argc, argv).options(desc);
+    opts::store(parser.run(), vmap);
+    opts::notify(vmap);
+    if (vmap.count("help")) { options.show_help = true; }
+    if (vmap.count("version")) { options.show_version = true; }
+  }
+
+  // Config file
+  {
+    auto desc = config_file_options_desc(options);
+    wordexp_t expansion_result;
+    wordexp("~/.minimu9-ahrs", &expansion_result, 0);
+    std::ifstream file(expansion_result.we_wordv[0]);
+    if (file)
+    {
+      opts::store(opts::parse_config_file(file, desc), vmap);
+      opts::notify(vmap);
+    }
+  }
 
   return options;
 }

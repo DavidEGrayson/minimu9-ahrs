@@ -23,6 +23,10 @@ See the [ahrs-visualizer project] if you are interesting in displaying the outpu
 
 ## Version History
 
+- 2.1.0 (2017-04-15):
+  - Added support for the MinIMU-9 v5 (LSM6DS33 and LIS3MDL).
+  - Added support for a configuration file at `~/.minimu9-ahrs`.
+  - Made the `minimu9-ahrs-calibrate` script store the raw data in `~/.minimu9-ahrs-cal-data`.
 - 2.0.0 (2014-07-08):
   - Added support for the MinIMU-9 v3 (LSM303D and L3GD20H)
   - Removed the right-shifting of raw accelerometer outputs; the raw readings are now signed 16-bit numbers that can range from -32768 to 32767.  Previously the readings were signed 12-bit numbers, so this new version effectively gives readings that are greater by a factor of 16.

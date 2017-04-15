@@ -286,7 +286,7 @@ int main_with_exceptions(int argc, char **argv)
   return 0;
 }
 
-int main(int argc, char **argv)
+int main(int argc, char ** argv)
 {
   try
   {
