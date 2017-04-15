@@ -144,89 +144,251 @@ minimu9::comm_config minimu9::auto_detect(const std::string & i2c_bus_name)
   return config;
 }
 
-void minimu9::handle::open(const minimu9::comm_config & config)
+sensor_set minimu9::config_sensor_set(const comm_config & config)
 {
-  // TODO: need to do some cool stuff here
+  sensor_set set;
+
   if (config.lsm6.use_sensor)
   {
-    
+    set.acc = true;
+    set.gyro = true;
+  }
+
+  if (config.lis3mdl.use_sensor)
+  {
+    set.mag = true;
+  }
+
+  if (config.lsm303.use_sensor)
+  {
+    set.mag = true;
+    set.acc = true;
+  }
+
+  if (config.l3g.use_sensor)
+  {
+    set.gyro = true;
+  }
+
+  return set;
+}
+
+minimu9::comm_config minimu9::disable_redundant_sensors(
+  const comm_config & in, const sensor_set & needed)
+{
+  comm_config config = in;
+
+  sensor_set missing = needed;
+
+  if (!(missing.acc || missing.gyro))
+  {
+    config.lsm6.use_sensor = false;
+  }
+  else if (config.lsm6.use_sensor)
+  {
+    missing.acc = false;
+    missing.gyro = false;
+  }
+
+  if (!missing.mag)
+  {
+    config.lis3mdl.use_sensor = false;
+  }
+  else if (config.lis3mdl.use_sensor)
+  {
+    missing.mag = false;
+  }
+
+  if (!(missing.mag || missing.acc))
+  {
+    config.lsm303.use_sensor = false;
+  }
+  else if (config.lsm303.use_sensor)
+  {
+    missing.mag = false;
+    missing.acc = false;
+  }
+
+  if (!missing.gyro)
+  {
+    config.l3g.use_sensor = false;
+  }
+  else if (config.l3g.use_sensor)
+  {
+    missing.gyro = false;
+  }
+
+  return config;
+}
+
+void minimu9::handle::open(const comm_config & config)
+{
+  this->config = config;
+
+  if (config.lsm6.use_sensor)
+  {
+    lsm6.open(config.lsm6);
+  }
+
+  if (config.lis3mdl.use_sensor)
+  {
+    lis3mdl.open(config.lis3mdl);
+  }
+
+  if (config.lsm303.use_sensor)
+  {
+    lsm303.open(config.lsm303);
+  }
+
+  if (config.l3g.use_sensor)
+  {
+    l3g.open(config.l3g);
   }
 }
 
 void minimu9::handle::enable()
 {
-  compass.enable();
-  gyro.enable();
+  if (config.lsm6.use_sensor)
+  {
+    lsm6.enable();
+  }
+
+  if (config.lis3mdl.use_sensor)
+  {
+    lis3mdl.enable();
+  }
+
+  if (config.lsm303.use_sensor)
+  {
+    lsm303.enable();
+  }
+
+  if (config.l3g.use_sensor)
+  {
+    l3g.enable();
+  }
 }
 
 void minimu9::handle::load_calibration()
 {
-    wordexp_t expansion_result;
-    wordexp("~/.minimu9-ahrs-cal", &expansion_result, 0);
+  wordexp_t expansion_result;
+  wordexp("~/.minimu9-ahrs-cal", &expansion_result, 0);
 
-    std::ifstream file(expansion_result.we_wordv[0]);
-    if (file.fail())
-    {
-        throw posix_error("Failed to open calibration file ~/.minimu9-ahrs-cal");
-    }
+  std::ifstream file(expansion_result.we_wordv[0]);
+  if (file.fail())
+  {
+    throw posix_error("Failed to open calibration file ~/.minimu9-ahrs-cal");
+  }
 
-    file >> mag_min(0) >> mag_max(0) >> mag_min(1) >> mag_max(1) >> mag_min(2) >> mag_max(2);
-    if (file.fail() || file.bad())
-    {
-        throw std::runtime_error("Failed to parse calibration file ~/.minimu9-ahrs-cal");
-    }
+  file >> mag_min(0) >> mag_max(0)
+       >> mag_min(1) >> mag_max(1)
+       >> mag_min(2) >> mag_max(2);
+  if (file.fail() || file.bad())
+  {
+    throw std::runtime_error("Failed to parse calibration file ~/.minimu9-ahrs-cal");
+  }
+}
+
+void minimu9::handle::read_mag_raw()
+{
+  if (config.lis3mdl.use_sensor)
+  {
+    lis3mdl.read();
+    for (int i = 0; i < 3; i++) { m[i] = lis3mdl.m[i]; }
+  }
+  else if (config.lsm303.use_sensor)
+  {
+    lsm303.read_mag();
+    for (int i = 0; i < 3; i++) { m[i] = lsm303.m[i]; }
+  }
+  else
+  {
+    throw std::runtime_error("No magnetometer to read.");
+  }
+}
+
+void minimu9::handle::read_acc_raw()
+{
+  if (config.lsm6.use_sensor)
+  {
+    lsm6.read_acc();
+    for (int i = 0; i < 3; i++) { a[i] = lsm6.a[i]; }
+  }
+  else if (config.lsm303.use_sensor)
+  {
+    lsm303.read_acc();
+    for (int i = 0; i < 3; i++) { a[i] = lsm303.a[i]; }
+  }
+  else
+  {
+    throw std::runtime_error("No accelerometer to read.");
+  }
+}
+
+void minimu9::handle::read_gyro_raw()
+{
+  if (config.lsm6.use_sensor)
+  {
+    lsm6.read_gyro();
+    for (int i = 0; i < 3; i++) { g[i] = lsm6.g[i]; }
+  }
+  else if (config.l3g.use_sensor)
+  {
+    l3g.read();
+    for (int i = 0; i < 3; i++) { g[i] = l3g.g[i]; }
+  }
+  else
+  {
+    throw std::runtime_error("No gyro to read.");
+  }
 }
 
 void minimu9::handle::measure_offsets()
 {
-    // LSM303 accelerometer: 8 g sensitivity.  3.8 mg/digit; 1 g = 256.
-    // TODO: unify this with the other place in the code where we scale accelerometer readings.
-    gyro_offset = vector::Zero();
-    const int sampleCount = 32;
-    for(int i = 0; i < sampleCount; i++)
-    {
-        gyro.read();
-        gyro_offset += vector_from_ints(&gyro.g);
-        usleep(20*1000);
-    }
-    gyro_offset /= sampleCount;
+  // LSM303 accelerometer: 8 g sensitivity.  3.8 mg/digit; 1 g = 256.
+  gyro_offset = vector::Zero();
+  const int sampleCount = 32;
+  for(int i = 0; i < sampleCount; i++)
+  {
+    read_gyro_raw();
+    gyro_offset += vector_from_ints(&g);
+    usleep(20*1000);
+  }
+  gyro_offset /= sampleCount;
 }
 
 vector minimu9::handle::read_mag()
 {
-    compass.read_mag();
-    raw_m = int_vector_from_ints(&compass.m);
+  read_mag_raw();
 
-    vector v;
-    v(0) = (float)(compass.m[0] - mag_min(0)) / (mag_max(0) - mag_min(0)) * 2 - 1;
-    v(1) = (float)(compass.m[1] - mag_min(1)) / (mag_max(1) - mag_min(1)) * 2 - 1;
-    v(2) = (float)(compass.m[2] - mag_min(2)) / (mag_max(2) - mag_min(2)) * 2 - 1;
-    return v;
+  vector v;
+  v(0) = (float)(m[0] - mag_min(0)) / (mag_max(0) - mag_min(0)) * 2 - 1;
+  v(1) = (float)(m[1] - mag_min(1)) / (mag_max(1) - mag_min(1)) * 2 - 1;
+  v(2) = (float)(m[2] - mag_min(2)) / (mag_max(2) - mag_min(2)) * 2 - 1;
+  return v;
 }
 
 vector minimu9::handle::read_acc()
 {
-    // Info about linear acceleration sensitivity from datasheets:
-    // LSM303DLM: at FS = 8 g, 3.9 mg/digit (12-bit reading)
-    // LSM303DLHC: at FS = 8 g, 4 mg/digit (12-bit reading probably an approximation)
-    // LSM303DLH: at FS = 8 g, 3.9 mg/digit (12-bit reading)
-    // LSM303D: at FS = 8 g, 0.244 mg/LSB (16-bit reading)
-    const float accel_scale = 0.000244;
+  // Info about linear acceleration sensitivity from datasheets:
+  // LSM303DLM: at FS = 8 g, 3.9 mg/digit (12-bit reading)
+  // LSM303DLHC: at FS = 8 g, 4 mg/digit (12-bit reading probably an approximation)
+  // LSM303DLH: at FS = 8 g, 3.9 mg/digit (12-bit reading)
+  // LSM303D: at FS = 8 g, 0.244 mg/LSB (16-bit reading)
+  const float accel_scale = 0.000244;
 
-    compass.read_acc();
-    imu::raw_a = int_vector_from_ints(&compass.a);
-    return vector_from_ints(&compass.a) * accel_scale;
+  read_acc_raw();
+  return vector_from_ints(&a) * accel_scale;
 }
 
 vector minimu9::handle::read_gyro()
 {
-    // Info about sensitivity from datasheets:
-    // L3G4200D: at FS = 2000 dps, 70 mdps/digit
-    // L3GD20: at FS = 2000 dps, 70 mdps/digit
-    // L3GD20H: at FS = 2000 dps, 70 mdps/digit
-    const float gyro_scale = 0.07 * 3.14159265 / 180;
+  // Info about sensitivity from datasheets:
+  // L3G4200D: at FS = 2000 dps, 70 mdps/digit
+  // L3GD20: at FS = 2000 dps, 70 mdps/digit
+  // L3GD20H: at FS = 2000 dps, 70 mdps/digit
+  const float gyro_scale = 0.07 * 3.14159265 / 180;
 
-    gyro.read();
-    raw_g = int_vector_from_ints(&gyro.g);
-    return ( vector_from_ints(&gyro.g) - gyro_offset ) * gyro_scale;
+  read_gyro_raw();
+  return (vector_from_ints(&g) - gyro_offset) * gyro_scale;
 }

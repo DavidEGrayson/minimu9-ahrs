@@ -65,7 +65,7 @@ namespace l3g
     void open(const comm_config &);
 
     // gyro angular velocity readings
-    int g[3];  // TODO: use int16_t, right?
+    int32_t g[3];
 
     void enable();
 

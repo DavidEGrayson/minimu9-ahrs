@@ -177,8 +177,8 @@ namespace lsm303
   public:
     void open(const comm_config &);
 
-    int a[3];  // accelerometer readings
-    int m[3];  // magnetometer readings
+    int32_t a[3];  // accelerometer readings
+    int32_t m[3];  // magnetometer readings
 
     void enable();
 

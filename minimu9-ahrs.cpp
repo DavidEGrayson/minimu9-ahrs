@@ -76,9 +76,9 @@ void stream_raw_values(imu & imu)
   {
     imu.read();
     printf("%7d %7d %7d  %7d %7d %7d  %7d %7d %7d\n",
-           imu.raw_m[0], imu.raw_m[1], imu.raw_m[2],
-           imu.raw_a[0], imu.raw_a[1], imu.raw_a[2],
-           imu.raw_g[0], imu.raw_g[1], imu.raw_g[2]
+           imu.m[0], imu.m[1], imu.m[2],
+           imu.a[0], imu.a[1], imu.a[2],
+           imu.g[0], imu.g[1], imu.g[2]
       );
     usleep(20*1000);
   }
@@ -234,7 +234,32 @@ int main_with_exceptions(int argc, char **argv)
     return 0;
   }
 
-  auto config = minimu9::auto_detect(i2c_bus_name);
+  // Decide what sensors we want to use.
+  sensor_set set;
+  set.mag = set.acc = set.gyro = true;
+
+  minimu9::comm_config config = minimu9::auto_detect(i2c_bus_name);
+
+  sensor_set missing = set - minimu9::config_sensor_set(config);
+  if (missing)
+  {
+    if (missing.mag)
+    {
+      std::cerr << "Error: No magnetometer found." << std::endl;
+    }
+    if (missing.acc)
+    {
+      std::cerr << "Error: No accelerometer found." << std::endl;
+    }
+    if (missing.gyro)
+    {
+      std::cerr << "Error: No gyro found." << std::endl;
+    }
+    std::cerr << "Error: Needed sensors are missing." << std::endl;
+    return 1;
+  }
+
+  config = minimu9::disable_redundant_sensors(config, set);
 
   minimu9::handle imu;
   imu.open(config);
