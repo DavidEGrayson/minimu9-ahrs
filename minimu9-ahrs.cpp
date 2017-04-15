@@ -299,12 +299,6 @@ int main(int argc, char **argv)
     std::cerr << "Error: " << what << " (" << code << ")" << std::endl;
     return 2;
   }
-  catch(const opts::multiple_occurrences & error)
-  {
-    std::cerr << "Error: " << error.what() << " of " <<
-      error.get_option_name() << " option." << std::endl;
-    return 1;
-  }
   catch(const std::exception & error)
   {
     std::cerr << "Error: " << error.what() << std::endl;
