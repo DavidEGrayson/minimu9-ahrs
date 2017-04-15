@@ -12,7 +12,7 @@
 // #2127  LSM303D                    SA0 pulled to VDD, accessible thru-hole.
 // #2468  LSM303D + L3GD20H (v3)     SA0 pulled to VDD, accessible thru-hole
 
-void lsm303::open(const comm_config & config)
+void lsm303::handle::open(const comm_config & config)
 {
   if (!config.use_sensor)
   {
@@ -23,29 +23,29 @@ void lsm303::open(const comm_config & config)
   i2c.open(config.i2c_bus_name);
 }
 
-uint8_t lsm303::readMagReg(uint8_t reg)
+uint8_t lsm303::handle::readMagReg(uint8_t reg)
 {
   return i2c.write_byte_and_read_byte(config.i2c_address_mag, reg);
 }
 
-uint8_t lsm303::readAccReg(uint8_t reg)
+uint8_t lsm303::handle::readAccReg(uint8_t reg)
 {
   return i2c.write_byte_and_read_byte(config.i2c_address_acc, reg);
 }
 
-void lsm303::writeMagReg(uint8_t reg, uint8_t value)
+void lsm303::handle::writeMagReg(uint8_t reg, uint8_t value)
 {
   i2c.write_two_bytes(config.i2c_address_mag, reg, value);
 }
 
-void lsm303::writeAccReg(uint8_t reg, uint8_t value)
+void lsm303::handle::writeAccReg(uint8_t reg, uint8_t value)
 {
   i2c.write_two_bytes(config.i2c_address_acc, reg, value);
 }
 
 // Turns on the LSM303's accelerometer and magnetometers and places them in normal
 // mode.
-void lsm303::enable(void)
+void lsm303::handle::enable(void)
 {
   if (config.device == LSM303D)
   {
@@ -119,7 +119,7 @@ void lsm303::enable(void)
   }
 }
 
-void lsm303::readAcc(void)
+void lsm303::handle::readAcc(void)
 {
   uint8_t block[6];
   i2c.write_byte_and_read(config.i2c_address_acc,
@@ -129,7 +129,7 @@ void lsm303::readAcc(void)
   a[2] = (int16_t)(block[4] | block[5] << 8);
 }
 
-void lsm303::readMag(void)
+void lsm303::handle::readMag(void)
 {
   uint8_t block[6];
 
@@ -162,7 +162,7 @@ void lsm303::readMag(void)
   }
 }
 
-void lsm303::read(void)
+void lsm303::handle::read(void)
 {
   readAcc();
   readMag();

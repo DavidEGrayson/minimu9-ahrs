@@ -1,7 +1,7 @@
 #include "l3g.h"
 #include <stdexcept>
 
-void l3g::open(const comm_config & config)
+void l3g::handle::open(const comm_config & config)
 {
   if (!config.use_sensor)
   {
@@ -13,26 +13,27 @@ void l3g::open(const comm_config & config)
 }
 
 // Turns on the gyro and places it in normal mode.
-void l3g::enable()
+void l3g::handle::enable()
 {
   writeReg(CTRL_REG1, 0b00001111); // Normal power mode, all axes enabled
   writeReg(CTRL_REG4, 0b00100000); // 2000 dps full scale
 }
 
-void l3g::writeReg(uint8_t reg, uint8_t value)
+void l3g::handle::writeReg(uint8_t reg, uint8_t value)
 {
   i2c.write_two_bytes(config.i2c_address, reg, value);
 }
 
-uint8_t l3g::readReg(uint8_t reg)
+uint8_t l3g::handle::readReg(uint8_t reg)
 {
   return i2c.write_byte_and_read_byte(config.i2c_address, reg);
 }
 
-void l3g::read()
+void l3g::handle::read()
 {
   uint8_t block[6];
-  i2c.write_byte_and_read(config.i2c_address, 0x80 | OUT_X_L, block, sizeof(block));
+  i2c.write_byte_and_read(config.i2c_address,
+    0x80 | OUT_X_L, block, sizeof(block));
 
   g[0] = (int16_t)(block[1] << 8 | block[0]);
   g[1] = (int16_t)(block[3] << 8 | block[2]);

@@ -20,10 +20,10 @@ minimu9_comm_config minimu9_auto_detect(const std::string & i2c_bus_name)
       int result = bus.try_write_byte_and_read_byte(addr, lsm6::WHO_AM_I);
       if (result == lsm6::LSM6DS33)
       {
-        config.lsm6_config.use_sensor = true;
-        config.lsm6_config.device = (lsm6::device_type)result;
-        config.lsm6_config.i2c_bus_name = i2c_bus_name;
-        config.lsm6_config.i2c_address = (lsm6::i2c_addr)addr;
+        config.lsm6.use_sensor = true;
+        config.lsm6.device = (lsm6::device_type)result;
+        config.lsm6.i2c_bus_name = i2c_bus_name;
+        config.lsm6.i2c_address = (lsm6::i2c_addr)addr;
         break;
       }
     }
@@ -37,10 +37,10 @@ minimu9_comm_config minimu9_auto_detect(const std::string & i2c_bus_name)
       int result = bus.try_write_byte_and_read_byte(addr, lis3mdl::WHO_AM_I);
       if (result == lis3mdl::LIS3MDL)
       {
-        config.lis3mdl_config.use_sensor = true;
-        config.lis3mdl_config.device = (lis3mdl::device_type)result;
-        config.lis3mdl_config.i2c_bus_name = i2c_bus_name;
-        config.lis3mdl_config.i2c_address = (lis3mdl::i2c_addr)addr;
+        config.lis3mdl.use_sensor = true;
+        config.lis3mdl.device = (lis3mdl::device_type)result;
+        config.lis3mdl.i2c_bus_name = i2c_bus_name;
+        config.lis3mdl.i2c_address = (lis3mdl::i2c_addr)addr;
         break;
       }
     }
@@ -60,10 +60,10 @@ minimu9_comm_config minimu9_auto_detect(const std::string & i2c_bus_name)
       if (result == l3g::L3G4200D || result == l3g::L3GD20
         || result == l3g::L3GD20H)
       {
-        config.l3g_config.use_sensor = true;
-        config.l3g_config.device = (l3g::device_type)result;
-        config.l3g_config.i2c_bus_name = i2c_bus_name;
-        config.l3g_config.i2c_address = (l3g::i2c_addr)addr;
+        config.l3g.use_sensor = true;
+        config.l3g.device = (l3g::device_type)result;
+        config.l3g.i2c_bus_name = i2c_bus_name;
+        config.l3g.i2c_address = (l3g::i2c_addr)addr;
         break;
       }
     }
@@ -71,7 +71,7 @@ minimu9_comm_config minimu9_auto_detect(const std::string & i2c_bus_name)
 
   // Detect LSM303 devices.
   {
-    auto & c = config.lsm303_config;
+    auto & c = config.lsm303;
     if (lsm303::LSM303D == bus.try_write_byte_and_read_byte(
         lsm303::LSM303D_SA0_HIGH_ADDR, lsm303::WHO_AM_I))
     {
@@ -147,7 +147,7 @@ minimu9_comm_config minimu9_auto_detect(const std::string & i2c_bus_name)
 void MinIMU9::open(const minimu9_comm_config & config)
 {
   // TODO: need to do some cool stuff here
-  if (config.lsm6_config.use_sensor)
+  if (config.lsm6.use_sensor)
   {
     
   }

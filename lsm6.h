@@ -3,9 +3,8 @@
 #include <i2c_bus.h>
 #include <cstdint>
 
-class lsm6
+namespace lsm6
 {
-public:
   enum device_type
   {
     LSM6DS33 = 0x69,
@@ -29,9 +28,19 @@ public:
     i2c_addr i2c_address;
   };
 
-  lsm6(const comm_config &);
+  class handle
+  {
+  public:
+    void open(const comm_config &);
 
-private:
-  i2c_bus i2c;
-  comm_config config;
+    // acceleration readings
+    int16_t a[3];
+
+    // gyro angular velocity readings
+    int16_t g[3];
+
+  protected:
+    i2c_bus i2c;
+    comm_config config;
+  };
 };

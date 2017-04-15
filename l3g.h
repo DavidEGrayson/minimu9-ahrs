@@ -2,9 +2,8 @@
 
 #include "i2c_bus.h"
 
-class l3g
+namespace l3g
 {
-public:
   enum device_type
   {
     L3G4200D = 0xD3,
@@ -60,18 +59,22 @@ public:
     i2c_addr i2c_address;
   };
 
-  void open(const comm_config &);
+  class handle
+  {
+  public:
+    void open(const comm_config &);
 
-  // gyro angular velocity readings
-  int g[3];  // TODO: use int16_t, right?
+    // gyro angular velocity readings
+    int g[3];  // TODO: use int16_t, right?
 
-  void enable();
+    void enable();
 
-  void writeReg(uint8_t reg, uint8_t value);
-  uint8_t readReg(uint8_t reg);
-  void read();
+    void writeReg(uint8_t reg, uint8_t value);
+    uint8_t readReg(uint8_t reg);
+    void read();
 
-private:
-  i2c_bus i2c;
-  comm_config config;
+  protected:
+    i2c_bus i2c;
+    comm_config config;
+  };
 };

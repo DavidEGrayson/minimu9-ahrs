@@ -3,14 +3,13 @@
 #include <stdint.h>
 #include "i2c_bus.h"
 
-class lsm303
+namespace lsm303
 {
-public:
   enum device_type
   {
     LSM303DLH = 1,     // no WHO_AM_I register
     LSM303DLM = 0x3C,
-    LSM303DLHC = 3,    // no WHO_AM_I register
+    LSM303DLHC = 3,    // undocumented WHO_AM_I register with 0x3C
     LSM303D = 0x49,
   };
 
@@ -164,7 +163,8 @@ public:
     D_OUT_Z_H_M       = 0x0D,
   };
 
-  struct comm_config {
+  struct comm_config
+  {
     bool use_sensor = false;
     device_type device;
     std::string i2c_bus_name;
@@ -172,23 +172,27 @@ public:
     i2c_addr i2c_address_mag;
   };
 
-  void open(const comm_config &);
+  class handle
+  {
+  public:
+    void open(const comm_config &);
 
-  int a[3];  // accelerometer readings
-  int m[3];  // magnetometer readings
+    int a[3];  // accelerometer readings
+    int m[3];  // magnetometer readings
 
-  void enable(void);
+    void enable(void);
 
-  void writeAccReg(uint8_t reg, uint8_t value);
-  uint8_t readAccReg(uint8_t reg);
-  void writeMagReg(uint8_t reg, uint8_t value);
-  uint8_t readMagReg(uint8_t reg);
+    void writeAccReg(uint8_t reg, uint8_t value);
+    uint8_t readAccReg(uint8_t reg);
+    void writeMagReg(uint8_t reg, uint8_t value);
+    uint8_t readMagReg(uint8_t reg);
 
-  void readAcc(void);
-  void readMag(void);
-  void read(void);
+    void readAcc();
+    void readMag();
+    void read();
 
-private:
-  i2c_bus i2c;
-  comm_config config;
+  protected:
+    i2c_bus i2c;
+    comm_config config;
+  };
 };

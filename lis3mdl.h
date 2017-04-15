@@ -3,9 +3,8 @@
 #include <i2c_bus.h>
 #include <cstdint>
 
-class lis3mdl
+namespace lis3mdl
 {
-public:
   enum device_type
   {
     LIS3MDL = 0x3D,
@@ -29,10 +28,14 @@ public:
     i2c_addr i2c_address;
   };
 
-  lis3mdl(const comm_config &);
+  class handle
+  {
+  public:
+    void open(const comm_config &);
 
-private:
-  i2c_bus i2c;
-  i2c_addr address;
-  device_type device;
+  protected:
+    i2c_bus i2c;
+    i2c_addr address;
+    device_type device;
+  };
 };
