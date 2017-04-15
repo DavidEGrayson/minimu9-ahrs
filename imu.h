@@ -5,6 +5,7 @@
 class imu
 {
 public:
+  virtual void read_raw() { read_mag_raw(); read_acc_raw(); read_gyro_raw(); }
   virtual void read_acc_raw() = 0;
   virtual void read_mag_raw() = 0;
   virtual void read_gyro_raw() = 0;
