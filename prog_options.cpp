@@ -38,7 +38,6 @@ static opts::options_description processing_options_desc(prog_options & options)
       "normal: Fuse compass and gyro.\n"
       "gyro-only:  Use only gyro (drifts).\n"
       "compass-only:  Use only compass (noisy).\n"
-      // TODO: "scaled:  Just print scaled values from sensor axes.\n")
       "raw: Just print raw values from sensors axes.")
     ("output",
       opts::value<std::string>(&options.output_mode)->default_value("matrix"),
