@@ -14,6 +14,7 @@
 #include <time.h>
 #include <sys/time.h>
 #include <sys/timerfd.h>
+#include <pthread.h>
 #include <system_error>
 #include <chrono>
 
@@ -173,7 +174,7 @@ void ahrs(imu & imu, fuse_function * fuse, rotation_output_function * output)
   int timerfd = timerfd_create(CLOCK_MONOTONIC, 0);
   if (timerfd == -1)
   {
-    throw posix_error("Failed to create timerfd.");
+    throw posix_error("Failed to create timerfd");
   }
 
   struct itimerspec spec = { 0 };
@@ -182,7 +183,7 @@ void ahrs(imu & imu, fuse_function * fuse, rotation_output_function * output)
   int result = timerfd_settime(timerfd, 0, &spec, NULL);
   if (result == -1)
   {
-    throw posix_error("Failed to set timerfd interval.");
+    throw posix_error("Failed to set timerfd interval");
   }
 
   // TODO: clean up the timing stuff
@@ -198,7 +199,6 @@ void ahrs(imu & imu, fuse_function * fuse, rotation_output_function * output)
 
     float dt = dt2.count() / 1e9;
     if (dt < 0){ throw std::runtime_error("Time went backwards."); }
-    //std::cout << dt*1e9 << "  ";
 
     vector angular_velocity = imu.read_gyro();
     vector acceleration = imu.read_acc();

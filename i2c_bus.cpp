@@ -60,7 +60,7 @@ void i2c_bus::open_from_fd(int other_fd)
   fd = dup(other_fd);
   if (fd == -1)
   {
-    throw posix_error("Failed to dup I2C device.");
+    throw posix_error("Failed to dup I2C device");
   }
 }
 
