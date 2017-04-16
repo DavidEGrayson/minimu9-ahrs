@@ -16,7 +16,7 @@ CPPFLAGS += -Wall
 CPPFLAGS += --std=gnu++11
 
 # Use boost libraries
-LDFLAGS += -lboost_program_options
+LDLIBS += -lboost_program_options
 
 # Put debugging info in there so we can get stack traces.
 #CPPFLAGS += -g -rdynamic
