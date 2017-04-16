@@ -64,13 +64,6 @@ void output_euler(quaternion & rotation)
                         * (180 / M_PI));
 }
 
-int millis()
-{
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
-    return (tv.tv_sec) * 1000 + (tv.tv_usec)/1000;
-}
-
 void stream_raw_values(imu & imu)
 {
   imu.enable();
@@ -171,6 +164,7 @@ void ahrs(imu & imu, fuse_function * fuse, rotation_output_function * output)
   // to ground coordinates when it its changed to a matrix.
   quaternion rotation = quaternion::Identity();
 
+  // Set up a timer that expires every 20 ms.
   int timerfd = timerfd_create(CLOCK_MONOTONIC, 0);
   if (timerfd == -1)
   {
@@ -186,18 +180,13 @@ void ahrs(imu & imu, fuse_function * fuse, rotation_output_function * output)
     throw posix_error("Failed to set timerfd interval");
   }
 
-  // TODO: clean up the timing stuff
-  int start = millis(); // truncate 64-bit return value
-  auto start2 = std::chrono::steady_clock::now();
+  auto start = std::chrono::steady_clock::now();
   while(1)
   {
-    auto last_start2 = start2;
-    start2 = std::chrono::steady_clock::now();
-    std::chrono::nanoseconds dt2 = start2 - last_start2;
-
-    start = millis();
-
-    float dt = dt2.count() / 1e9;
+    auto last_start = start;
+    start = std::chrono::steady_clock::now();
+    std::chrono::nanoseconds duration = start - last_start;
+    float dt = duration.count() / 1e9;
     if (dt < 0){ throw std::runtime_error("Time went backwards."); }
 
     vector angular_velocity = imu.read_gyro();
@@ -209,8 +198,6 @@ void ahrs(imu & imu, fuse_function * fuse, rotation_output_function * output)
     output(rotation);
     std::cout << "  " << acceleration << "  " << magnetic_field << std::endl;
 
-    // Ensure that each iteration of the loop takes at least 20 ms.
-    //while(millis() - start < 20) { usleep(1000); }
     uint64_t expirations = 0;
     ssize_t read_result = read(timerfd, &expirations, sizeof(expirations));
     if (read_result != 8)
