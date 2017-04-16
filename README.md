@@ -48,7 +48,8 @@ If this information doesn't work for you, please search Google for tips about
 how to enable I²C for your particular board and your particular Linux
 distribution.
 
-Here are some other related resources that might be useful for you when figuring out how to enable I²C:
+Here are some other related resources that might be useful for you when
+figuring out how to enable I²C:
 
 * [Configuring Your Pi for I²C by Adafruit](http://learn.adafruit.com/adafruit-16-channel-servo-driver-with-raspberry-pi/configuring-your-pi-for-i2c/)
 * [Guide to interfacing a Gyro and Accelerometer with a Raspberry Pi](http://ozzmaker.com/berryimu/)
@@ -95,7 +96,8 @@ MinIMU-9 are listed below:
 | GPIO 0 (SDA)     | SDA          |
 | GPIO 1 (SCL)     | SCL          |
 
-Below is a [picture][wiring_pic] with a MinIMU-9 v2 showing how to make those connections:
+Below is a [picture][wiring_pic] with a MinIMU-9 v2 showing how to make those
+connections:
 
 [![][wiring_pic_small]][wiring_pic]
 
@@ -243,9 +245,12 @@ angles of the board in degrees.  All three Euler angles should be close zero
 when the board is oriented with the Z axis facing down and the X axis facing
 towards magnetic north.  From that starting point:
 
-* A positive `yaw` corresponds to a rotation about the Z axis that is clockwise when viewed from above.
-* A positive `pitch` correspond to a rotation about the Y axis that would cause the X axis to aim higher into the sky.
-* A positive `roll` would correspond to a counter-clockwise rotation about the X axis.
+* A positive `yaw` corresponds to a rotation about the Z axis that is
+  clockwise when viewed from above.
+* A positive `pitch` correspond to a rotation about the Y axis that would
+  cause the X axis to aim higher into the sky.
+* A positive `roll` would correspond to a counter-clockwise rotation about
+  the X axis.
 
 The way you should think about it is that board starts in the neutral position,
 then the yaw rotation is applied, then the pitch rotation is applied, and then
