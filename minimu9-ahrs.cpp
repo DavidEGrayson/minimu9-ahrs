@@ -5,6 +5,7 @@
 #include "version.h"
 #include "prog_options.h"
 #include "minimu9.h"
+#include "exceptions.h"
 #include <iostream>
 #include <iomanip>
 #include <stdio.h>
@@ -12,6 +13,7 @@
 #include <unistd.h>
 #include <time.h>
 #include <sys/time.h>
+#include <sys/timerfd.h>
 #include <system_error>
 #include <chrono>
 
@@ -168,6 +170,21 @@ void ahrs(imu & imu, fuse_function * fuse, rotation_output_function * output)
   // to ground coordinates when it its changed to a matrix.
   quaternion rotation = quaternion::Identity();
 
+  int timerfd = timerfd_create(CLOCK_MONOTONIC, 0);
+  if (timerfd == -1)
+  {
+    throw posix_error("Failed to create timerfd.");
+  }
+
+  struct itimerspec spec = { 0 };
+  spec.it_value.tv_nsec = 1;
+  spec.it_interval.tv_nsec = 20000000;
+  int result = timerfd_settime(timerfd, 0, &spec, NULL);
+  if (result == -1)
+  {
+    throw posix_error("Failed to set timerfd interval.");
+  }
+
   // TODO: clean up the timing stuff
   int start = millis(); // truncate 64-bit return value
   auto start2 = std::chrono::steady_clock::now();
@@ -181,7 +198,7 @@ void ahrs(imu & imu, fuse_function * fuse, rotation_output_function * output)
 
     float dt = dt2.count() / 1e9;
     if (dt < 0){ throw std::runtime_error("Time went backwards."); }
-    std::cout << dt*1e9 << "  ";
+    //std::cout << dt*1e9 << "  ";
 
     vector angular_velocity = imu.read_gyro();
     vector acceleration = imu.read_acc();
@@ -193,9 +210,12 @@ void ahrs(imu & imu, fuse_function * fuse, rotation_output_function * output)
     std::cout << "  " << acceleration << "  " << magnetic_field << std::endl;
 
     // Ensure that each iteration of the loop takes at least 20 ms.
-    while(millis() - start < 20)
+    //while(millis() - start < 20) { usleep(1000); }
+    uint64_t expirations = 0;
+    ssize_t read_result = read(timerfd, &expirations, sizeof(expirations));
+    if (read_result != 8)
     {
-      usleep(1000);
+      throw std::runtime_error("Failed to read from timer.");
     }
   }
 }
