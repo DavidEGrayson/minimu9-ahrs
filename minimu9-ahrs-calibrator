@@ -72,42 +72,17 @@ class Calibration:
   def scaled_readings(self):
     return [self.scale(r) for r in self.raw_readings]
 
-  def score(self):
-    return -average([(m - 1.0)**2 for m in self.scaled_magnitudes()])
-
-def negative_score(values, raw_readings):
-  cal = Calibration(values, raw_readings)
-  return -cal.score()
 
 def run(file=sys.stdin):
   try:
-    print("Reading data...", end="", file=sys.stderr)
     raw_readings = read_vectors(file)
-    print(" done.", file=sys.stderr)
 
     if len(raw_readings) < 300:
-      print("Warning: Only " + str(len(raw_readings)) + " readings were provided.", file=sys.stderr)
+      print("Warning: Only " + str(len(raw_readings)) + " readings were provided.",
+            file=sys.stderr)
 
-    print("Optimizing calibration...", end="", file=sys.stderr)
-    if verbose:
-      print("", file=sys.stderr)
-
-    cal1 = guess(raw_readings)
-    if verbose:
-      print("Initial calibration: " + cal1.info_string(), file=sys.stderr)
-
-    cal_values = scipy.optimize.fmin(negative_score, cal1.values, \
-                                     args=[raw_readings], maxiter=1000, \
-                                     full_output=False, disp=verbose, retall=False)
-    cal = Calibration(cal_values, raw_readings)
-    print(" done.", file=sys.stderr)
-
-    if verbose:
-      print("Final calibration: " + cal.info_string())
-
+    cal = simple_minmax_calibration(raw_readings)
     print(cal)
-
-    warn_about_bad_calibration(cal, raw_readings)
 
   except UserError as e:
     print("Error: " + str(e), file=sys.stderr)
@@ -120,28 +95,13 @@ def read_vectors(file):
   vectors = [Vector(*[int(s) for s in line.split()[0:3]]) for line in file]
   return vectors
 
-def guess(readings):
+def simple_minmax_calibration(readings):
   guess = []
   for axis in Axes:
     values = [v[axis] for v in readings]
-    guess.extend(percentile_to_value(values, 1, 99))
+    guess.extend([min(values), max(values)])
   return Calibration(guess, readings)
 
-def warn_about_bad_calibration(cal, raw_vectors):
-  warn = False
-  for axis in Axes:
-    readings = [v[axis] for v in raw_vectors]
-    min_reading = min(readings)
-    max_reading = max(readings)
-    min_cal = cal.values[axis * 2]
-    max_cal = cal.values[axis * 2 + 1]
-    if min_cal < min_reading - (max_reading - min_reading) or \
-      max_cal > max_reading + (max_reading - min_reading):
-      warn = True
-      break
-  if warn:
-    print("Warning: The generated calibration appears to be wrong; " +
-      "please try again with a different data set.", file=sys.stderr)
 
 if __name__=='__main__':
   run()
