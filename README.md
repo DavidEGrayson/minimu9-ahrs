@@ -33,10 +33,8 @@ First, you need to make sure your system supports I²C.  Try typing
 `ls /dev/i2c*`: if you don't see a device there named something like
 `/dev/i2c-0` then your I²C is not enabled properly.
 
-On a *Raspberry Pi running Raspbian*, the I²C support is provided by kernel
-modules named `i2c-bcm2708` and `i2c-dev`.  You should run `sudo raspi-config`
-and browse its menus to find the option to enable thise modules to load
-automatically when you boot up.
+On a **Raspberry Pi running Raspbian**, you should run `sudo raspi-config`
+and browse its menus to find the option to enable I²C.
 
 If that does not work here are some other things to try: Add `i2c-bcm2708` and
 `i2c-dev` to to the list in `/etc/modules` so they get loaded automatically when
