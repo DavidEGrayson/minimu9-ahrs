@@ -13,6 +13,7 @@
 #include <time.h>
 #include <sys/time.h>
 #include <system_error>
+#include <chrono>
 
 // TODO: print warning if accelerometer magnitude is not close to 1 when starting up
 
@@ -167,13 +168,20 @@ void ahrs(imu & imu, fuse_function * fuse, rotation_output_function * output)
   // to ground coordinates when it its changed to a matrix.
   quaternion rotation = quaternion::Identity();
 
+  // TODO: clean up the timing stuff
   int start = millis(); // truncate 64-bit return value
+  auto start2 = std::chrono::steady_clock::now();
   while(1)
   {
-    int last_start = start;
+    auto last_start2 = start2;
+    start2 = std::chrono::steady_clock::now();
+    std::chrono::nanoseconds dt2 = start2 - last_start2;
+
     start = millis();
-    float dt = (start-last_start)/1000.0;
+
+    float dt = dt2.count() / 1e9;
     if (dt < 0){ throw std::runtime_error("Time went backwards."); }
+    std::cout << dt*1e9 << "  ";
 
     vector angular_velocity = imu.read_gyro();
     vector acceleration = imu.read_acc();
@@ -182,7 +190,7 @@ void ahrs(imu & imu, fuse_function * fuse, rotation_output_function * output)
     fuse(rotation, dt, angular_velocity, acceleration, magnetic_field);
 
     output(rotation);
-    std::cout << "  " << acceleration << "  " << magnetic_field << std::endl << std::flush;
+    std::cout << "  " << acceleration << "  " << magnetic_field << std::endl;
 
     // Ensure that each iteration of the loop takes at least 20 ms.
     while(millis() - start < 20)
