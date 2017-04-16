@@ -158,7 +158,7 @@ permissions properly as described above.
 If you get a "No such file or directory" error referring to your I²C device,
 make sure that you have properly enabled I²C as described above.
 
-### Building From Source
+### Building from source
 
 To build `minimu9-ahrs`, you first need to isntall some libraries that it
 depends on.  On Raspbian, you can install these dependencies by running:
@@ -177,7 +177,7 @@ Finally, to install minimu9-ahrs onto your system, run:
 I no longer distribute Debian packages for this program, so I recommend building
 it from source as described here.
 
-h3. Looking at raw values
+### Looking at raw values
 
 As a first test, you should look at the raw readings from the sensors on your
 IMU to make sure it is OK.  Run `minimu9-ahrs --mode raw`.  The output should
@@ -192,7 +192,7 @@ look something like this:
 ```
 
 **Yes, there will be noise in all the readings, even if your IMU is not moving
-at all.** That is totally normal for almost any kind of sensor.
+at all.** That is totally normal.
 
 This output consists of three vectors.  From left to right they are the raw
 magnetometer reading, the raw accelerometer reading, and the raw gyro reading.
@@ -202,8 +202,7 @@ when the X axis of the board is pointing straight up, the accelerometer's X
 reading (the 4th number on each line) should be positive and the other two
 components of the acceleration should be close to zero.
 
-
-## Calibrating
+### Calibrating
 
 The magnetometer will need to be calibrated to create a mapping from the
 ellipsoid shape of the raw readings to the unit sphere shape that we want the
@@ -221,12 +220,12 @@ many different orientations as possible.  Once the script has collected enough
 data, it saves the data to `~/.minimu9-ahrs-cal-data` and then runs a separate
 Python script (`minimu9-ahrs-calibrator`) to create a calibration.
 
-The Python script used to use a complicated algorithm powered by SciPy that
-would take about 20 minutes to run.  Currently, the script just uses a very
-simple algorithm that finds the minimum and maximum values of each axis of the
-magnetometer and uses those as the calibration values.  This is probably not the
-best way to calibrate your magnetometer; there are more advanced ways that might
-work better.
+The Python script previously had a complicated algorithm powered by SciPy that
+would take about 20 minutes to run and was not reliable.  Currently, the script
+just uses a very simple algorithm that finds the minimum and maximum values of
+each axis of the magnetometer and uses those as the calibration values.  This is
+probably not the best way to calibrate your magnetometer; there are more
+advanced ways that might work better.
 
 The `minimu9-ahrs-calibrate` script saves the calibration file to
 `~/.minimu9-ahrs-cal`.  The calibration file is simply a one-line file with 6
@@ -270,7 +269,7 @@ and a precise description of its output format, view the man page by running
 * [RTIMULib2](https://github.com/RTIMULib/RTIMULib2) - another project
   that works with the MinIMU-9 and the Raspberry Pi.
 
-## Version History
+## Version history
 
 - 3.0.0 (2017-04-15):
   - Added support for the MinIMU-9 v5 (LSM6DS33 and LIS3MDL).
