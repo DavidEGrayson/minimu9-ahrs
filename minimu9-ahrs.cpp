@@ -6,6 +6,7 @@
 #include "prog_options.h"
 #include "minimu9.h"
 #include "exceptions.h"
+#include "pacer.h"
 #include <iostream>
 #include <iomanip>
 #include <stdio.h>
@@ -13,7 +14,6 @@
 #include <unistd.h>
 #include <time.h>
 #include <sys/time.h>
-#include <sys/timerfd.h>
 #include <pthread.h>
 #include <system_error>
 #include <chrono>
@@ -165,20 +165,8 @@ void ahrs(imu & imu, fuse_function * fuse, rotation_output_function * output)
   quaternion rotation = quaternion::Identity();
 
   // Set up a timer that expires every 20 ms.
-  int timerfd = timerfd_create(CLOCK_MONOTONIC, 0);
-  if (timerfd == -1)
-  {
-    throw posix_error("Failed to create timerfd");
-  }
-
-  struct itimerspec spec = { 0 };
-  spec.it_value.tv_nsec = 1;
-  spec.it_interval.tv_nsec = 20000000;
-  int result = timerfd_settime(timerfd, 0, &spec, NULL);
-  if (result == -1)
-  {
-    throw posix_error("Failed to set timerfd interval");
-  }
+  pacer loop_pacer;
+  loop_pacer.set_period_ns(20000000);
 
   auto start = std::chrono::steady_clock::now();
   while(1)
@@ -198,12 +186,7 @@ void ahrs(imu & imu, fuse_function * fuse, rotation_output_function * output)
     output(rotation);
     std::cout << "  " << acceleration << "  " << magnetic_field << std::endl;
 
-    uint64_t expirations = 0;
-    ssize_t read_result = read(timerfd, &expirations, sizeof(expirations));
-    if (read_result != 8)
-    {
-      throw std::runtime_error("Failed to read from timer.");
-    }
+    loop_pacer.pace();
   }
 }
 

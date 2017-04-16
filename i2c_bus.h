@@ -10,13 +10,13 @@ public:
   i2c_bus();
 
   // Move constructor
-  i2c_bus(i2c_bus &&) = default;
+  i2c_bus(i2c_bus &&);
 
   // Copy constructor
   i2c_bus(const i2c_bus &);
 
   // Move assignment operator
-  i2c_bus & operator=(i2c_bus &&) = default;
+  i2c_bus & operator=(i2c_bus &&);
 
   // Copy assignment operator
   i2c_bus & operator=(const i2c_bus &);
