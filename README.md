@@ -97,7 +97,7 @@ MinIMU-9 are listed below:
 
 Below is a [picture][wiring_pic] with a MinIMU-9 v2 showing how to make those connections:
 
-![][wiring_pic_small]
+[![][wiring_pic_small]][wiring_pic]
 
 You will need four female-female jumper wires designed for 0.1"-spaced pins.
 Pololu's [Female-Female Premium Jumper Wires][ffwires] work well.
