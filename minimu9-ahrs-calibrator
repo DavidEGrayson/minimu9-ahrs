@@ -3,12 +3,8 @@
 from __future__ import print_function
 import sys
 import math
-import scipy.optimize
 
 verbose = False
-
-class UserError(Exception):
-  pass
 
 def average(list):
   return sum(list)/len(list)
@@ -59,11 +55,10 @@ class Calibration:
     return "%d %d %d %d %d %d" % tuple(self.values)
 
   def info_string(self):
-    return "%-32s  avg=%7.4f stdev=%7.4f score=%7.4f" % (
+    return "%-32s  avg=%7.4f stdev=%7.4f" % (
       str(self),
       average(self.scaled_magnitudes()),
-      std_deviation(self.scaled_magnitudes()),
-      self.score()
+      std_deviation(self.scaled_magnitudes())
     )
 
   def scaled_magnitudes(self):
@@ -82,10 +77,11 @@ def run(file=sys.stdin):
             file=sys.stderr)
 
     cal = simple_minmax_calibration(raw_readings)
-    print(cal)
 
-  except UserError as e:
-    print("Error: " + str(e), file=sys.stderr)
+    if verbose:
+      print("calibration info: " + cal.info_string(), file=sys.stderr)
+
+    print(cal)
 
   except KeyboardInterrupt:
     print("", file=sys.stderr)   # newline to tidy things up
