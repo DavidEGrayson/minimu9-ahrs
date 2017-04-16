@@ -137,7 +137,7 @@ void lsm303::handle::read_mag()
   {
     // LSM303D: XYZ order, little endian
     i2c.write_byte_and_read(config.i2c_address_mag,
-      0x80 | OUT_X_L_M, block, sizeof(block));
+      0x80 | D_OUT_X_L_M, block, sizeof(block));
     m[0] = (int16_t)(block[0] | block[1] << 8);
     m[1] = (int16_t)(block[2] | block[3] << 8);
     m[2] = (int16_t)(block[4] | block[5] << 8);
@@ -146,7 +146,7 @@ void lsm303::handle::read_mag()
   {
     // LSM303DLH: XYZ order, big endian
     i2c.write_byte_and_read(config.i2c_address_mag,
-      0x80 | OUT_X_H_M, block, sizeof(block));
+      0x80 | DLH_OUT_X_H_M, block, sizeof(block));
     m[0] = (int16_t)(block[1] | block[0] << 8);
     m[1] = (int16_t)(block[3] | block[2] << 8);
     m[2] = (int16_t)(block[5] | block[4] << 8);
@@ -155,7 +155,7 @@ void lsm303::handle::read_mag()
   {
     // LSM303DLM, LSM303DLHC: XZY order, big endian (and same addresses)
     i2c.write_byte_and_read(config.i2c_address_mag,
-      0x80 | OUT_X_H_M, block, sizeof(block));
+      0x80 | DLM_OUT_X_H_M, block, sizeof(block));
     m[0] = (int16_t)(block[1] | block[0] << 8);
     m[1] = (int16_t)(block[5] | block[4] << 8);
     m[2] = (int16_t)(block[3] | block[2] << 8);
