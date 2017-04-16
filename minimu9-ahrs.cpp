@@ -133,7 +133,7 @@ void fuse_default(quaternion & rotation, float dt, const vector & angular_veloci
 {
   vector correction = vector(0, 0, 0);
 
-  if (abs(acceleration.norm() - 1) <= 0.3)
+  if (fabs(acceleration.norm() - 1) <= 0.3)
   {
     // The magnetidude of acceleration is close to 1 g, so
     // it might be pointing up and we can do drift correction.

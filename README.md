@@ -26,6 +26,8 @@ See the [ahrs-visualizer project] if you are interesting in displaying the outpu
 - 3.0.0 (2017-04-15):
   - Added support for the MinIMU-9 v5 (LSM6DS33 and LIS3MDL).
   - Added support for a configuration file at `~/.minimu9-ahrs`.
+  - Fixed a bug that resulted in corrections from the accelerometer always being applied
+    even if the acceleration magnitude was not close to 1 g (thanks nxdefiant).
   - Use a Linux timerfd for more accurate timing (thanks to nxdefiant for the idea).
   - Made the `minimu9-ahrs-calibrate` script store the raw data in `~/.minimu9-ahrs-cal-data`.
   - Changed the minimu9-ahrs-calibrator Python script to just do simple minima/maxima because the fancy optimization algorithm was not reliable.
