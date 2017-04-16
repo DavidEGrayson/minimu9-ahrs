@@ -36,7 +36,7 @@ First, you need to make sure your system supports I²C.  Try typing
 On a **Raspberry Pi running Raspbian**, you should run `sudo raspi-config`
 and browse its menus to find the option to enable I²C.
 
-If that does not work here are some other things to try: Add `i2c-bcm2708` and
+If that does not work, here are some other things to try: Add `i2c-bcm2708` and
 `i2c-dev` to to the list in `/etc/modules` so they get loaded automatically when
 you boot up.  Add the line `dtparam=i2c1=on` to the bottom of
 `/boot/config.txt` to enable the Raspberry Pi's external I2C interface.  After
@@ -56,7 +56,7 @@ Here are some other related resources that might be useful for you when figuring
 ### Managing device permissions
 
 After enabling the I²C devices, you should set them up so that your user has
-permission to access them.  That way, you won't have to run sudo.
+permission to access them.  That way, you won't have to run `sudo`.
 
 First, run `groups` to see what groups your user belongs to.  If `i2c` is on the
 list, then that is good.  If you are not on the `i2c` group, then you should add
@@ -97,7 +97,7 @@ MinIMU-9 are listed below:
 
 Below is a [picture][wiring_pic] with a MinIMU-9 v2 showing how to make those connections:
 
-[][wiring_pic_small]
+![][wiring_pic_small]
 
 You will need four female-female jumper wires designed for 0.1"-spaced pins.
 Pololu's [Female-Female Premium Jumper Wires][ffwires] work well.
