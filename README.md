@@ -13,8 +13,8 @@ and similar boards over I²C.  It supports the following sensor chips:
 * L3GD20 gyro
 * L3G4200D gyro
 
-This program works with any board that has a magnetometer, acceleromter, and
-a gyro from the list above.  This includes the following Pololu products:
+This program works with any board that has a magnetometer, acceleromter, and a
+gyro from the list above.  This includes the following Pololu products:
 
 * MinIMU-9 [v0][mv0], [v1][mv1], [v2][mv2], [v3][mv3], [v5][mv5]
 * AltIMU-10 [v3][av3], [v4][av4], [v5][av5]
@@ -29,9 +29,9 @@ work on any embedded Linux board that supports I²C.
 
 ### Enabling I²C
 
-First, you need to make sure your system supports I²C.  Try typing @ls
-/dev/i2c*@: if you don't see a device there named something like @/dev/i2c-0@
-then your I²C is not enabled properly.
+First, you need to make sure your system supports I²C.  Try typing
+`ls /dev/i2c*`: if you don't see a device there named something like
+`/dev/i2c-0` then your I²C is not enabled properly.
 
 On a *Raspberry Pi running Raspbian*, the I²C support is provided by kernel
 modules named `i2c-bcm2708` and `i2c-dev`.  You should run `sudo raspi-config`
