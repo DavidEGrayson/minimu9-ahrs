@@ -105,12 +105,12 @@ Pololu's [Female-Female Premium Jumper Wires][ffwires] work well.
 ### Determining which bus to use
 
 The default I²C bus used by this program is `/dev/i2c-0`.  If you want to use a
-different bus, you should make a configuration file in your home directory,
-`~/.minimu9-ahrs`, with a single line of the form `i2c-bus=BUSNAME`, where
+different bus, you should make a configuration file in your home directory named
+`~/.minimu9-ahrs` with a single line of the form `i2c-bus=BUSNAME`, where
 `BUSNAME` is the full path to the bus you want to use.
 
 Unless you have a very old Raspberry Pi, the exposed I²C bus is actually
-`/dev/i2c-1` instead of bus 0, so your `~/.minimu9-ahrs` config file should
+`/dev/i2c-1` instead of `/dev/i2c-0`, so your `~/.minimu9-ahrs` config file should
 read:
 
     i2c-bus=/dev/i2c-1
@@ -124,7 +124,22 @@ After you have enabled I²C, given yourself the proper permissions, soldered the
 MinIMU-9, and connected it to the Raspberry Pi, you should check your setup by
 running `i2cdetect`.  Try running `i2cdetect -y N`, where `N` is the number of
 the I²C bus you want to use (typically 1 or 0).  The output should look similar
-to [this][i2cdetect_sample].  The exact output will depend on the type of IMU
+to this:
+
+```
+$ i2cdetect -y 1
+     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
+00:          -- -- -- -- -- -- -- -- -- -- -- -- --
+10: -- -- -- -- -- -- -- -- -- -- -- -- -- 1d -- --
+20: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+30: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+40: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+50: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+60: -- -- -- -- -- -- -- -- -- -- -- 6b -- -- -- --
+70: -- -- -- -- -- -- -- --
+```
+
+The exact output will depend on the type of IMU
 you are using, but the important thing is that the body of the printed table
 should contain a few hex numbers representing the addresses of I²C devices that
 were detected on the bus.
