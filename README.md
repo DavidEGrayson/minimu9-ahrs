@@ -259,6 +259,41 @@ the roll rotation is applied to get the board to its final position.
 Look at the Euler angle output as you turn the board and make sure that it looks
 good.
 
+
+## Building for python
+
+You can also use this driver with python.
+To do that you need to install python library for boost:
+
+```
+sudo apt-get install libboost-python-dev
+```
+
+**Warning!** The default size for swap for raspberry pi is 100MB - this might be not enough for extending python. In case of memory problems see [this link](https://raspberrypi.stackexchange.com/questions/70/how-to-set-up-swap-space) and try icreasing swap space.
+
+To build python bindings do:
+
+```
+make
+sudo python setup.py install
+```
+Building python wrapper can be time consuming, so at thi point you may want to go and make yourself nice cup of cofee.
+Currently, python bindings allow you to only use the raw input. This is only very basic python wrapper. The usage is as follows:
+
+```
+from minimu import Minimu
+i2c_bus_name = '/dev/i2c-1'
+driver = Minimu(i2c_bus_name)
+driver.connect()
+driver.read()
+# 
+# [-8877, -1278, -269, -958, 3461, 2049, 4175, 4908, 4814]
+#
+# The values are:
+# imu.m[0], imu.m[1], imu.m[2], imu.a[0], imu.a[1], imu.a[2], imu.g[0], imu.g[1], imu.g[2]
+```
+
+
 ## Man page
 
 For more information about `minimu9-ahrs`, including all the options it supports
