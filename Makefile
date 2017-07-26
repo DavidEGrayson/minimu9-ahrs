@@ -13,7 +13,7 @@ CPPFLAGS += $(shell pkg-config --cflags $(EIGEN_NAME))
 CPPFLAGS += -Wall
 
 # Use a modern language
-CPPFLAGS += --std=gnu++11
+CPPFLAGS += -std=gnu++11
 
 # Use boost libraries
 LDLIBS += -lboost_program_options
