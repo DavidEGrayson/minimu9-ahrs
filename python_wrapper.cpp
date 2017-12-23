@@ -1,25 +1,33 @@
-#include <boost/python.hpp>
 #include "lsm6.h"
 #include "lis3mdl.h"
-#include <minimu9.h>
+#include "minimu9.h"
+
+#include <boost/python.hpp>
+
 #include <string>
 #include <vector>
 #include <iostream>
+
 using namespace boost::python;
 
 namespace py = boost::python;
 
 class minimu
 {
-	public:
+public:
 	minimu9::handle imu;
 	minimu9::comm_config config;
-	minimu(std::string device){
+
+	minimu(std::string device)
+  {
 		sensor_set set;
 		set.mag = set.acc = set.gyro = true;
+
 		config = minimu9::auto_detect(device);
+
 		sensor_set missing = set - minimu9::config_sensor_set(config);
 
+    // TODO: don't write to cerr, a well-behaved library should not do that
 		if (missing)
 		{
 			if (missing.mag)
@@ -36,16 +44,18 @@ class minimu
 			}
 			std::cerr << "Error: Needed sensors are missing." << std::endl;
 		}
-		config = minimu9::disable_redundant_sensors(config, set);
-		
 
+		config = minimu9::disable_redundant_sensors(config, set);
 	}
-	void connect(){
+
+	void connect()
+  {
 		imu.open(config);
 		imu.enable();
 	}
 
-	py::list read(){
+	py::list read()
+  {
 		imu.read_raw();
 		py::list l;
 		l.append(imu.m[0]);
@@ -65,6 +75,5 @@ BOOST_PYTHON_MODULE(minimu)
 {
 	class_<minimu>("Minimu", init<std::string>())
 		.def("read", &minimu::read)
-		.def("connect", &minimu::connect)
-	;
+		.def("connect", &minimu::connect);
 }
