@@ -288,6 +288,7 @@ To build the Python bindings, run:
 
 ```text
 sudo apt-get install libboost-python-dev
+pip install pkgconfig
 make
 sudo python setup.py install
 ```
