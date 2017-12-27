@@ -294,8 +294,8 @@ sudo python setup.py install
 ```
 
 Note that the default size for swap for raspberry pi is 100MB.  To successfully
-not enough for build Python extensions, you might need to [add more swap space]
-(https://raspberrypi.stackexchange.com/questions/70/how-to-set-up-swap-space).
+not enough for build Python extensions, you might need to
+[add more swap space](https://raspberrypi.stackexchange.com/questions/70/how-to-set-up-swap-space).
 
 Here is some example code for using the Python wrapper:
 
