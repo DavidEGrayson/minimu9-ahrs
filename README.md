@@ -267,50 +267,6 @@ and a precise description of its output format, view the man page by running
 `man minimu9-ahrs`.
 
 
-## Building Python bindings
-
-This project includes a user-contributed Python extension that lets you read raw
-sensor values directly into a Python program without running an external
-program.  This might be useful to some people because it gives you more control
-over the timing of when sensor values are read, and it avoids the overhead of
-string formatting and string parsing.
-
-Note that the Python extension has some issues: I have not tested it to see how
-its error handling works (so there might be no error handling), and if something
-goes wrong during initialization then it will print error messages to the
-standard error pipe.
-
-If you don't like using Python or using this Python extension,
-please note that you can run `minimu9-ahrs` as a command-line program from any
-programming language to access raw or processed sensor readings.
-
-To build the Python bindings, run:
-
-```text
-sudo apt-get install libboost-python-dev
-pip install pkgconfig
-make
-sudo python setup.py install
-```
-
-Note that the default size for swap for raspberry pi is 100MB.  To successfully
-not enough for build Python extensions, you might need to [add more swap space]
-(https://raspberrypi.stackexchange.com/questions/70/how-to-set-up-swap-space).
-
-Here is some example code for using the Python wrapper:
-
-```python
-from minimu import Minimu
-i2c_bus_name = '/dev/i2c-1'
-driver = Minimu(i2c_bus_name)
-driver.connect()
-driver.read()
-#
-# [-8877, -1278, -269, -958, 3461, 2049, 4175, 4908, 4814]
-#
-# The values are: MX MY MZ AX AY AZ GX GY GZ
-```
-
 ## Related projects
 
 * [ahrs-visualizer] - another program by me that provides a 3D display of
