@@ -31,7 +31,7 @@ minimu9::comm_config minimu9::auto_detect(const std::string & i2c_bus_name)
 
   // Detect LIS3MDL devices.
   {
-    auto addrs = { lis3mdl::SA1_LOW_ADDR, lis3mdl::SA1_LOW_ADDR };
+    auto addrs = { lis3mdl::SA1_LOW_ADDR, lis3mdl::SA1_HIGH_ADDR };
     for (uint8_t addr : addrs)
     {
       int result = bus.try_write_byte_and_read_byte(addr, lis3mdl::WHO_AM_I);
