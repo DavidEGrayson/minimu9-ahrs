@@ -12,8 +12,8 @@ namespace lis3mdl
 
   enum i2c_addr
   {
-    SA1_LOW_ADDR = 0x1E,
-    SA1_HIGH_ADDR = 0x1C,
+    SA1_LOW_ADDR = 0x1C,
+    SA1_HIGH_ADDR = 0x1E,
   };
 
   enum reg_addr
