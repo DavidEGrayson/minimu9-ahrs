@@ -6,8 +6,6 @@
 // raw vectors.
 
 #include "imu.h"
-#include "lsm303.h"
-#include "l3g.h"
 #include "lsm6.h"
 #include "lis3mdl.h"
 #include "lps25h.h"

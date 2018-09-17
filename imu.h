@@ -17,7 +17,8 @@ public:
   virtual void read_acc_raw() = 0;
   virtual void read_mag_raw() = 0;
   virtual void read_gyro_raw() = 0;
-
+  virtual void read_temp_raw() = 0;
+  virtual void read_press_raw() = 0;
 
   virtual float get_acc_scale() const = 0;
   virtual float get_gyro_scale() const = 0;
@@ -39,7 +40,7 @@ public:
 
   virtual uint32_t read_temp() = 0;
   virtual uint32_t read_press() = 0;
-  
+
   void read(){ read_mag(); read_acc(); read_gyro(); read_temp(); read_press(); }
 
   virtual void measure_offsets() = 0;

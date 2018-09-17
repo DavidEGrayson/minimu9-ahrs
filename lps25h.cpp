@@ -29,9 +29,9 @@ void lps25h::handle::enable()
     uint8_t xlow;
     uint8_t low;
     uint8_t high;
-    i2c_write_byte_and_read(config.i2c_address, REF_P_XL, xlow, sizeof(xlow));
-    i2c.write_byte_and_read(config.i2c_address, REF_P_L, low, sizeof(low));
-    i2c.write_byte_and_read(config.i2c_address, REF_P_H, high, sizeof(high));
+    i2c.write_byte_and_read(config.i2c_address, REF_P_XL, &xlow, 1);
+    i2c.write_byte_and_read(config.i2c_address, REF_P_L, &low, 1);
+    i2c.write_byte_and_read(config.i2c_address, REF_P_H, &high, 1);
     refp = (int32_t)(xlow | low << 8 | high << 16);
   }
   else
@@ -49,8 +49,8 @@ void lps25h::handle::read_temp()
 {
   uint8_t low;
   uint8_t high;
-  i2c.write_byte_and_read(config.i2c_address, TEMP_OUT_L, low, sizeof(low));
-  i2c.write_byte_and_read(config.i2c_address, TEMP_OUT_H, high, sizeof(high));
+  i2c.write_byte_and_read(config.i2c_address, TEMP_OUT_L, &low, 1);
+  i2c.write_byte_and_read(config.i2c_address, TEMP_OUT_H, &high, 1);
   t = (int16_t)(low | high << 8);
 }
 
@@ -59,9 +59,9 @@ void lps25h::handle::read_press()
   uint8_t xlow;
   uint8_t low;
   uint8_t high;
-  i2c_write_byte_and_read(config.i2c_address, PRESS_OUT_XL, xlow, sizeof(xlow));
-  i2c.write_byte_and_read(config.i2c_address, PRESS_OUT_L, low, sizeof(low));
-  i2c.write_byte_and_read(config.i2c_address, PRESS_OUT_H, high, sizeof(high));
+  i2c.write_byte_and_read(config.i2c_address, PRESS_POUT_XL, &xlow, 1);
+  i2c.write_byte_and_read(config.i2c_address, PRESS_OUT_L, &low, 1);
+  i2c.write_byte_and_read(config.i2c_address, PRESS_OUT_H, &high, 1);
   p = (int32_t)(xlow | low << 8 | high << 16);
 }
 

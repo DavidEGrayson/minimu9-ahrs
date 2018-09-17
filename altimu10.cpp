@@ -7,7 +7,7 @@
 #include <fstream>
 #include <wordexp.h>
 
-mi::comm_config altimu10::auto_detect(const std::string & i2c_bus_name)
+altimu10::comm_config altimu10::auto_detect(const std::string & i2c_bus_name)
 {
   i2c_bus bus(i2c_bus_name.c_str());
   altimu10::comm_config config;
@@ -51,13 +51,12 @@ mi::comm_config altimu10::auto_detect(const std::string & i2c_bus_name)
   {
     auto & c = config.lps25h;
     if (lps25h::LPS25H == bus.try_write_byte_and_read_byte(
-        lps25h::LPS25H_SA0_HIGH_ADDR, lps25h::WHO_AM_I))
+        lps25h::SA0_HIGH_ADDR, lps25h::WHO_AM_I))
     {
       c.use_sensor = true;
       c.device = lps25h::LPS25H;
       c.i2c_bus_name = i2c_bus_name;
-      c.i2c_address_acc = c.i2c_address_mag =
-        lps25h::LSP25H_SA0_HIGH_ADDR;
+      c.i2c_address = lps25h::SA0_HIGH_ADDR;
     }
 
   }
@@ -282,9 +281,9 @@ vector altimu10::handle::read_gyro()
 uint32_t altimu10::handle::read_temp()
 {
   read_temp_raw();
-  return ((t/480) + 42.5)
-
+  return ((t/480) + 42.5);
 }
+
 uint32_t altimu10::handle::read_press()
 {
   read_press_raw();

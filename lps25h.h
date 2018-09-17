@@ -12,8 +12,8 @@ namespace lps25h
 
   enum i2c_addr
   {
-    SA1_LOW_ADDR = 0x5C,
-    SA1_HIGH_ADDR = 0x5D,
+    SA0_LOW_ADDR = 0x5C,
+    SA0_HIGH_ADDR = 0x5D,
   };
 
   enum reg_addr
@@ -69,7 +69,8 @@ namespace lps25h
 
     void write_reg(reg_addr addr, uint8_t value);
 
-    void read();
+    void read_temp();
+    void read_press();
 
     int16_t t;
     int32_t p;
