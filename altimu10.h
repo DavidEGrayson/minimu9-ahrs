@@ -1,10 +1,5 @@
 #pragma once
 
-// TODO: I'd rather have the minimu9 and imu class not know anything about
-// floating point vectors and calibration.  Maybe just provide floating
-// point scaling factors so that higher-level code can make sense of the
-// raw vectors.
-
 #include "imu.h"
 #include "lsm6.h"
 #include "lis3mdl.h"
@@ -47,8 +42,8 @@ namespace altimu10
     virtual vector read_acc();
     virtual vector read_mag();
     virtual vector read_gyro();
-    virtual uint32_t read_temp();
-    virtual uint32_t read_press();
+    virtual float read_temp();
+    virtual float read_press();
 
     virtual void enable();
     virtual void load_calibration();

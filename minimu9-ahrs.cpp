@@ -164,9 +164,9 @@ void ahrs(imu & imu, fuse_function * fuse, rotation_output_function * output)
   // to ground coordinates when it its changed to a matrix.
   quaternion rotation = quaternion::Identity();
 
-  // Set up a timer that expires every 20 ms.
+  // Set up a timer that expires every 1 s.
   pacer loop_pacer;
-  loop_pacer.set_period_ns(20000000);
+  loop_pacer.set_period_s(1);
 
   auto start = std::chrono::steady_clock::now();
   while(1)
@@ -180,8 +180,8 @@ void ahrs(imu & imu, fuse_function * fuse, rotation_output_function * output)
     vector angular_velocity = imu.read_gyro();
     vector acceleration = imu.read_acc();
     vector magnetic_field = imu.read_mag();
-    uint32_t temperature = imu.read_temp();
-    uint32_t pressure = imu.read_press();
+    float temperature = imu.read_temp();
+    float pressure = imu.read_press();
     fuse(rotation, dt, angular_velocity, acceleration, magnetic_field);
 
     output(rotation);

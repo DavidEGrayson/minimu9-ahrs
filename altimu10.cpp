@@ -278,15 +278,14 @@ vector altimu10::handle::read_gyro()
   return (vector_from_ints(&g) - gyro_offset) * get_gyro_scale();
 }
 
-uint32_t altimu10::handle::read_temp()
+float altimu10::handle::read_temp()
 {
   read_temp_raw();
-  return ((t/480) + 42.5);
+  return (((float)t/480) + 42.5);
 }
 
-uint32_t altimu10::handle::read_press()
+float altimu10::handle::read_press()
 {
   read_press_raw();
-  return ((p+refp)/4096.f);
-
+  return ((float)(p+refp)/4096.f);
 }

@@ -38,8 +38,8 @@ public:
   virtual vector read_acc() = 0;  // In body coords, with units = g
   virtual vector read_gyro() = 0; // In body coords, with units = rad/sec
 
-  virtual uint32_t read_temp() = 0;
-  virtual uint32_t read_press() = 0;
+  virtual float read_temp() = 0;
+  virtual float read_press() = 0;
 
   void read(){ read_mag(); read_acc(); read_gyro(); read_temp(); read_press(); }
 
