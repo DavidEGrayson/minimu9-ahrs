@@ -2,6 +2,8 @@
 
 #include <cstdint>
 #include <string>
+#include <linux/i2c.h>
+#include <sys/ioctl.h>
 
 class i2c_bus
 {
