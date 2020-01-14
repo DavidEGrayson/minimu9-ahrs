@@ -4,7 +4,7 @@
 #include "vector.h"
 #include "version.h"
 #include "prog_options.h"
-#include "minimu9.h"
+#include "altimu10.h"
 #include "exceptions.h"
 #include "pacer.h"
 #include <iostream>
@@ -164,9 +164,9 @@ void ahrs(imu & imu, fuse_function * fuse, rotation_output_function * output)
   // to ground coordinates when it its changed to a matrix.
   quaternion rotation = quaternion::Identity();
 
-  // Set up a timer that expires every 20 ms.
+  // Set up a timer that expires every 1 s.
   pacer loop_pacer;
-  loop_pacer.set_period_ns(20000000);
+  loop_pacer.set_period_s(1);
 
   auto start = std::chrono::steady_clock::now();
   while(1)
@@ -180,11 +180,12 @@ void ahrs(imu & imu, fuse_function * fuse, rotation_output_function * output)
     vector angular_velocity = imu.read_gyro();
     vector acceleration = imu.read_acc();
     vector magnetic_field = imu.read_mag();
-
+    float temperature = imu.read_temp();
+    float pressure = imu.read_press();
     fuse(rotation, dt, angular_velocity, acceleration, magnetic_field);
 
     output(rotation);
-    std::cout << "  " << acceleration << "  " << magnetic_field << std::endl;
+    std::cout << "  " << acceleration << "  " << magnetic_field << " " << temperature << " " << pressure << std::endl;
 
     loop_pacer.pace();
   }
@@ -211,9 +212,9 @@ int main_with_exceptions(int argc, char **argv)
   sensor_set set;
   set.mag = set.acc = set.gyro = true;
 
-  minimu9::comm_config config = minimu9::auto_detect(options.i2c_bus_name);
+  altimu10::comm_config config = altimu10::auto_detect(options.i2c_bus_name);
 
-  sensor_set missing = set - minimu9::config_sensor_set(config);
+  sensor_set missing = set - altimu10::config_sensor_set(config);
   if (missing)
   {
     if (missing.mag)
@@ -232,9 +233,7 @@ int main_with_exceptions(int argc, char **argv)
     return 1;
   }
 
-  config = minimu9::disable_redundant_sensors(config, set);
-
-  minimu9::handle imu;
+  altimu10::handle imu;
   imu.open(config);
 
   rotation_output_function * output;

@@ -5,6 +5,8 @@ struct sensor_set
   bool mag = false;
   bool acc = false;
   bool gyro = false;
+  bool temp = false;
+  bool press = false;
 
   operator bool()
   {
@@ -22,5 +24,7 @@ inline sensor_set operator-(
   r.mag = c1.mag && !c2.mag;
   r.acc = c1.acc && !c2.acc;
   r.gyro = c1.gyro && !c2.gyro;
+  r.temp = c1.temp && !c2.temp;
+  r.press = c1.press && !c2.press;
   return r;
 }
