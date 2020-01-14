@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <linux/i2c-dev.h>
+#include <linux/i2c.h>
 
 static inline std::system_error posix_error(const std::string & what)
 {
