@@ -162,7 +162,7 @@ make sure that you have properly enabled I²C as described above.
 
 ### Building from source
 
-To build `minimu9-ahrs`, you first need to isntall some libraries that it
+To build `minimu9-ahrs`, you first need to install some libraries that it
 depends on.  On Raspbian, you can install these dependencies by running:
 
     sudo apt-get install libi2c-dev libeigen3-dev libboost-program-options-dev
