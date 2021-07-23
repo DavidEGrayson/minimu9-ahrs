@@ -122,9 +122,12 @@ int i2c_bus::try_write_byte_and_read(uint8_t address, uint8_t byte,
 #ifdef DEBUG_I2C
   fprintf(stderr, "I2C write 0x%02x 0x%02x and read %u bytes: result %d,",
     address, byte, size, result);
-  for (int i = 0; i < result; i++)
+  if (result == 2)
   {
-    fprintf(stderr, " 0x%02x", data[i]);
+    for (size_t i = 0; i < size; i++)
+    {
+      fprintf(stderr, " 0x%02x", data[i]);
+    }
   }
   fprintf(stderr, "\n");
 #endif
