@@ -22,7 +22,7 @@ static opts::options_description sensor_options_desc(prog_options & options)
   opts::options_description desc("Sensor options");
   desc.add_options()
     ("i2c-bus,b",
-      opts::value<std::string>(&options.i2c_bus_name)->default_value("/dev/i2c-0"),
+      opts::value<std::string>(&options.i2c_bus_name)->default_value("/dev/i2c-1"),
      "I2C bus the IMU is connected to")
     ;
   return desc;
