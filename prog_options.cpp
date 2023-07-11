@@ -5,7 +5,7 @@
 #include <boost/program_options.hpp>
 namespace opts = boost::program_options;
 
-static opts::options_description general_options_desc(prog_options & options)
+static opts::options_description general_options_desc()
 {
   opts::options_description desc("General options");
   desc.add_options()
@@ -51,7 +51,7 @@ static opts::options_description processing_options_desc(prog_options & options)
 
 static opts::options_description command_line_options_desc(prog_options & options)
 {
-  return general_options_desc(options)
+  return general_options_desc()
     .add(sensor_options_desc(options))
     .add(processing_options_desc(options))
     ;
