@@ -18,7 +18,7 @@ minimu9::comm_config minimu9::auto_detect(const std::string & i2c_bus_name)
     for (uint8_t addr : addrs)
     {
       int result = bus.try_write_byte_and_read_byte(addr, lsm6::WHO_AM_I);
-      if (result == lsm6::LSM6DS33)
+      if (result == lsm6::LSM6DS33 || result == lsm6::LSM6DSO)
       {
         config.lsm6.use_sensor = true;
         config.lsm6.device = (lsm6::device_type)result;

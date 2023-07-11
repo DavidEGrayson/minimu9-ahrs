@@ -14,9 +14,9 @@ void lsm6::handle::open(const comm_config & config)
 
 void lsm6::handle::enable()
 {
-  if (config.device == LSM6DS33)
+  if (config.device == LSM6DS33 || config.device == LSM6DSO)
   {
-    //// LSM6DS33 gyro
+    //// LSM6DS33/LSM6DSO gyro
 
     // ODR = 1000 (1.66 kHz (high performance))
     // FS_G = 11 (2000 dps)
@@ -25,11 +25,10 @@ void lsm6::handle::enable()
     // defaults
     write_reg(CTRL7_G, 0b00000000);
 
-    //// LSM6DS33 accelerometer
+    //// LSM6DS33/LSM6DSO accelerometer
 
     // ODR = 1000 (1.66 kHz (high performance))
     // FS_XL = 11 (8 g full scale)
-    // BW_XL = 00 (400 Hz filter bandwidth)
     write_reg(CTRL1_XL, 0b10001100);
 
     //// common
@@ -51,8 +50,7 @@ void lsm6::handle::write_reg(reg_addr addr, uint8_t value)
 void lsm6::handle::read_gyro()
 {
   uint8_t block[6];
-  i2c.write_byte_and_read(config.i2c_address,
-    OUTX_L_G, block, sizeof(block));
+  i2c.write_byte_and_read(config.i2c_address, OUTX_L_G, block, sizeof(block));
   g[0] = (int16_t)(block[0] | block[1] << 8);
   g[1] = (int16_t)(block[2] | block[3] << 8);
   g[2] = (int16_t)(block[4] | block[5] << 8);
@@ -61,10 +59,8 @@ void lsm6::handle::read_gyro()
 void lsm6::handle::read_acc()
 {
   uint8_t block[6];
-  i2c.write_byte_and_read(config.i2c_address,
-    OUTX_L_XL, block, sizeof(block));
+  i2c.write_byte_and_read(config.i2c_address, OUTX_L_XL, block, sizeof(block));
   a[0] = (int16_t)(block[0] | block[1] << 8);
   a[1] = (int16_t)(block[2] | block[3] << 8);
   a[2] = (int16_t)(block[4] | block[5] << 8);
 }
-

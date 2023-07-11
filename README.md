@@ -3,6 +3,7 @@
 **minimu9-ahrs** is a program for reading sensor data from the Pololu MinIMU-9
 and similar boards over I²C.  It supports the following sensor chips:
 
+* LSM6DSO
 * LSM6DS33 accelerometer and gyro
 * LIS3MDL magnetometer
 * LSM303D magnetometer and accelerometer
@@ -16,8 +17,8 @@ and similar boards over I²C.  It supports the following sensor chips:
 This program works with any board that has a magnetometer, acceleromter, and a
 gyro from the list above.  This includes the following Pololu products:
 
-* MinIMU-9 [v0][mv0], [v1][mv1], [v2][mv2], [v3][mv3], [v5][mv5]
-* AltIMU-10 [v3][av3], [v4][av4], [v5][av5]
+* MinIMU-9 [v0][mv0], [v1][mv1], [v2][mv2], [v3][mv3], [v5][mv5], [v6][mv6]
+* AltIMU-10 [v3][av3], [v4][av4], [v5][av5], [v6][av6]
 * [Balboa 32U4 Balancing Robot Kit][balboa]
 
 The program can output the raw sensor data from the magnetometor, accelerometer,
@@ -51,8 +52,8 @@ distribution.
 Here are some other related resources that might be useful for you when
 figuring out how to enable I²C:
 
-* [Configuring Your Pi for I²C by Adafruit](http://learn.adafruit.com/adafruit-16-channel-servo-driver-with-raspberry-pi/configuring-your-pi-for-i2c/)
-* [Guide to interfacing a Gyro and Accelerometer with a Raspberry Pi](http://ozzmaker.com/berryimu/)
+* [Configuring Your Pi for I²C by Adafruit](https://learn.adafruit.com/adafruit-16-channel-servo-driver-with-raspberry-pi/configuring-your-pi-for-i2c/)
+* [Guide to interfacing a Gyro and Accelerometer with a Raspberry Pi](https://ozzmaker.com/berryimu/)
 
 ### Managing device permissions
 
@@ -279,6 +280,10 @@ and a precise description of its output format, view the man page by running
 
 ## Version history
 
+- 4.0.0 (2023-07-11):
+  - Added support for the MinIMU-9 v6 (LSM6DSO and LIS3MDL).
+  - Changed the default I²C bus to /dev/i2c-1 to better serve Raspberry Pi users.
+  - Updated the minimu9-ahrs-calibrator script to use Python 3.
 - 3.0.0 (2017-04-15):
   - Added support for the MinIMU-9 v5 (LSM6DS33 and LIS3MDL).
   - Added support for a configuration file at `~/.minimu9-ahrs`.
@@ -286,12 +291,16 @@ and a precise description of its output format, view the man page by running
     even if the acceleration magnitude was not close to 1 g (thanks nxdefiant).
   - Use a Linux timerfd for more accurate timing (thanks to nxdefiant for the idea).
   - Made the `minimu9-ahrs-calibrate` script store the raw data in `~/.minimu9-ahrs-cal-data`.
-  - Changed the minimu9-ahrs-calibrator Python script to just do simple minima/maxima because the fancy optimization algorithm was not reliable.
+  - Changed the minimu9-ahrs-calibrator Python script to just do simple minima/maxima
+    because the fancy optimization algorithm was not reliable.
   - Fixed the way boost_program_options is linked.
   - Expanded the README so it can replace the wiki.
 - 2.0.0 (2014-07-08):
   - Added support for the MinIMU-9 v3 (LSM303D and L3GD20H)
-  - Removed the right-shifting of raw accelerometer outputs; the raw readings are now signed 16-bit numbers that can range from -32768 to 32767.  Previously the readings were signed 12-bit numbers, so this new version effectively gives readings that are greater by a factor of 16.
+  - Removed the right-shifting of raw accelerometer outputs; the raw readings are now
+    signed 16-bit numbers that can range from -32768 to 32767.  Previously the readings
+    were signed 12-bit numbers, so this new version effectively gives readings that
+    are greater by a factor of 16.
   - Changed the minimu9-ahrs-calibrator Python script to use SciPy instead of the old optimization algorithm.
   - Changed the minimu9-ahrs-calibrator script to print a warning if there are fewer than 300 input vectors instead of exiting.
   - Changed the minimu9-ahrs-calibrator script to print a warning if the calibration looks wrong.
@@ -306,11 +315,13 @@ and a precise description of its output format, view the man page by running
 [av3]: https://www.pololu.com/product/2469
 [av4]: https://www.pololu.com/product/2470
 [av5]: https://www.pololu.com/product/2739
+[av6]: https://www.pololu.com/product/2863
 [mv0]: https://www.pololu.com/product/1264
 [mv1]: https://www.pololu.com/product/1265
 [mv2]: https://www.pololu.com/product/1268
 [mv3]: https://www.pololu.com/product/2468
 [mv5]: https://www.pololu.com/product/2738
+[mv6]: https://www.pololu.com/product/2862
 [balboa]: https://www.pololu.com/product/3575
 [ffwires]: https://www.pololu.com/catalog/category/66
 [wiring_pic]: http://www.davidegrayson.com/minimu9-ahrs/wiring.jpg
