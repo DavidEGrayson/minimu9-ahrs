@@ -78,7 +78,8 @@ prog_options get_prog_options(int argc, char ** argv)
   {
     // TODO: reject positional args
     auto desc = command_line_options_desc(options);
-    auto parser = opts::command_line_parser(argc, argv).options(desc);
+    auto parser = opts::command_line_parser(argc, argv).options(desc)
+      .positional(opts::positional_options_description());
     opts::store(parser.run(), vmap);
     opts::notify(vmap);
     if (vmap.count("help")) { options.show_help = true; }
