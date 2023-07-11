@@ -3,8 +3,8 @@
 **minimu9-ahrs** is a program for reading sensor data from the Pololu MinIMU-9
 and similar boards over I²C.  It supports the following sensor chips:
 
-* LSM6DSO
 * LSM6DS33 accelerometer and gyro
+* LSM6DSO accelerometer and gyro
 * LIS3MDL magnetometer
 * LSM303D magnetometer and accelerometer
 * LSM303DLHC magnetometer and accelerometer
@@ -36,18 +36,6 @@ First, you need to make sure your system supports I²C.  Try typing
 
 On a **Raspberry Pi running Raspbian**, you should run `sudo raspi-config`
 and browse its menus to find the option to enable I²C.
-
-If that does not work, here are some other things to try: Add `i2c-bcm2708` and
-`i2c-dev` to to the list in `/etc/modules` so they get loaded automatically when
-you boot up.  Add the line `dtparam=i2c1=on` to the bottom of
-`/boot/config.txt` to enable the Raspberry Pi's external I²C interface.  After
-making these changes, reboot.  If you run `lsmod | grep i2c` you should see the
-modules mentioned above, which means they were successfully loaded into the
-kernel.  If you run `ls /dev/i2c*` you should see `/dev/i2c-1`.
-
-If this information doesn't work for you, please search Google for tips about
-how to enable I²C for your particular board and your particular Linux
-distribution.
 
 Here are some other related resources that might be useful for you when
 figuring out how to enable I²C:
@@ -98,7 +86,7 @@ MinIMU-9 are listed below:
 | GPIO 3 (SCL)     | SCL          |
 
 Below is a [picture][wiring_pic] with a MinIMU-9 v2 showing how to make those
-connections:
+connections.
 
 [![][wiring_pic_small]][wiring_pic]
 
@@ -115,9 +103,9 @@ in your home directory named
 `~/.minimu9-ahrs` with a single line of the form `i2c-bus=BUSNAME`, where
 `BUSNAME` is the full path to the bus you want to use.
 
-For example, to use `/dev/i2c-3` by default, the config file should read:
+For example, to use `/dev/i2c-0` by default, the config file should read:
 
-    i2c-bus=/dev/i2c-3
+    i2c-bus=/dev/i2c-0
 
 If you are not sure which bus to use, you could try running `i2cdetect` on each
 available bus as described below.
@@ -177,9 +165,6 @@ code and then run this command:
 Finally, to install minimu9-ahrs onto your system, run:
 
     sudo make install
-
-I no longer distribute Debian packages for this program, so I recommend building
-it from source as described here.
 
 ### Looking at raw values
 
@@ -272,7 +257,7 @@ and a precise description of its output format, view the man page by running
 ## Related projects
 
 * [ahrs-visualizer] - another program by me that provides a 3D display of
-  the orientation output from `minimu9-ahrs`
+  the orientation output from `minimu9-ahrs`.
 * [Pololu MinIMU-9 Step-by-Step][kim] - an alternative tutorial by Mike Kim
   that explains how to use minimu9-ahrs and ahrs-visualizer.
 * [RTIMULib2](https://github.com/RTIMULib/RTIMULib2) - another project
