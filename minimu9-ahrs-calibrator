@@ -1,6 +1,5 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
-from __future__ import print_function
 import sys
 import math
 
@@ -97,7 +96,6 @@ def simple_minmax_calibration(readings):
     values = [v[axis] for v in readings]
     guess.extend([min(values), max(values)])
   return Calibration(guess, readings)
-
 
 if __name__=='__main__':
   run()
