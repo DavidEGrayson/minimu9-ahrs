@@ -31,7 +31,7 @@ work on any embedded Linux board that supports I²C.
 
 First, you need to make sure your system supports I²C.  Try typing
 `ls /dev/i2c*`: if you don't see a device there named something like
-`/dev/i2c-0` then your I²C is not enabled properly.
+`/dev/i2c-1` then your I²C is not enabled properly.
 
 On a **Raspberry Pi running Raspbian**, you should run `sudo raspi-config`
 and browse its menus to find the option to enable I²C.
@@ -39,7 +39,7 @@ and browse its menus to find the option to enable I²C.
 If that does not work, here are some other things to try: Add `i2c-bcm2708` and
 `i2c-dev` to to the list in `/etc/modules` so they get loaded automatically when
 you boot up.  Add the line `dtparam=i2c1=on` to the bottom of
-`/boot/config.txt` to enable the Raspberry Pi's external I2C interface.  After
+`/boot/config.txt` to enable the Raspberry Pi's external I²C interface.  After
 making these changes, reboot.  If you run `lsmod | grep i2c` you should see the
 modules mentioned above, which means they were successfully loaded into the
 kernel.  If you run `ls /dev/i2c*` you should see `/dev/i2c-1`.
@@ -93,8 +93,8 @@ MinIMU-9 are listed below:
 |------------------|--------------|
 | GND              | GND          |
 | 3V3 Power        | VDD          |
-| GPIO 0 (SDA)     | SDA          |
-| GPIO 1 (SCL)     | SCL          |
+| GPIO 2 (SDA)     | SDA          |
+| GPIO 3 (SCL)     | SCL          |
 
 Below is a [picture][wiring_pic] with a MinIMU-9 v2 showing how to make those
 connections:
@@ -106,16 +106,17 @@ Pololu's [Female-Female Premium Jumper Wires][ffwires] work well.
 
 ### Determining which bus to use
 
-The default I²C bus used by this program is `/dev/i2c-0`.  If you want to use a
-different bus, you should make a configuration file in your home directory named
+The default I²C bus used by this program is `/dev/i2c-1`.
+On most Raspberry Pi boards, this bus is accessible on the GPIO connector.
+
+If you want to use a different bus, you should make a configuration file
+in your home directory named
 `~/.minimu9-ahrs` with a single line of the form `i2c-bus=BUSNAME`, where
 `BUSNAME` is the full path to the bus you want to use.
 
-Unless you have a very old Raspberry Pi, the exposed I²C bus is actually
-`/dev/i2c-1` instead of `/dev/i2c-0`, so your `~/.minimu9-ahrs` config file should
-read:
+For example, to use `/dev/i2c-3` by default, the config file should read:
 
-    i2c-bus=/dev/i2c-1
+    i2c-bus=/dev/i2c-3
 
 If you are not sure which bus to use, you could try running `i2cdetect` on each
 available bus as described below.
