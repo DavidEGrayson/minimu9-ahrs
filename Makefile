@@ -3,26 +3,17 @@ BIN := minimu9-ahrs
 
 CC := g++
 
-CPPFLAGS += -I.
+CPPFLAGS += -I. -Wall -Wextra -std=gnu++11 -O2
 
 # Use the Eigen library.
 EIGEN_NAME = eigen3
 CPPFLAGS += $(shell pkg-config --cflags $(EIGEN_NAME))
-
-# All warnings
-CPPFLAGS += -Wall
-
-# Use a modern language
-CPPFLAGS += -std=gnu++11
 
 # Use boost libraries
 LDLIBS += -lboost_program_options
 
 # Put debugging info in there so we can get stack traces.
 #CPPFLAGS += -g -rdynamic
-
-# Optimize the code.
-CPPFLAGS += -O2
 
 # Generate .d files with dependency info
 CPPFLAGS += -MD -MP

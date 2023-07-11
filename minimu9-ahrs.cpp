@@ -106,6 +106,10 @@ typedef void fuse_function(quaternion & rotation, float dt, const vector & angul
 void fuse_compass_only(quaternion & rotation, float dt, const vector& angular_velocity,
   const vector & acceleration, const vector & magnetic_field)
 {
+  (void)dt;
+  (void)angular_velocity;
+  (void)acceleration;
+  (void)magnetic_field;
   // Implicit conversion of rotation matrix to quaternion.
   rotation = rotation_from_compass(acceleration, magnetic_field);
 }
@@ -125,6 +129,8 @@ void rotate(quaternion & rotation, const vector & w, float dt)
 void fuse_gyro_only(quaternion & rotation, float dt, const vector & angular_velocity,
   const vector & acceleration, const vector & magnetic_field)
 {
+  (void)acceleration;
+  (void)magnetic_field;
   rotate(rotation, angular_velocity, dt);
 }
 
