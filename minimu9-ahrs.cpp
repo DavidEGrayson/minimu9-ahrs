@@ -5,6 +5,7 @@
 #include "version.h"
 #include "prog_options.h"
 #include "minimu9.h"
+#include "lps.h"
 #include "exceptions.h"
 #include "pacer.h"
 #include <iostream>
@@ -66,10 +67,24 @@ void output_euler(quaternion & rotation)
 
 void stream_raw_values(imu & imu)
 {
+  lps::handle lps_handle; // tmphax
+  lps::comm_config lps_cfg;
+  lps_cfg.use_sensor = true;
+  lps_cfg.device = lps::LPS22DF;
+  lps_cfg.i2c_bus_name = "/dev/i2c-1";
+  lps_cfg.i2c_address = lps::sa0_low_addr | 1;
+  lps_handle.open(lps_cfg);
+  lps_handle.enable();
+
   imu.enable();
-  while(1)
+  while (1)
   {
+    lps_handle.read_pressure();
+
     imu.read_raw();
+
+    printf("%5f ", lps_handle.pressure_inches_hg);
+
     printf("%7d %7d %7d  %7d %7d %7d  %7d %7d %7d\n",
            imu.m[0], imu.m[1], imu.m[2],
            imu.a[0], imu.a[1], imu.a[2],
