@@ -175,13 +175,13 @@ void ahrs(imu & imu, fuse_function * fuse, rotation_output_function * output)
   loop_pacer.set_period_ns(20000000);
 
   auto start = std::chrono::steady_clock::now();
-  while(1)
+  while (1)
   {
     auto last_start = start;
     start = std::chrono::steady_clock::now();
     std::chrono::nanoseconds duration = start - last_start;
     float dt = duration.count() / 1e9;
-    if (dt < 0){ throw std::runtime_error("Time went backwards."); }
+    if (dt < 0) { throw std::runtime_error("Time went backwards."); }
 
     vector angular_velocity = imu.read_gyro();
     vector acceleration = imu.read_acc();
@@ -200,7 +200,7 @@ int main_with_exceptions(int argc, char **argv)
 {
   prog_options options = get_prog_options(argc, argv);
 
-  if(options.show_help)
+  if (options.show_help)
   {
     print_command_line_options_desc();
     std::cout << "For more information, run: man minimu9-ahrs" << std::endl;

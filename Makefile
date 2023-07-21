@@ -13,7 +13,7 @@ CPPFLAGS += $(shell pkg-config --cflags $(EIGEN_NAME))
 LDLIBS += -lboost_program_options
 
 # Put debugging info in there so we can get stack traces.
-#CPPFLAGS += -g -rdynamic
+#CPPFLAGS += -g -rdynamic -O0
 
 # Generate .d files with dependency info
 CPPFLAGS += -MD -MP
